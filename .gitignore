@@ -3,3 +3,20 @@ dist
 .vite
 .DS_Store
 *.local
+
+# Environment variables - NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# IDE
+.idea
+.vscode
+*.swp
+
+# OS
+Thumbs.db
