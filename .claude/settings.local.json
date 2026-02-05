@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)",
+      "Bash(curl:*)",
+      "Bash(unzip:*)",
+      "Bash(sudo cp:*)",
+      "Bash(/usr/local/bin/gh:*)",
+      "Bash(~/bin/gh auth status:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
