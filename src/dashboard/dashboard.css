@@ -3384,8 +3384,6 @@ tbody tr:hover {
   .recharts-wrapper {
     margin: 0 auto;
   }
-}
-
 /* Tablet specific chart adjustments */
 @media (max-width: 1023px) and (min-width: 768px) {
   /* Override inline grid styles for tablet */
