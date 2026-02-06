@@ -1,0 +1,647 @@
+/* ══════════════════════════════════════
+   Onboarding – Redesigned UI
+   Inspired by Untitled UI reference
+   ══════════════════════════════════════ */
+
+.onboarding {
+  min-height: 100vh;
+  background: #D9D9D9;
+  direction: rtl;
+  font-family: "Liebling", "Heebo", system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Header ── */
+.onboarding__header {
+  padding: 1.5rem 2rem 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.onboarding__logo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #000;
+  letter-spacing: -0.02em;
+}
+
+/* ── Progress Dots ── */
+.ob-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0 1.5rem;
+}
+
+.ob-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c4c4c4;
+  transition: all 0.3s ease;
+}
+
+.ob-dot--active {
+  width: 32px;
+  border-radius: 100px;
+  background: #DAFD68;
+  box-shadow: 0 0 12px rgba(218, 253, 104, 0.4);
+}
+
+.ob-dot--done {
+  background: #DAFD68;
+}
+
+/* ── Content Area ── */
+.onboarding__content {
+  width: 100%;
+  max-width: 640px;
+  padding: 0 1.5rem 3rem;
+}
+
+/* ── Card ── */
+.ob-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.ob-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #DAFD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+}
+
+.ob-card__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.ob-card__subtitle {
+  font-size: 0.92rem;
+  color: #828282;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════
+   Pill / Badge Selector
+   ══════════════════════════════ */
+.ob-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 2rem;
+}
+
+.ob-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 100px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  user-select: none;
+}
+
+.ob-pill:hover {
+  border-color: #bbb;
+  background: #fafafa;
+}
+
+.ob-pill--selected {
+  border-color: #DAFD68;
+  background: #f8fde8;
+  color: #000;
+  font-weight: 600;
+}
+
+.ob-pill__check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #DAFD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ob-pill__check svg {
+  width: 10px;
+  height: 10px;
+  stroke: #000;
+  stroke-width: 3;
+  fill: none;
+}
+
+/* ══════════════════════════════
+   Slider
+   ══════════════════════════════ */
+.ob-slider-group {
+  margin-bottom: 1.8rem;
+}
+
+.ob-slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.ob-slider-label__text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ob-slider-label__value {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #000;
+  background: #f5f5f5;
+  padding: 0.25rem 0.8rem;
+  border-radius: 100px;
+}
+
+.ob-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 100px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e8e8e8;
+  outline: none;
+  cursor: pointer;
+}
+
+.ob-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #DAFD68;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  transition: transform 0.15s;
+}
+
+.ob-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+}
+
+.ob-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #DAFD68;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+}
+
+/* ══════════════════════════════
+   Focus Area Cards (Grid)
+   ══════════════════════════════ */
+.ob-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ob-focus-card {
+  position: relative;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ob-focus-card:hover {
+  border-color: #ccc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ob-focus-card--selected {
+  border-color: #DAFD68;
+  background: #fdfff5;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.15);
+}
+
+.ob-focus-card__check {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #DAFD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.ob-focus-card--selected .ob-focus-card__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ob-focus-card__check svg {
+  width: 13px;
+  height: 13px;
+  stroke: #000;
+  stroke-width: 3;
+  fill: none;
+}
+
+.ob-focus-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.9rem;
+  font-size: 1.2rem;
+  border: 1px solid #eee;
+}
+
+.ob-focus-card--selected .ob-focus-card__icon {
+  background: #f0fce4;
+  border-color: #DAFD68;
+}
+
+.ob-focus-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 0.25rem;
+}
+
+.ob-focus-card__desc {
+  font-size: 0.8rem;
+  color: #828282;
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════
+   Funnel Template Cards
+   ══════════════════════════════ */
+.ob-templates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ob-template {
+  position: relative;
+  background: #fafafa;
+  border: 2px solid #eee;
+  border-radius: 16px;
+  padding: 1.8rem 1.2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ob-template:hover {
+  border-color: #ccc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ob-template--selected {
+  border-color: #DAFD68;
+  background: #fdfff5;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.15);
+}
+
+.ob-template__check {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #DAFD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.ob-template--selected .ob-template__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ob-template__check svg {
+  width: 13px;
+  height: 13px;
+  stroke: #000;
+  stroke-width: 3;
+  fill: none;
+}
+
+.ob-template__icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.ob-template__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 0.4rem;
+}
+
+.ob-template__stages {
+  font-size: 0.78rem;
+  color: #828282;
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════
+   Contact Form
+   ══════════════════════════════ */
+.ob-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.ob-field {
+  margin-bottom: 1.2rem;
+}
+
+.ob-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+.ob-input,
+.ob-select,
+.ob-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: #000;
+  background: #fff;
+  direction: rtl;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.ob-input:focus,
+.ob-select:focus,
+.ob-textarea:focus {
+  border-color: #DAFD68;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.2);
+}
+
+.ob-input::placeholder,
+.ob-textarea::placeholder {
+  color: #bbb;
+}
+
+.ob-textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.ob-phone-wrap {
+  display: flex;
+  gap: 0;
+  direction: ltr;
+}
+
+.ob-phone-prefix {
+  padding: 0.75rem 0.8rem;
+  border: 1.5px solid #e0e0e0;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  background: #f8f8f8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ob-phone-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px 0 0 10px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: #000;
+  background: #fff;
+  direction: ltr;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.ob-phone-input:focus {
+  border-color: #DAFD68;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.2);
+}
+
+.ob-phone-input::placeholder {
+  color: #bbb;
+}
+
+/* ══════════════════════════════
+   Buttons
+   ══════════════════════════════ */
+.ob-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.ob-btn {
+  padding: 0.8rem 2rem;
+  border-radius: 100px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ob-btn:active {
+  transform: scale(0.97);
+}
+
+.ob-btn--primary {
+  background: #111;
+  color: #fff;
+  padding: 0.8rem 2.2rem;
+}
+
+.ob-btn--primary:hover {
+  background: #000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ob-btn--primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ob-btn--back {
+  background: transparent;
+  color: #666;
+  border: 1.5px solid #ddd;
+  padding: 0.8rem 1.8rem;
+}
+
+.ob-btn--back:hover {
+  border-color: #bbb;
+  color: #333;
+}
+
+.ob-btn--finish {
+  background: #111;
+  color: #fff;
+  padding: 0.85rem 2.5rem;
+  font-size: 1rem;
+}
+
+.ob-btn--finish:hover {
+  background: #000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Spinner ── */
+.ob-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ob-spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes ob-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ══════════════════════════════
+   Step Transition Animation
+   ══════════════════════════════ */
+.ob-step-enter {
+  animation: ob-step-in 0.35s ease forwards;
+}
+
+@keyframes ob-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════
+   Responsive
+   ══════════════════════════════ */
+@media (max-width: 640px) {
+  .onboarding__content {
+    padding: 0 1rem 2rem;
+  }
+
+  .ob-card {
+    padding: 1.8rem 1.3rem;
+    border-radius: 16px;
+  }
+
+  .ob-card__title {
+    font-size: 1.25rem;
+  }
+
+  .ob-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ob-templates {
+    grid-template-columns: 1fr;
+  }
+
+  .ob-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ob-nav {
+    flex-direction: column-reverse;
+  }
+
+  .ob-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ob-pills {
+    gap: 0.4rem;
+  }
+
+  .ob-pill {
+    font-size: 0.82rem;
+    padding: 0.5rem 0.9rem;
+  }
+}
