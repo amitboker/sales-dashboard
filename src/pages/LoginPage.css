@@ -4,6 +4,7 @@
   min-height: 100vh;
   direction: rtl;
   font-family: "Liebling", "Heebo", system-ui, -apple-system, sans-serif;
+  background: #D9D9D9;
 }
 
 /* ── Left: Form Side ── */
@@ -24,14 +25,14 @@
 .login__title {
   font-size: 2rem;
   font-weight: 800;
-  color: #1a1a2e;
+  color: #000;
   text-align: center;
   margin-bottom: 0.4rem;
 }
 
 .login__subtitle {
   text-align: center;
-  color: #666;
+  color: #828282;
   font-size: 0.9rem;
   margin-bottom: 2rem;
 }
@@ -97,13 +98,13 @@
 
 .login__forgot {
   font-size: 0.82rem;
-  color: #2D5F4F;
+  color: #000;
   font-weight: 500;
   transition: color 0.2s;
 }
 
 .login__forgot:hover {
-  color: #1a3d32;
+  color: #000;
 }
 
 .login__remember {
@@ -134,13 +135,13 @@
 }
 
 .login__remember input[type="checkbox"]:checked + .login__checkbox {
-  background: #2D5F4F;
-  border-color: #2D5F4F;
+  background: #DAFD68;
+  border-color: #DAFD68;
 }
 
 .login__remember input[type="checkbox"]:checked + .login__checkbox::after {
   content: '✓';
-  color: #fff;
+  color: #000;
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -149,8 +150,8 @@
 .login__btn-primary {
   width: 100%;
   padding: 0.85rem;
-  background: #2D5F4F;
-  color: #fff;
+  background: #DAFD68;
+  color: #000;
   font-size: 1rem;
   font-weight: 600;
   border-radius: 10px;
@@ -159,7 +160,7 @@
 }
 
 .login__btn-primary:hover:not(:disabled) {
-  background: #234d3f;
+  background: #c8ec55;
 }
 
 .login__btn-primary:disabled {
@@ -210,7 +211,7 @@
   width: 100%;
   padding: 0.85rem;
   background: #DAFD68;
-  color: #1a1a2e;
+  color: #000;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 10px;
@@ -241,7 +242,7 @@
   height: 18px;
   border-radius: 50%;
   border: 2.5px solid rgba(26, 26, 46, 0.2);
-  border-top-color: #1a1a2e;
+  border-top-color: #000;
   animation: btn-spin 0.7s linear infinite;
   flex-shrink: 0;
 }
@@ -258,7 +259,7 @@
 }
 
 .login__signup-text a {
-  color: #2D5F4F;
+  color: #000;
   font-weight: 600;
 }
 
@@ -277,11 +278,12 @@
 /* ── Right: Testimonials Side ── */
 .login__testimonials-side {
   flex: 0.85;
-  background: linear-gradient(160deg, #2D5F4F 0%, #3a7a64 40%, #4a9478 100%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  border-left: 1px solid #e5e5e5;
 }
 
 .login__testimonials-list {
@@ -293,19 +295,19 @@
 }
 
 .login__tcard {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
   backdrop-filter: blur(12px);
   border-radius: 14px;
   padding: 1.4rem;
   text-align: right;
-  color: #fff;
+  color: #000;
   transition: transform 0.3s, background 0.3s;
 }
 
 .login__tcard:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.15);
+  background: #fafafa;
 }
 
 .login__tcard-avatar {
@@ -315,7 +317,7 @@
   float: left;
   margin-right: 0;
   margin-left: 0;
-  background: rgba(255, 255, 255, 0.15);
+  background: #f1f1f1;
 }
 
 .login__tcard-name {
@@ -325,7 +327,7 @@
 
 .login__tcard-handle {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #828282;
   display: block;
   margin-bottom: 0.5rem;
 }
@@ -333,7 +335,7 @@
 .login__tcard-text {
   font-size: 0.85rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
+  color: #828282;
   clear: both;
 }
 
