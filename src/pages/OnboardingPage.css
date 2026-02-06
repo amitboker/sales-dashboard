@@ -451,49 +451,6 @@
   line-height: 1.6;
 }
 
-.ob-phone-wrap {
-  display: flex;
-  gap: 0;
-  direction: ltr;
-}
-
-.ob-phone-prefix {
-  padding: 0.75rem 0.8rem;
-  border: 1.5px solid #e0e0e0;
-  border-left: none;
-  border-radius: 0 10px 10px 0;
-  background: #f8f8f8;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.ob-phone-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px 0 0 10px;
-  font-size: 0.92rem;
-  font-family: inherit;
-  color: #000;
-  background: #fff;
-  direction: ltr;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-
-.ob-phone-input:focus {
-  border-color: #DAFD68;
-  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.2);
-}
-
-.ob-phone-input::placeholder {
-  color: #bbb;
-}
 
 /* ══════════════════════════════
    Buttons

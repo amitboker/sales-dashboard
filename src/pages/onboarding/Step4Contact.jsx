@@ -21,7 +21,7 @@ export default function Step4Contact({ clientId, updateClientData, goBack, onCom
       firstName,
       lastName,
       email,
-      phone: phone ? `+972${phone}` : '',
+      phone,
       message,
     };
 
@@ -80,16 +80,13 @@ export default function Step4Contact({ clientId, updateClientData, goBack, onCom
 
       <div className="ob-field">
         <label className="ob-label">טלפון</label>
-        <div className="ob-phone-wrap">
-          <div className="ob-phone-prefix">🇮🇱 +972</div>
-          <input
-            className="ob-phone-input"
-            type="tel"
-            placeholder="50-000-0000"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </div>
+        <input
+          className="ob-input"
+          type="tel"
+          placeholder="050-000-0000"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
       </div>
 
       <div className="ob-field">

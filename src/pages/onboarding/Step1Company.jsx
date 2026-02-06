@@ -12,23 +12,6 @@ const COMPANY_TYPES = [
   'אחר',
 ];
 
-const EMPLOYEE_RANGES = [
-  { label: '1-10', value: 10 },
-  { label: '11-25', value: 25 },
-  { label: '26-50', value: 50 },
-  { label: '51-100', value: 100 },
-  { label: '101-200', value: 200 },
-  { label: '201-500+', value: 500 },
-];
-
-const SALES_REP_RANGES = [
-  { label: '1-3', value: 3 },
-  { label: '4-10', value: 10 },
-  { label: '11-25', value: 25 },
-  { label: '26-50', value: 50 },
-  { label: '51-100+', value: 100 },
-];
-
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24">
     <polyline points="20 6 9 17 4 12" />
@@ -37,8 +20,8 @@ const CheckIcon = () => (
 
 export default function Step1Company({ clientId, updateClientData, goNext }) {
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [employeesIndex, setEmployeesIndex] = useState(0);
-  const [salesIndex, setSalesIndex] = useState(0);
+  const [employeesCount, setEmployeesCount] = useState(1);
+  const [salesCount, setSalesCount] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,8 +31,6 @@ export default function Step1Company({ clientId, updateClientData, goNext }) {
     );
   };
 
-  const employees = EMPLOYEE_RANGES[employeesIndex];
-  const salesReps = SALES_REP_RANGES[salesIndex];
   const isValid = selectedTypes.length > 0;
 
   const handleSubmit = async () => {
@@ -62,16 +43,16 @@ export default function Step1Company({ clientId, updateClientData, goNext }) {
       const industry = selectedTypes.join(', ');
       const data = await saveCompanyDetails(clientId, {
         companyName,
-        salesReps: salesReps.value,
+        salesReps: salesCount,
         industry,
-        employees: employees.label,
+        employees: employeesCount,
         companyTypes: selectedTypes,
       });
       updateClientData({
         companyName,
-        salesReps: salesReps.value,
+        salesReps: salesCount,
         industry,
-        employees: employees.label,
+        employees: employeesCount,
         companyTypes: selectedTypes,
       });
       goNext();
@@ -118,14 +99,15 @@ export default function Step1Company({ clientId, updateClientData, goNext }) {
       <div className="ob-slider-group">
         <div className="ob-slider-label">
           <span className="ob-slider-label__text">כמה עובדים בחברה?</span>
-          <span className="ob-slider-label__value">{employees.label} עובדים</span>
+          <span className="ob-slider-label__value">{employeesCount} עובדים</span>
         </div>
         <input
           type="range"
-          min="0"
-          max={EMPLOYEE_RANGES.length - 1}
-          value={employeesIndex}
-          onChange={(e) => setEmployeesIndex(Number(e.target.value))}
+          min="1"
+          max="200"
+          step="1"
+          value={employeesCount}
+          onChange={(e) => setEmployeesCount(Number(e.target.value))}
           className="ob-slider"
         />
       </div>
@@ -133,14 +115,15 @@ export default function Step1Company({ clientId, updateClientData, goNext }) {
       <div className="ob-slider-group">
         <div className="ob-slider-label">
           <span className="ob-slider-label__text">כמה אנשי מכירות?</span>
-          <span className="ob-slider-label__value">{salesReps.label} נציגים</span>
+          <span className="ob-slider-label__value">{salesCount} נציגים</span>
         </div>
         <input
           type="range"
-          min="0"
-          max={SALES_REP_RANGES.length - 1}
-          value={salesIndex}
-          onChange={(e) => setSalesIndex(Number(e.target.value))}
+          min="1"
+          max="200"
+          step="1"
+          value={salesCount}
+          onChange={(e) => setSalesCount(Number(e.target.value))}
           className="ob-slider"
         />
       </div>
