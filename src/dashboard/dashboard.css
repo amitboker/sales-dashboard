@@ -36,7 +36,7 @@
   color: #1f2a33;
   background-color: #f5f6f7;
   direction: rtl;
-  --color-bg: #D9D9D9;
+  --color-bg: #F1F1F1;
   --color-surface: #ffffff;
   --color-surface-muted: #f5f5f5;
   --color-border: #e5e5e5;
@@ -218,8 +218,8 @@
 .nav-badge {
   margin-right: auto;
   margin-left: 0;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-dark);
+  background: #f3ff9b;
+  color: #000;
   font-size: 10px;
   padding: 2px 8px;
   border-radius: 999px;
@@ -227,8 +227,9 @@
 }
 
 .nav-item.active .nav-badge {
-  background: #fff6ad;
+  background: #f3ff9b;
   color: #000;
+  border: 1px solid rgba(0, 0, 0, 0.55);
 }
 
 /* ===== NAV FOOTER ===== */
@@ -549,6 +550,63 @@
   font-size: 18px;
   text-align: center;
   margin-bottom: 18px;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.card-header-row .section-title {
+  margin-bottom: 0;
+  text-align: right;
+}
+
+.time-range-select {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.time-range-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.time-range-option {
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.time-range-option:hover {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+.time-range-option.active {
+  color: #000;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 /* ===== CHART ===== */
@@ -1077,6 +1135,7 @@ tbody tr:hover {
   margin-top: 4px;
 }
 
+
 /* ===== OPEN OPPORTUNITIES ===== */
 .opportunities-card {
   padding: 32px 28px;
@@ -1418,12 +1477,13 @@ tbody tr:hover {
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin: 6px auto 0;
-  max-width: 1120px;
+  margin: -64px auto 0;
+  max-width: 70%;
   padding: 0 20px;
   direction: rtl;
+  transform: translateY(-12px);
 }
 
 .ai-prompt-row.is-refreshing .ai-prompt-pill {
@@ -1457,7 +1517,8 @@ tbody tr:hover {
   text-decoration: underline;
   cursor: pointer;
   padding: 6px 8px;
-  margin-right: auto;
+  margin-right: 0;
+  margin-left: 12px;
 }
 
 @keyframes aiPromptRefresh {
@@ -1488,6 +1549,11 @@ tbody tr:hover {
   max-width: 1120px;
   width: calc(100% - 40px);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ai-chatbar--wide {
+  max-width: 70%;
+  width: calc(100% - 40px);
 }
 
 .ai-chatbar:focus-within {
@@ -1533,6 +1599,73 @@ tbody tr:hover {
   background: #1f2a33;
   color: #fff;
   border-color: #1f2a33;
+}
+
+.ai-chat-embed {
+  max-width: 1120px;
+  margin: 8px auto 14px;
+  padding: 0 20px;
+}
+
+.ai-chat-embed > div {
+  width: 100%;
+}
+
+.ai-chat-embed .max-w-3xl {
+  max-width: 768px !important;
+  margin: 0 auto;
+}
+
+.ai-min-chat {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 999px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.ai-min-chat__icon,
+.ai-min-chat__send {
+  flex-shrink: 0;
+}
+
+.ai-min-chat__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid #f0f0f0;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: #1f2a33;
+}
+
+.ai-min-chat__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2a33;
+  text-align: right;
+}
+
+.ai-min-chat__send {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: #fff;
+  display: grid;
+  place-items: center;
 }
 
 .ai-chat-btn.ghost {
@@ -2078,6 +2211,10 @@ tbody tr:hover {
   font-weight: 600;
 }
 
+
+/* --- Scenario Selector (Projection Builder) --- */
+
+
 .forecast-view-enter {
   animation: forecastViewIn 0.4s ease-out both;
 }
@@ -2243,16 +2380,62 @@ tbody tr:hover {
 }
 
 /* Arrow between sections */
-.fn-arrow-wrap {
+.fn-arrow {
   display: flex;
-  justify-content: center;
-  padding: 6px 0;
-  animation: arrowPulse 2s ease-in-out infinite;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+  transition: opacity 0.2s ease;
 }
 
-@keyframes arrowPulse {
-  0%, 100% { opacity: 0.5; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(3px); }
+.fn-arrow-line {
+  width: 2px;
+  height: 28px;
+  background: var(--color-border);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.fn-arrow-head {
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
+  transform: rotate(45deg);
+  transition: border-color 0.2s ease;
+}
+
+.fn-arrow-label {
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-soft);
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  direction: rtl;
+}
+
+.fn-arrow.inactive {
+  opacity: 0.5;
+}
+
+.fn-arrow.active .fn-arrow-line {
+  background: #c8ec55;
+}
+
+.fn-arrow.active .fn-arrow-head {
+  border-right-color: #c8ec55;
+  border-bottom-color: #c8ec55;
+}
+
+.fn-arrow.inactive .fn-arrow-label {
+  background: #f2f2f2;
+  border-color: #e0e0e0;
+  color: var(--color-muted);
 }
 
 /* Funnel sections */
@@ -2376,6 +2559,7 @@ tbody tr:hover {
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
+  position: relative;
 }
 
 .fn-metric:hover {
@@ -2402,6 +2586,27 @@ tbody tr:hover {
   font-weight: 700;
   color: #000;
   direction: ltr;
+}
+
+.fn-metric-tooltip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #efefef;
+  border: 1px solid #d6d6d6;
+  color: #333;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+.fn-metric:hover .fn-metric-tooltip {
+  opacity: 1;
 }
 
 /* Final results */
@@ -2456,6 +2661,8 @@ tbody tr:hover {
   color: #000;
   direction: ltr;
 }
+
+
 
 /* ============================================
    TOP BAR + AVATAR DROPDOWN

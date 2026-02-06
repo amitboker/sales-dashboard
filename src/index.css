@@ -1,12 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Tailwind directives - commented out until dependencies are installed */
-/* Uncomment after running: npm install */
-/*
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-*/
 
 @font-face {
   font-family: "Liebling";
@@ -64,7 +60,7 @@
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
   --border: 214.3 31.8% 91.4%;
-  --radius: 0.5rem;
+  --radius: 0.65rem;
 }
 
 .dark {

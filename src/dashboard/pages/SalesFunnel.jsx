@@ -120,7 +120,7 @@ export default function SalesFunnel() {
         }
         filters={
           <>
-            <button className="button primary">
+            <button className="button">
               <Icon name="file-download" size={14} style={{ filter: "brightness(0)" }} /> הורד דאטה
             </button>
             <button className="button primary" onClick={handleExportPDF}>

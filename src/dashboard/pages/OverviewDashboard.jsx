@@ -23,6 +23,14 @@ export default function OverviewDashboard() {
   const [contentHeight, setContentHeight] = useState(0);
   const areaChartRef = useRef(null);
   const pieChartRef = useRef(null);
+  const [timeRange, setTimeRange] = useState("month");
+
+  const timeRangeOptions = [
+    { value: "day", label: "יום" },
+    { value: "week", label: "שבוע" },
+    { value: "two-weeks", label: "שבועיים" },
+    { value: "month", label: "חודש אחרון" },
+  ];
 
   const handleExportPDF = async () => {
     try {
@@ -86,7 +94,22 @@ export default function OverviewDashboard() {
 
       <div className="grid section" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 20 }}>
         <div className="card padded anim-fade-up" ref={areaChartRef} style={{ animationDelay: "0.1s" }}>
-          <div className="section-title">הכנסות חודשיות</div>
+          <div className="card-header-row">
+            <div className="section-title">הכנסות חודשיות</div>
+            <div className="time-range-toggle" role="group" aria-label="טווח זמן">
+              {timeRangeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`time-range-option ${timeRange === option.value ? "active" : ""}`}
+                  onClick={() => setTimeRange(option.value)}
+                  aria-pressed={timeRange === option.value}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={380}>
             <AreaChart data={monthlyRevenue} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <defs>

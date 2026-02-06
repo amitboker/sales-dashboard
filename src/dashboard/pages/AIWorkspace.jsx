@@ -32,7 +32,7 @@ export default function AIWorkspace() {
         <div className="ai-main">
           <div className="ai-hero">
             <div className="ai-orb" />
-            <div className="ai-title">שלום, שם פרטי. במה תרצה להתמקד?</div>
+            <div className="ai-title">היי {`{firstName}`}, בוא נצלול לדאטה 📊</div>
             <div className="ai-subtitle">
               ספר לנו מה אתה צריך — ונטפל בכל השאר
             </div>
@@ -64,12 +64,6 @@ export default function AIWorkspace() {
             </div>
           </div>
 
-          <div className="ai-pill-row">
-            <button className="ai-pill">חבר יומן</button>
-            <button className="ai-pill">דמו משימה</button>
-            <button className="ai-pill">אינטגרציות</button>
-            <button className="ai-pill">שיתופים</button>
-          </div>
         </div>
 
         <div className={`ai-prompt-row ${isRefreshing ? "is-refreshing" : ""}`}>
@@ -97,7 +91,7 @@ export default function AIWorkspace() {
           ))}
         </div>
 
-        <div className="ai-chatbar">
+        <div className="ai-chatbar ai-chatbar--wide">
           <div className="ai-chat-input">
             <Icon name="filter" size={16} style={{ filter: "brightness(0.5)" }} />
             <input
@@ -107,9 +101,12 @@ export default function AIWorkspace() {
             />
           </div>
           <div className="ai-chat-actions">
-            <button className="ai-chat-btn ghost">Attach</button>
-            <button className="ai-chat-btn ghost">Voice</button>
-            <button className="ai-chat-btn primary">Send</button>
+            <button className="ai-chat-btn primary" aria-label="שליחה">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5l-7 7 7 7" />
+                <path d="M5 12h14" />
+              </svg>
+            </button>
           </div>
         </div>
 

@@ -1,13 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import PageHeader from "../components/PageHeader.jsx";
 import InputRow from "../components/InputRow.jsx";
 import SummaryTile from "../components/SummaryTile.jsx";
 import Icon from "../components/Icon.jsx";
-import { forecastDefaults } from "../data/mockData.js";
 
 function fmt(n) {
-  if (n == null || isNaN(n)) return "$0";
-  return "$" + Math.round(n).toLocaleString();
+  if (n == null || isNaN(n)) return "₪0";
+  return "₪" + Math.round(n).toLocaleString();
 }
 
 function fmtPct(n) {
@@ -18,6 +17,18 @@ function fmtPct(n) {
 function fmtNum(n) {
   if (n == null || isNaN(n)) return "0";
   return Math.round(n).toLocaleString();
+}
+
+function stripCommas(value) {
+  return value.replace(/,/g, "");
+}
+
+function formatNumberInput(value) {
+  const raw = value.replace(/,/g, "");
+  if (!raw) return "";
+  const [intPart, decPart] = raw.split(".");
+  const formattedInt = Number(intPart || "0").toLocaleString();
+  return decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt;
 }
 
 /* ── Sidebar rate field ── */
@@ -61,20 +72,77 @@ function SidebarRateField({ icon, label, value, onChange, helper, computed }) {
 /* ── Funnel metric card ── */
 function FunnelMetric({ label, sublabel, value, formula }) {
   return (
-    <div className="fn-metric" title={formula}>
+    <div className="fn-metric">
       <div className="fn-metric-label">{label}</div>
       <div className="fn-metric-sub">{sublabel}</div>
       <div className="fn-metric-value">{value}</div>
+      {formula && <div className="fn-metric-tooltip">{formula}</div>}
     </div>
   );
 }
 
 /* ── Arrow separator ── */
-function FunnelArrow() {
+function FunnelArrow({ fromStep, toStep, conversionLabel, isActive = true }) {
+  const showLabel = Boolean(conversionLabel);
+  const labelText = isActive ? conversionLabel : "ממתין לקלט";
   return (
-    <div className="fn-arrow-wrap">
-      <Icon name="chevron-down" size={28} style={{ filter: "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" }} />
+    <div
+      className={`fn-arrow ${isActive ? "active" : "inactive"}`}
+      aria-label={fromStep && toStep ? `${fromStep} → ${toStep}` : "חיבור שלב"}
+    >
+      {showLabel && <div className="fn-arrow-label">{labelText}</div>}
+      <div className="fn-arrow-line" />
+      <div className="fn-arrow-head" />
     </div>
+  );
+}
+
+function ScenarioSelector({ value, onSelect }) {
+  const options = [
+    { key: "pessimistic", label: "פסימי" },
+    { key: "realistic", label: "ריאלי" },
+    { key: "optimistic", label: "אופטימי" },
+  ];
+  const containerStyle = {
+    marginLeft: "auto",
+    display: "inline-flex",
+    gap: 4,
+    padding: 4,
+    borderRadius: 999,
+    border: "1px solid #e5e5e5",
+    background: "#fff",
+    direction: "rtl",
+  };
+  const buttonStyle = {
+    border: 0,
+    background: "transparent",
+    color: "#828282",
+    padding: "4px 10px",
+    fontSize: 12,
+    fontFamily: "inherit",
+    borderRadius: 999,
+    cursor: "pointer",
+    transition: "background 0.15s ease, color 0.15s ease",
+  };
+  const activeStyle = {
+    background: "#DAFD68",
+    color: "#000",
+  };
+
+  return (
+    <span style={containerStyle} role="tablist" aria-label="בחירת תרחיש">
+      {options.map((option) => (
+        <button
+          key={option.key}
+          type="button"
+          style={value === option.key ? { ...buttonStyle, ...activeStyle } : buttonStyle}
+          onClick={() => onSelect(option.key)}
+          aria-pressed={value === option.key}
+        >
+          {option.label}
+        </button>
+      ))}
+    </span>
   );
 }
 
@@ -92,7 +160,7 @@ function FunnelInput({ label, value, onChange, prefix }) {
           value={value}
           onChange={(e) => {
             const raw = e.target.value.replace(/[^0-9.]/g, "");
-            onChange(raw);
+            onChange(formatNumberInput(raw));
           }}
         />
       </div>
@@ -103,18 +171,40 @@ function FunnelInput({ label, value, onChange, prefix }) {
 /* ══════════════════════════════════════════
    FOUNDER SNAPSHOT
    ══════════════════════════════════════════ */
-function FounderSnapshot() {
-  const [spend, setSpend] = useState("100000");
-  const [apps, setApps] = useState("1000");
-  const [avgDealValue, setAvgDealValue] = useState("10000");
-  const [appToCallPct, setAppToCallPct] = useState("70.00");
-  const [showRatePct, setShowRatePct] = useState("50.00");
-  const [closeRatePct, setCloseRatePct] = useState("10.00");
+function ProjectionBuilderView() {
+  const initialSpend = formatNumberInput("100000");
+  const initialApps = formatNumberInput("1000");
+  const initialAvgDeal = formatNumberInput("10000");
+  const initialAppToCall = "40.00";
+  const initialShowRate = "45.00";
+  const initialCloseRate = "8.00";
+
+  const [scenario, setScenario] = useState("realistic");
+  const [spend, setSpend] = useState(initialSpend);
+  const [apps, setApps] = useState(initialApps);
+  const [avgDealValue, setAvgDealValue] = useState(initialAvgDeal);
+  const [appToCallPct, setAppToCallPct] = useState(initialAppToCall);
+  const [showRatePct, setShowRatePct] = useState(initialShowRate);
+  const [closeRatePct, setCloseRatePct] = useState(initialCloseRate);
+  const [resultsByScenario, setResultsByScenario] = useState({});
+  const [viewScenario, setViewScenario] = useState("realistic");
+  const [lastComputedScenario, setLastComputedScenario] = useState(null);
+  const [highlightResults, setHighlightResults] = useState(false);
+  const [lastCalculatedInputs, setLastCalculatedInputs] = useState({
+    spend: initialSpend,
+    apps: initialApps,
+    avgDealValue: initialAvgDeal,
+    appToCallPct: initialAppToCall,
+    showRatePct: initialShowRate,
+    closeRatePct: initialCloseRate,
+  });
+  const finalResultsRef = useRef(null);
+  const didInitRef = useRef(false);
 
   const calc = useMemo(() => {
-    const s = parseFloat(spend) || 0;
-    const a = parseFloat(apps) || 0;
-    const adv = parseFloat(avgDealValue) || 0;
+    const s = parseFloat(stripCommas(spend)) || 0;
+    const a = parseFloat(stripCommas(apps)) || 0;
+    const adv = parseFloat(stripCommas(avgDealValue)) || 0;
     const atc = (parseFloat(appToCallPct) || 0) / 100;
     const sr = (parseFloat(showRatePct) || 0) / 100;
     const cr = (parseFloat(closeRatePct) || 0) / 100;
@@ -135,23 +225,79 @@ function FounderSnapshot() {
     return { cpApp, calls, cpCall, liveCalls, cpLiveCall, closes, cpa, rev, profit, profitPct, appToClosePct, callToClosePct };
   }, [spend, apps, avgDealValue, appToCallPct, showRatePct, closeRatePct]);
 
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+    setResultsByScenario({ [scenario]: calc });
+    setViewScenario(scenario);
+    setLastComputedScenario(scenario);
+  }, [calc, scenario]);
+
+  const pendingChanges = [
+    spend !== lastCalculatedInputs.spend,
+    apps !== lastCalculatedInputs.apps,
+    avgDealValue !== lastCalculatedInputs.avgDealValue,
+    appToCallPct !== lastCalculatedInputs.appToCallPct,
+    showRatePct !== lastCalculatedInputs.showRatePct,
+    closeRatePct !== lastCalculatedInputs.closeRatePct,
+  ].some(Boolean);
+
+  const activeScenarioForDisplay = resultsByScenario[viewScenario]
+    ? viewScenario
+    : lastComputedScenario || scenario;
+  const results = resultsByScenario[activeScenarioForDisplay] || calc;
+  const isComputed = (key) => Boolean(resultsByScenario[key]);
+
+  const handleCalculate = () => {
+    setResultsByScenario((prev) => ({
+      ...prev,
+      [scenario]: calc,
+    }));
+    setLastCalculatedInputs({
+      spend,
+      apps,
+      avgDealValue,
+      appToCallPct,
+      showRatePct,
+      closeRatePct,
+    });
+    setViewScenario(scenario);
+    setLastComputedScenario(scenario);
+    if (finalResultsRef.current) {
+      finalResultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlightResults(true);
+      setTimeout(() => setHighlightResults(false), 900);
+    }
+  };
+
   return (
     <div className="founder-snapshot forecast-view-enter">
       {/* ── LEFT: Conversion Rates Sidebar ── */}
       <aside className="fn-sidebar">
+        <div style={{ marginBottom: 12, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "var(--color-muted)", marginBottom: 6 }}>
+            תרחיש
+          </div>
+          <ScenarioSelector value={scenario} onSelect={setScenario} />
+        </div>
         <div className="fn-sidebar-inner">
           <h3 className="fn-sidebar-title">
             <Icon name="bar-chart" size={16} style={{ filter: "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" }} />
             Conversion Rates
           </h3>
           <p className="fn-sidebar-subtitle">שיעורי המרה</p>
+          {pendingChanges && (
+            <div style={{ fontSize: 11, color: "var(--color-muted)", marginBottom: 10 }}>
+              שינויים טרם חושבו
+            </div>
+          )}
 
           <SidebarRateField
             icon="bell"
-            label="App → Call %"
+            label="ליד → שיחה %"
             value={appToCallPct}
             onChange={setAppToCallPct}
-            helper="אחוז בקשות שהופכות לשיחות"
+            helper="אחוז לידים שהופכים לשיחות"
           />
           <SidebarRateField
             icon="check-circle"
@@ -169,7 +315,7 @@ function FounderSnapshot() {
           />
           <SidebarRateField
             icon="trending-up"
-            label="App → Close %"
+            label="ליד → סגירה %"
             value={fmtPct(calc.appToClosePct)}
             helper="מחושב אוטומטית"
             computed
@@ -181,6 +327,14 @@ function FounderSnapshot() {
             helper="מחושב אוטומטית"
             computed
           />
+          <button
+            type="button"
+            className="button primary"
+            onClick={handleCalculate}
+            style={{ width: "100%", marginTop: 12, justifyContent: "center" }}
+          >
+            חשב תוצאות לתרחיש
+          </button>
         </div>
       </aside>
 
@@ -194,13 +348,11 @@ function FounderSnapshot() {
             <span className="fn-section-sub">נתוני קלט</span>
           </div>
           <div className="fn-inputs-grid">
-            <FunnelInput label="Spend (תקציב)" value={spend} onChange={setSpend} prefix="$" />
-            <FunnelInput label="Apps (בקשות)" value={apps} onChange={setApps} />
-            <FunnelInput label="Avg Deal Value (ערך עסקה)" value={avgDealValue} onChange={setAvgDealValue} prefix="$" />
+            <FunnelInput label="Spend (תקציב)" value={spend} onChange={setSpend} prefix="₪" />
+            <FunnelInput label="Apps (לידים)" value={apps} onChange={setApps} />
+            <FunnelInput label="Avg Deal Value (ערך עסקה)" value={avgDealValue} onChange={setAvgDealValue} prefix="₪" />
           </div>
         </div>
-
-        <FunnelArrow />
 
         {/* STEP 1: Initial Metrics */}
         <div className="fn-section fn-section-calc">
@@ -210,12 +362,17 @@ function FounderSnapshot() {
             <span className="fn-section-sub">מדדי פתיחה</span>
           </div>
           <div className="fn-metrics-grid">
-            <FunnelMetric label="CPApp" sublabel="עלות לבקשה" value={fmt(calc.cpApp)} formula={`Spend ÷ Apps = ${fmt(parseFloat(spend)||0)} ÷ ${fmtNum(parseFloat(apps)||0)}`} />
-            <FunnelMetric label="Calls" sublabel="שיחות שנקבעו" value={fmtNum(calc.calls)} formula={`Apps × App→Call% = ${fmtNum(parseFloat(apps)||0)} × ${appToCallPct}%`} />
+            <FunnelMetric label="עלות לליד" sublabel="עלות לליד" value={fmt(calc.cpApp)} formula={`תקציב ÷ לידים = ${fmt(parseFloat(stripCommas(spend))||0)} ÷ ${fmtNum(parseFloat(stripCommas(apps))||0)}`} />
+            <FunnelMetric label="Calls" sublabel="שיחות שנקבעו" value={fmtNum(calc.calls)} formula={`לידים × ליד→שיחה% = ${fmtNum(parseFloat(stripCommas(apps))||0)} × ${appToCallPct}%`} />
           </div>
         </div>
 
-        <FunnelArrow />
+        <FunnelArrow
+          fromStep="STEP 1"
+          toStep="STEP 2"
+          conversionLabel={`Show Rate: ${fmtPct(parseFloat(showRatePct) || 0)}`}
+          isActive={(parseFloat(showRatePct) || 0) > 0 && calc.calls > 0}
+        />
 
         {/* STEP 2: Call Metrics */}
         <div className="fn-section fn-section-calc">
@@ -225,16 +382,23 @@ function FounderSnapshot() {
             <span className="fn-section-sub">מדדי שיחות</span>
           </div>
           <div className="fn-metrics-grid fn-metrics-grid-3">
-            <FunnelMetric label="CPCall" sublabel="עלות לשיחה" value={fmt(calc.cpCall)} formula={`Spend ÷ Calls = ${fmt(parseFloat(spend)||0)} ÷ ${fmtNum(calc.calls)}`} />
+            <FunnelMetric label="CPCall" sublabel="עלות לשיחה" value={fmt(calc.cpCall)} formula={`Spend ÷ Calls = ${fmt(parseFloat(stripCommas(spend))||0)} ÷ ${fmtNum(calc.calls)}`} />
             <FunnelMetric label="Live Calls" sublabel="שיחות חיות" value={fmtNum(calc.liveCalls)} formula={`Calls × ShowRate = ${fmtNum(calc.calls)} × ${showRatePct}%`} />
             <FunnelMetric label="Show Rate" sublabel="אחוז התייצבות" value={fmtPct(parseFloat(showRatePct) || 0)} formula="מוגדר בסרגל הצד" />
           </div>
-          <div className="fn-metrics-grid" style={{ marginTop: 12 }}>
-            <FunnelMetric label="CPLive Call" sublabel="עלות לשיחה חיה" value={fmt(calc.cpLiveCall)} formula={`Spend ÷ LiveCalls = ${fmt(parseFloat(spend)||0)} ÷ ${fmtNum(calc.liveCalls)}`} />
+          <div className="fn-metrics-grid" style={{ marginTop: 12, gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div style={{ gridColumn: "2 / 3", justifySelf: "center", transform: "translateX(-14px)" }}>
+              <FunnelMetric label="CPLive Call" sublabel="עלות לשיחה חיה" value={fmt(calc.cpLiveCall)} formula={`Spend ÷ LiveCalls = ${fmt(parseFloat(stripCommas(spend))||0)} ÷ ${fmtNum(calc.liveCalls)}`} />
+            </div>
           </div>
         </div>
 
-        <FunnelArrow />
+        <FunnelArrow
+          fromStep="STEP 2"
+          toStep="STEP 3"
+          conversionLabel={`Close Rate: ${fmtPct(parseFloat(closeRatePct) || 0)}`}
+          isActive={(parseFloat(closeRatePct) || 0) > 0 && calc.liveCalls > 0}
+        />
 
         {/* STEP 3: Closing Metrics */}
         <div className="fn-section fn-section-calc">
@@ -246,14 +410,69 @@ function FounderSnapshot() {
           <div className="fn-metrics-grid fn-metrics-grid-3">
             <FunnelMetric label="Closes" sublabel="סגירות" value={fmtNum(calc.closes)} formula={`LiveCalls × CloseRate = ${fmtNum(calc.liveCalls)} × ${closeRatePct}%`} />
             <FunnelMetric label="Close Rate" sublabel="אחוז סגירה" value={fmtPct(parseFloat(closeRatePct) || 0)} formula="מוגדר בסרגל הצד" />
-            <FunnelMetric label="CPA" sublabel="עלות לרכישה" value={fmt(calc.cpa)} formula={`Spend ÷ Closes = ${fmt(parseFloat(spend)||0)} ÷ ${fmtNum(calc.closes)}`} />
+            <FunnelMetric label="CPA" sublabel="עלות לרכישה" value={fmt(calc.cpa)} formula={`Spend ÷ Closes = ${fmt(parseFloat(stripCommas(spend))||0)} ÷ ${fmtNum(calc.closes)}`} />
           </div>
         </div>
 
         <FunnelArrow />
 
         {/* FINAL RESULTS */}
-        <div className="fn-section fn-section-results">
+        <div
+          className="fn-section fn-section-results"
+          ref={finalResultsRef}
+          style={{
+            boxShadow: highlightResults ? "0 0 0 3px rgba(218, 253, 104, 0.6)" : undefined,
+            transition: "box-shadow 0.4s ease",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 14,
+              right: 16,
+              display: "inline-flex",
+              gap: 4,
+              padding: 4,
+              borderRadius: 999,
+              border: "1px solid rgba(0, 0, 0, 0.1)",
+              background: "rgba(255,255,255,0.85)",
+              direction: "rtl",
+            }}
+            role="tablist"
+            aria-label="בחירת תרחיש להצגה"
+          >
+            {[
+              { key: "pessimistic", label: "פסימי" },
+              { key: "realistic", label: "ריאלי" },
+              { key: "optimistic", label: "אופטימי" },
+            ].map((option) => {
+              const disabled = !isComputed(option.key);
+              const isActive = viewScenario === option.key;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => !disabled && setViewScenario(option.key)}
+                  aria-pressed={isActive}
+                  style={{
+                    border: 0,
+                    background: isActive ? "#DAFD68" : "transparent",
+                    color: disabled ? "rgba(0,0,0,0.35)" : isActive ? "#000" : "rgba(0,0,0,0.7)",
+                    padding: "3px 10px",
+                    fontSize: 11,
+                    fontFamily: "inherit",
+                    borderRadius: 999,
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    transition: "background 0.15s ease, color 0.15s ease",
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
           <div className="fn-section-header fn-results-header">
             <Icon name="dollar" size={18} style={{ filter: "brightness(0)" }} />
             <span>FINAL RESULTS</span>
@@ -265,21 +484,21 @@ function FounderSnapshot() {
                 <Icon name="dollar" size={20} style={{ filter: "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" }} />
               </div>
               <div className="fn-result-label">Rev (הכנסות)</div>
-              <div className="fn-result-value">{fmt(calc.rev)}</div>
+              <div className="fn-result-value">{fmt(results.rev)}</div>
             </div>
-            <div className={`fn-result-card ${calc.profit < 0 ? "fn-result-negative" : ""}`}>
+            <div className={`fn-result-card ${results.profit < 0 ? "fn-result-negative" : ""}`}>
               <div className="fn-result-icon">
-                <Icon name="trending-up" size={20} style={{ filter: calc.profit >= 0 ? "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" : "sepia(1) saturate(5) hue-rotate(0deg) brightness(0.7)" }} />
+                <Icon name="trending-up" size={20} style={{ filter: results.profit >= 0 ? "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" : "sepia(1) saturate(5) hue-rotate(0deg) brightness(0.7)" }} />
               </div>
               <div className="fn-result-label">Profit (רווח)</div>
-              <div className="fn-result-value">{fmt(calc.profit)}</div>
+              <div className="fn-result-value">{fmt(results.profit)}</div>
             </div>
-            <div className={`fn-result-card ${calc.profitPct < 0 ? "fn-result-negative" : ""}`}>
+            <div className={`fn-result-card ${results.profitPct < 0 ? "fn-result-negative" : ""}`}>
               <div className="fn-result-icon">
-                <Icon name="bar-chart" size={20} style={{ filter: calc.profitPct >= 0 ? "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" : "sepia(1) saturate(5) hue-rotate(0deg) brightness(0.7)" }} />
+                <Icon name="bar-chart" size={20} style={{ filter: results.profitPct >= 0 ? "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)" : "sepia(1) saturate(5) hue-rotate(0deg) brightness(0.7)" }} />
               </div>
               <div className="fn-result-label">Profit % (שולי רווח)</div>
-              <div className="fn-result-value">{fmtPct(calc.profitPct)}</div>
+              <div className="fn-result-value">{fmtPct(results.profitPct)}</div>
             </div>
           </div>
         </div>
@@ -288,75 +507,21 @@ function FounderSnapshot() {
   );
 }
 
-/* ══════════════════════════════════════════
-   PROJECTIONS BUILDER
-   ══════════════════════════════════════════ */
-function ProjectionsBuilder() {
-  const d = forecastDefaults;
+function FounderSnapshot() {
   return (
     <div className="projections-tab forecast-view-enter">
-      <div className="grid grid-2 section">
-        <div className="card padded">
-          <div className="section-title">אחוזי המרה</div>
-          <InputRow label="Show Rate" value={`${d.showRate}%`} info="אחוז שמגיעים לשיחה" />
-          <InputRow label="Offer Rate" value={`${d.offerRate}%`} info="אחוז שמקבלים הצעה" />
-          <InputRow label="Close Rate" value={`${d.closeRate}%`} info="אחוז סגירה" />
-          <InputRow label="% MQL → QCall" value={`${d.mqlToQcall}%`} info="המרה מליד לשיחה" />
-        </div>
-        <div className="card padded">
-          <div className="section-title">הגדרות יעד</div>
-          <InputRow label="יעד הכנסות" value={d.revenueTarget.toLocaleString()} prefix="$" info="יעד הכנסות חודשי" />
-          <InputRow label="יעד MER" value={d.mer.toString()} info="Marketing Efficiency Ratio" />
-          <InputRow label="AOV (ערך עסקה ממוצע)" value={d.aov.toLocaleString()} prefix="$" info="Average Order Value" />
-        </div>
-      </div>
-
-      <div className="grid grid-2 section">
-        <div className="card padded">
-          <div className="section-title">תקציב ועלויות</div>
-          <InputRow label="תקציב מקסימלי" value={`$${d.maxBudget.toLocaleString()}`} info="תקציב שיווק מקסימלי" />
-          <InputRow label="CPA מקסימלי" value={`$${d.maxCPA.toLocaleString()}`} info="עלות רכישת לקוח" />
-          <InputRow label="עלות ליד מקסימלית" value={`$${d.maxCostPerLead}`} info="עלות ליד" />
-          <InputRow label="עלות שיחה מקסימלית" value={`$${d.maxCostPerCall}`} info="עלות שיחה" />
-        </div>
-        <div className="card padded">
-          <div className="section-title">משאבים נדרשים</div>
-          <InputRow label="עסקאות נדרשות" value={d.requiredDeals.toString()} info="מספר עסקאות נדרשות" />
-          <InputRow label="לידים נדרשים (MQLs)" value={d.requiredMQLs.toString()} info="מספר לידים נדרשים" />
-          <InputRow label="שיחות איכותיות נדרשות" value={d.qualifiedCalls.toString()} info="שיחות שמסתיימות בהצעה" />
-          <InputRow label="שיחות חיות נדרשות" value={d.liveCalls.toString()} info="שיחות טלפון נדרשות" />
-        </div>
-      </div>
-
-      <div className="card forecast-summary section">
-        <div className="section-title">סיכום התחזית</div>
-        <div className="grid grid-3">
-          <SummaryTile label="יעד הכנסות" value="$200,000" highlight />
-          <SummaryTile label="עסקאות נדרשות" value="25" />
-          <SummaryTile label="לידים נדרשים" value="441" />
-        </div>
-        <div className="grid grid-3" style={{ marginTop: 12 }}>
-          <SummaryTile label="תקציב מקסימלי" value="$57,142.86" />
-          <SummaryTile label="MER צפוי" value="3.5" highlight />
-          <SummaryTile label="CPA מקסימלי" value="$2,285.71" />
-        </div>
-        <div className="conversion-metrics">
-          <div className="conversion-metric">
-            <div className="metric-value">11.3%</div>
-            <div className="metric-label">Qualified Calls → Close</div>
-          </div>
-          <div className="conversion-metric">
-            <div className="metric-value">5.7%</div>
-            <div className="metric-label">MQLs → Close</div>
-          </div>
-          <div className="conversion-metric">
-            <div className="metric-value">50.0%</div>
-            <div className="metric-label">MQLs → Qualified Calls</div>
-          </div>
+      <div className="card padded" style={{ textAlign: "right" }}>
+        <div className="section-title">Founder Snapshot</div>
+        <div style={{ color: "var(--color-muted)", fontSize: 14 }}>
+          בקרוב — סיכום הנהלה ותובנות מרכזיות
         </div>
       </div>
     </div>
   );
+}
+
+function ProjectionsBuilder() {
+  return <ProjectionBuilderView />;
 }
 
 /* ══════════════════════════════════════════
@@ -373,7 +538,7 @@ export default function ForecastPlanner() {
         actions={
           <>
             <button className="button">
-              <Icon name="close" size={14} style={{ filter: "brightness(0.3)" }} /> אתחל
+              אתחל נתונים
             </button>
             <button className="button primary">
               <Icon name="file-download" size={14} style={{ filter: "brightness(0)" }} /> ייצא PDF
