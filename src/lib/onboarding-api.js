@@ -9,6 +9,48 @@ function now() {
   return new Date().toISOString();
 }
 
+async function getCustomFields(clientId) {
+  try {
+    const { data, error } = await db()
+      .from('clients')
+      .select('customFields')
+      .eq('id', clientId)
+      .single();
+    if (error) return null;
+    return data?.customFields || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function updateClientSafe(clientId, payload, customFields) {
+  const basePayload = { ...payload, updatedAt: now() };
+  const withCustom = customFields ? { ...basePayload, customFields } : basePayload;
+
+  let { data, error } = await db()
+    .from('clients')
+    .update(withCustom)
+    .eq('id', clientId)
+    .select()
+    .single();
+
+  if (!error) return data;
+
+  const msg = String(error.message || '').toLowerCase();
+  const customFieldIssue = msg.includes('customfields') || msg.includes('column') || msg.includes('schema cache');
+  if (!customFieldIssue || !customFields) throw error;
+
+  ({ data, error } = await db()
+    .from('clients')
+    .update(basePayload)
+    .eq('id', clientId)
+    .select()
+    .single());
+
+  if (error) throw error;
+  return data;
+}
+
 // ── Demo User ──
 
 export async function createDemoUser() {
@@ -38,36 +80,26 @@ export async function createDemoUser() {
 // ── Step 1: Company Details ──
 
 export async function saveCompanyDetails(clientId, { companyName, salesReps, industry, employees, companyTypes }) {
-  const { data: existing } = await db()
-    .from('clients')
-    .select('customFields')
-    .eq('id', clientId)
-    .single();
+  const existingCustom = await getCustomFields(clientId);
 
   const customFields = {
-    ...(existing?.customFields || {}),
+    ...(existingCustom || {}),
     companyProfile: {
       companyTypes: companyTypes || [],
       employees: employees || null,
     },
   };
 
-  const { data, error } = await db()
-    .from('clients')
-    .update({
+  return updateClientSafe(
+    clientId,
+    {
       companyName,
       salesReps: parseInt(salesReps) || 1,
       industry,
-      customFields,
       onboardingStep: 1,
-      updatedAt: now(),
-    })
-    .eq('id', clientId)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+    },
+    customFields
+  );
 }
 
 // ── Step 2: Funnel Template ──
@@ -213,57 +245,29 @@ export async function saveDataSource(clientId, { sheetUrl, fieldMapping }) {
 // ── Step 2: Focus Areas ──
 
 export async function saveFocusAreas(clientId, focusAreas) {
-  const { data: existing } = await db()
-    .from('clients')
-    .select('customFields')
-    .eq('id', clientId)
-    .single();
+  const existingCustom = await getCustomFields(clientId);
 
   const customFields = {
-    ...(existing?.customFields || {}),
+    ...(existingCustom || {}),
     focusAreas: focusAreas || [],
   };
-
-  const { data, error } = await db()
-    .from('clients')
-    .update({
-      customFields,
-      updatedAt: now(),
-    })
-    .eq('id', clientId)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  return updateClientSafe(clientId, {}, customFields);
 }
 
 // ── Step 4: Contact Details + Complete ──
 
 export async function saveContactDetails(clientId, contactDetails = {}) {
-  const { data: existingCustom } = await db()
-    .from('clients')
-    .select('customFields')
-    .eq('id', clientId)
-    .single();
+  const existingCustom = await getCustomFields(clientId);
 
   const customFields = {
-    ...(existingCustom?.customFields || {}),
+    ...(existingCustom || {}),
     contact: contactDetails,
   };
-
-  const { data, error } = await db()
-    .from('clients')
-    .update({
-      customFields,
-      onboardingStep: 4,
-      updatedAt: now(),
-    })
-    .eq('id', clientId)
-    .select()
-    .single();
-
-  if (error) throw error;
+  const data = await updateClientSafe(
+    clientId,
+    { onboardingStep: 4 },
+    customFields
+  );
 
   const { data: existing } = await db()
     .from('data_sources')
