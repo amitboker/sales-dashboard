@@ -9,7 +9,20 @@
       "Bash(sudo cp:*)",
       "Bash(/usr/local/bin/gh:*)",
       "Bash(~/bin/gh auth status:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd profile avatar in header, settings page, and collapsible sidebar\n\n- Add TopBar component with profile avatar dropdown \\(view profile / logout\\)\n- Add Settings page with profile photo upload and user info display\n- Add sidebar collapse/expand with smooth 300ms transitions\n- Add Light/Dark theme switcher in sidebar footer\n- Add tooltips on hover for collapsed sidebar icons\n- Add responsive layout: sidebar becomes bottom nav on mobile\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(npx vercel:*)",
+      "Bash(npx prisma init:*)",
+      "Bash(npm install:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(git -C \"/Users/amitboker/Downloads/Sales Dashboard\" log --oneline -5)",
+      "Bash(git -C \"/Users/amitboker/Downloads/Sales Dashboard\" status)",
+      "Bash(brew install:*)",
+      "Bash(npm init:*)",
+      "Bash(npx prisma db pull:*)"
     ]
   }
 }

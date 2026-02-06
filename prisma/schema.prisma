@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Client {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  companyName    String
+  salesReps      Int          @default(1)
+  industry       String?
+  onboardingStep Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  dataSource     DataSource?
+  funnelData     FunnelData[]
+  funnel         Funnel?
+  syncLogs       SyncLog[]
+
+  @@index([email])
+  @@map("clients")
+}
+
+model Funnel {
+  id           String   @id @default(uuid())
+  name         String   @default("משפך המכירות שלי")
+  description  String?
+  templateType String?
+  stages       Json
+  targets      Json?
+  clientId     String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("funnels")
+}
+
+model DataSource {
+  id             String    @id @default(uuid())
+  type           String    @default("google_sheets")
+  sheetId        String?
+  sheetName      String?
+  sheetUrl       String?
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiry    DateTime?
+  fieldMapping   Json
+  syncEnabled    Boolean   @default(true)
+  syncFrequency  Int       @default(15)
+  lastSync       DateTime?
+  lastSyncStatus String?
+  lastSyncError  String?
+  clientId       String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  client         Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("data_sources")
+}
+
+model FunnelData {
+  id           String   @id @default(uuid())
+  leadName     String?
+  phone        String?
+  email        String?
+  stage        String
+  source       String?
+  createdDate  DateTime
+  lastUpdated  DateTime @default(now())
+  customFields Json?
+  sourceRowId  String?
+  clientId     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, stage])
+  @@index([clientId, createdDate])
+  @@index([clientId, lastUpdated])
+  @@map("funnel_data")
+}
+
+model SyncLog {
+  id               String    @id @default(uuid())
+  clientId         String
+  status           String
+  recordsProcessed Int       @default(0)
+  recordsAdded     Int       @default(0)
+  recordsUpdated   Int       @default(0)
+  recordsSkipped   Int       @default(0)
+  errorMessage     String?
+  errorDetails     Json?
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  duration         Int?
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, startedAt])
+  @@map("sync_logs")
+}

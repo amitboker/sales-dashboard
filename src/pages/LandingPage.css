@@ -1,0 +1,422 @@
+/* ── Landing wrapper ── */
+.landing {
+  min-height: 100vh;
+  background: linear-gradient(165deg, #0a0a12 0%, #0d0f1a 30%, #111328 50%, #0a0a12 100%);
+  color: #fff;
+  overflow-x: hidden;
+  position: relative;
+  font-family: "Liebling", "Heebo", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Orange / red arc glow ── */
+.landing__glow {
+  position: absolute;
+  top: 30%;
+  left: -20%;
+  width: 140%;
+  height: 70%;
+  background: radial-gradient(ellipse at 70% 20%, rgba(255, 120, 30, 0.18) 0%, rgba(200, 50, 10, 0.10) 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing__glow::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 5%;
+  width: 80%;
+  height: 60%;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid rgba(255, 140, 40, 0.15);
+  transform: rotate(-15deg) scaleX(2.5);
+  filter: blur(2px);
+}
+
+/* ── Hero Section ── */
+.landing__hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.landing__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0.4rem 0.6rem 0.4rem 1.2rem;
+  margin-bottom: 2.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.landing__badge-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.landing__badge-new {
+  background: #DAFD68;
+  color: #1a1a2e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+}
+
+.landing__title {
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 0.2rem;
+  background: linear-gradient(180deg, #fff 40%, rgba(255, 255, 255, 0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing__subtitle {
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(180deg, #fff 20%, rgba(255, 255, 255, 0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing__description {
+  max-width: 600px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2.5rem;
+}
+
+/* ── CTAs ── */
+.landing__ctas {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.landing__cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(218, 253, 104, 0.12);
+  border: 1px solid rgba(218, 253, 104, 0.3);
+  color: #DAFD68;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 2rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.landing__cta-primary:hover {
+  background: rgba(218, 253, 104, 0.22);
+  border-color: rgba(218, 253, 104, 0.5);
+  transform: translateY(-1px);
+}
+
+.landing__cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  transition: color 0.3s ease;
+}
+
+.landing__cta-secondary:hover {
+  color: #fff;
+}
+
+/* ── Testimonials ── */
+.landing__testimonials {
+  position: relative;
+  z-index: 1;
+  padding: 4rem 2rem 6rem;
+}
+
+.landing__section-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.landing__testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing__card {
+  background: linear-gradient(145deg, rgba(218, 253, 104, 0.08) 0%, rgba(45, 95, 79, 0.12) 100%);
+  border: 1px solid rgba(218, 253, 104, 0.1);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.landing__card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(218, 253, 104, 0.25);
+}
+
+.landing__card-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.landing__card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.landing__card-handle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.landing__card-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Footer ── */
+.landing__footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.5rem 2rem;
+}
+
+.landing__footer-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.landing__footer-brand {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.landing__footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.landing__footer-links a:hover,
+.landing__footer-demo:hover {
+  color: #DAFD68;
+}
+
+.landing__footer-demo {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  padding: 0;
+  transition: color 0.3s;
+}
+
+.landing__footer-sep {
+  opacity: 0.3;
+}
+
+.landing__footer-copy {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Responsive ── */
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .landing__hero {
+    padding: 2rem 1.5rem;
+    min-height: 90vh;
+  }
+
+  .landing__title {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+  }
+
+  .landing__subtitle {
+    font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  }
+
+  .landing__description {
+    max-width: 550px;
+    font-size: 0.95rem;
+  }
+
+  .landing__testimonials {
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  .landing__testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    max-width: 700px;
+  }
+
+  .landing__footer {
+    padding: 1.5rem 1.5rem;
+  }
+}
+
+/* Mobile (≤767px) */
+@media (max-width: 767px) {
+  .landing__hero {
+    padding: 1.5rem 1rem;
+    min-height: 85vh;
+  }
+
+  .landing__badge {
+    padding: 0.35rem 0.5rem 0.35rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .landing__badge-text {
+    font-size: 0.75rem;
+  }
+
+  .landing__badge-new {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.6rem;
+  }
+
+  .landing__title {
+    font-size: clamp(1.8rem, 8vw, 2.8rem);
+    margin-bottom: 0.3rem;
+  }
+
+  .landing__subtitle {
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
+    margin-bottom: 1rem;
+  }
+
+  .landing__description {
+    max-width: 100%;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+  }
+
+  .landing__ctas {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.8rem;
+  }
+
+  .landing__cta-primary,
+  .landing__cta-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .landing__testimonials {
+    padding: 3rem 1rem 4rem;
+  }
+
+  .landing__section-title {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+  }
+
+  .landing__testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  .landing__card {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .landing__card-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .landing__card-name {
+    font-size: 0.95rem;
+  }
+
+  .landing__card-handle {
+    font-size: 0.75rem;
+  }
+
+  .landing__card-text {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .landing__footer {
+    padding: 1.2rem 1rem;
+  }
+
+  .landing__footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+  }
+
+  .landing__footer-brand {
+    font-size: 0.9rem;
+  }
+
+  .landing__footer-links {
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .landing__footer-copy {
+    font-size: 0.75rem;
+  }
+}

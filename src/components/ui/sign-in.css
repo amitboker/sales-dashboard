@@ -1,0 +1,444 @@
+/* Sign In Page Styles - Standalone CSS (works without Tailwind) */
+
+.sign-in-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  direction: rtl;
+  font-family: "Liebling", "Heebo", system-ui, -apple-system, sans-serif;
+}
+
+@media (min-width: 768px) {
+  .sign-in-page {
+    flex-direction: row-reverse;
+  }
+}
+
+.sign-in-form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #ffffff;
+}
+
+.sign-in-form-container {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.sign-in-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sign-in-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.1s forwards;
+  color: #111827;
+}
+
+.sign-in-title span {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.sign-in-description {
+  color: #6b7280;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.2s forwards;
+}
+
+.sign-in-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sign-in-field {
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.3s forwards;
+}
+
+.sign-in-field:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.sign-in-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.glass-input-wrapper {
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.glass-input-wrapper:focus-within {
+  border-color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.sign-in-input {
+  width: 100%;
+  background: transparent;
+  font-size: 0.875rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: none;
+  outline: none;
+  direction: rtl;
+}
+
+.sign-in-input::placeholder {
+  color: #9ca3af;
+}
+
+.sign-in-password-wrapper {
+  position: relative;
+}
+
+.sign-in-password-toggle {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.sign-in-password-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.sign-in-password-toggle:hover svg {
+  color: #111827;
+}
+
+.sign-in-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.5s forwards;
+}
+
+.sign-in-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.sign-in-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 2px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.sign-in-checkbox:checked {
+  background: hsl(142, 30%, 40%);
+  border-color: hsl(142, 30%, 40%);
+}
+
+.sign-in-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.sign-in-forgot-link {
+  color: #a78bfa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sign-in-forgot-link:hover {
+  text-decoration: underline;
+}
+
+.sign-in-submit-btn {
+  width: 100%;
+  border-radius: 1rem;
+  background: hsl(142, 30%, 40%);
+  color: white;
+  padding: 1rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.6s forwards;
+}
+
+.sign-in-submit-btn:hover:not(:disabled) {
+  background: hsl(142, 30%, 35%);
+}
+
+.sign-in-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sign-in-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.7s forwards;
+}
+
+.sign-in-divider::before {
+  content: '';
+  width: 100%;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.sign-in-divider-text {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  background: #ffffff;
+  position: absolute;
+}
+
+.sign-in-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.8s forwards;
+}
+
+.sign-in-google-btn:hover {
+  background: #f9fafb;
+}
+
+.sign-in-demo-btn {
+  width: 100%;
+  border-radius: 1rem;
+  background: #DAFD68;
+  color: #1a1a2e;
+  padding: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.85s forwards;
+}
+
+.sign-in-demo-btn:hover:not(:disabled) {
+  background: #c8ec55;
+}
+
+.sign-in-demo-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sign-in-signup-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.9s forwards;
+}
+
+.sign-in-signup-link {
+  color: #a78bfa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sign-in-signup-link:hover {
+  text-decoration: underline;
+}
+
+.sign-in-demo-creds {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out 0.95s forwards;
+}
+
+.sign-in-hero-section {
+  display: none;
+  flex: 1;
+  position: relative;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .sign-in-hero-section {
+    display: block;
+  }
+}
+
+.sign-in-hero-image {
+  position: absolute;
+  inset: 1rem;
+  border-radius: 1.5rem;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: slideRightIn 0.8s ease-out 0.3s forwards;
+}
+
+.sign-in-testimonials {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  padding: 0 2rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.testimonial-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem;
+  width: 16rem;
+  opacity: 0;
+  animation: testimonialIn 0.6s ease-out forwards;
+}
+
+.testimonial-card:nth-child(1) {
+  animation-delay: 1.0s;
+}
+
+.testimonial-card:nth-child(2) {
+  animation-delay: 1.2s;
+}
+
+.testimonial-card:nth-child(3) {
+  animation-delay: 1.4s;
+}
+
+.testimonial-card-xl {
+  display: none;
+}
+
+.testimonial-card-2xl {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .testimonial-card-xl {
+    display: flex;
+  }
+}
+
+@media (min-width: 1536px) {
+  .testimonial-card-2xl {
+    display: flex;
+  }
+}
+
+.testimonial-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+  border-radius: 1rem;
+  flex-shrink: 0;
+}
+
+.testimonial-content {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.testimonial-name {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.testimonial-handle {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.testimonial-text {
+  margin-top: 0.25rem;
+  color: rgba(17, 24, 39, 0.8);
+}
+
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0px);
+  }
+}
+
+@keyframes slideRightIn {
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateX(0px);
+  }
+}
+
+@keyframes testimonialIn {
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0px) scale(1);
+  }
+}

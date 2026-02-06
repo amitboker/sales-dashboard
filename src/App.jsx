@@ -1,56 +1,23 @@
-import { useState } from "react";
-import SideNav from "./components/SideNav.jsx";
-import TopBar from "./components/TopBar.jsx";
-import OverviewDashboard from "./pages/OverviewDashboard.jsx";
-import TeamPerformance from "./pages/TeamPerformance.jsx";
-import SalesFunnel from "./pages/SalesFunnel.jsx";
-import ForecastPlanner from "./pages/ForecastPlanner.jsx";
-import AIWorkspace from "./pages/AIWorkspace.jsx";
-import Settings from "./pages/Settings.jsx";
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import DashboardApp from './dashboard/DashboardApp';
+import PageTransition from './components/PageTransition';
 
-const pageMap = {
-  overview: OverviewDashboard,
-  funnel: SalesFunnel,
-  team: TeamPerformance,
-  ai: AIWorkspace,
-  forecast: ForecastPlanner,
-  settings: Settings,
-};
-
-export default function App() {
-  const [activePage, setActivePage] = useState("overview");
-  const [profileName] = useState("עמית בוקר");
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  const ActiveComponent = pageMap[activePage] || OverviewDashboard;
-  const isSettings = activePage === "settings";
+function App() {
+  const location = useLocation();
 
   return (
-    <div className="app">
-      <main className="content">
-        <TopBar
-          profileName={profileName}
-          profilePhoto={profilePhoto}
-          onNavigate={setActivePage}
-        />
-        {isSettings ? (
-          <ActiveComponent
-            profileName={profileName}
-            profilePhoto={profilePhoto}
-            onPhotoChange={setProfilePhoto}
-          />
-        ) : (
-          <ActiveComponent />
-        )}
-      </main>
-      <SideNav
-        activeId={activePage}
-        onSelect={setActivePage}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
-      />
-    </div>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
+        <Route path="/dashboard" element={<PageTransition variant="scale"><DashboardApp /></PageTransition>} />
+        <Route path="*" element={<PageTransition><LandingPage /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
+export default App;
