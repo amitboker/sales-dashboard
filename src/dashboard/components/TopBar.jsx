@@ -36,6 +36,14 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
   return (
     <div className="topbar">
       <div className="topbar-user-area" ref={dropdownRef}>
+        {/* User Info */}
+        <div className="topbar-user-info">
+          <div className="topbar-user-name">{profileName || "משתמש"}</div>
+          {profileRole && (
+            <div className="topbar-user-role">{profileRole}</div>
+          )}
+        </div>
+
         {/* Avatar */}
         <button
           className="topbar-avatar-btn"
@@ -49,32 +57,24 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
           )}
         </button>
 
-        {/* User Info */}
-        <div className="topbar-user-info">
-          <div className="topbar-user-name">{profileName || "משתמש"}</div>
-          {profileRole && (
-            <div className="topbar-user-role">{profileRole}</div>
-          )}
-        </div>
-
         {/* Action Buttons */}
         <div className="topbar-action-buttons">
-          <button 
-            className="topbar-icon-btn" 
-            type="button"
-            onClick={handleNotifications}
-            aria-label="התראות"
-          >
-            <Icon name="bell" size={18} />
-          </button>
-
-          <button 
-            className="topbar-icon-btn" 
+          <button
+            className="topbar-icon-btn"
             type="button"
             onClick={handleSettings}
             aria-label="הגדרות"
           >
             <Icon name="settings" size={18} />
+          </button>
+
+          <button
+            className="topbar-icon-btn"
+            type="button"
+            onClick={handleNotifications}
+            aria-label="התראות"
+          >
+            <Icon name="bell" size={18} />
           </button>
         </div>
 

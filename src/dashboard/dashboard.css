@@ -2050,7 +2050,7 @@ tbody tr:hover {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   padding: 0 0 20px;
   direction: rtl;
 }
@@ -2060,7 +2060,7 @@ tbody tr:hover {
   align-items: center;
   gap: 12px;
   position: relative;
-  direction: rtl;
+  direction: ltr;
 }
 
 /* Avatar - Rounded Rectangle (Squircle) */
@@ -2105,6 +2105,8 @@ tbody tr:hover {
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  direction: rtl;
+  text-align: right;
 }
 
 .topbar-user-name {
@@ -2520,6 +2522,10 @@ tbody tr:hover {
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto;
+  }
+
+  .topbar {
+    justify-content: flex-start;
   }
 
   .sidebar {
