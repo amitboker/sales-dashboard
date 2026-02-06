@@ -1368,6 +1368,7 @@ tbody tr:hover {
 /* --- Page enter --- */
 .page-enter {
   animation: pageIn 0.4s ease-out both;
+  margin-top: -14px;
 }
 
 @keyframes pageIn {
