@@ -40,8 +40,7 @@ export default function Step4Contact({ clientId, updateClientData, goBack, onCom
   return (
     <div className="ob-card">
       <div className="ob-card__icon">📨</div>
-      <h2 className="ob-card__title">איך ניצור איתך קשר?</h2>
-      <p className="ob-card__subtitle">נחזור אליך תוך 24 שעות</p>
+      <h2 className="ob-card__title">פרטי קשר</h2>
 
       <div className="ob-form-row">
         <div className="ob-field">

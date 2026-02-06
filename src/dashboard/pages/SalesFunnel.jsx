@@ -1,12 +1,14 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import PageHeader from "../components/PageHeader.jsx";
 import AlertCard from "../components/AlertCard.jsx";
 import Icon from "../components/Icon.jsx";
+import FunnelStagesEditor from "../components/FunnelStagesEditor.jsx";
+import useFunnelStages from "../hooks/useFunnelStages.js";
 import {
-  alerts, funnelStages, overallConversion, criticalLeaks,
+  alerts, overallConversion, criticalLeaks,
   leakageAnalysis, avgTimePerStage,
 } from "../data/mockData.js";
 import { generatePDF } from "../utils/pdfExport.js";
@@ -67,8 +69,10 @@ function FunnelStageRow({ stage, maxValue }) {
 }
 
 export default function SalesFunnel() {
-  const maxVal = Math.max(...funnelStages.map((s) => s.value));
+  const { stages, setStages, activeStages } = useFunnelStages();
+  const maxVal = Math.max(1, ...activeStages.map((s) => s.value));
   const barChartRef = useRef(null);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   const handleExportPDF = async () => {
     try {
@@ -87,7 +91,7 @@ export default function SalesFunnel() {
           {
             title: "שלבי המשפך",
             columns: ["שלב", "כמות", "אחוז", "שיעור המרה"],
-            rows: funnelStages.map(s => [s.label, String(s.value), s.percent, s.conversionRate || "-"]),
+            rows: activeStages.map(s => [s.label, String(s.value), s.percent, s.conversionRate || "-"]),
             columnStyles: { 1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" } },
           },
           {
@@ -105,41 +109,34 @@ export default function SalesFunnel() {
   };
 
   return (
-    <div>
+    <div className="sales-funnel-page">
       <PageHeader
         title="משפך מכירות"
         subtitle="ניתוח שלבי המשפך וזיהוי דליפות"
         actions={
+          <button className="button" onClick={() => setEditorOpen(true)}>
+            <Icon name="settings" size={14} style={{ filter: "brightness(0.3)" }} /> עריכת משפך
+          </button>
+        }
+        filters={
           <>
             <button className="button primary">
-              <Icon name="file-download" size={14} style={{ filter: "brightness(0) invert(1)" }} /> הורד דאטה
+              <Icon name="file-download" size={14} style={{ filter: "brightness(0)" }} /> הורד דאטה
             </button>
             <button className="button primary" onClick={handleExportPDF}>
-              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0) invert(1)" }} /> ייצוא דוח PDF
+              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0)" }} /> ייצוא דוח PDF
             </button>
           </>
         }
       />
 
-      <div className="grid grid-2 section" style={{ gridTemplateColumns: "1fr 2fr" }}>
-        <div className="card padded">
-          <div className="alerts-header">
-            <Icon name="bell" size={16} style={{ filter: "sepia(1) saturate(3) hue-rotate(30deg) brightness(0.7)" }} />
-            <h3>התראות</h3>
-          </div>
-          <div className="alerts-section">
-            {alerts.map((alert) => (
-              <AlertCard key={alert.title} {...alert} />
-            ))}
-          </div>
-        </div>
-
+      <div className="grid grid-2 section" style={{ gridTemplateColumns: "2fr 1fr" }}>
         <div className="card padded">
           <div className="section-title">משפך מכירות</div>
-          <div className="funnel-badge">5 שלבים</div>
+          <div className="funnel-badge">{activeStages.length} שלבים</div>
           <div className="funnel-container">
-            {funnelStages.map((stage) => (
-              <FunnelStageRow key={stage.label} stage={stage} maxValue={maxVal} />
+            {activeStages.map((stage) => (
+              <FunnelStageRow key={stage.id} stage={stage} maxValue={maxVal} />
             ))}
           </div>
 
@@ -186,7 +183,29 @@ export default function SalesFunnel() {
             ))}
           </div>
         </div>
+
+        <div className="card padded">
+          <div className="alerts-header">
+            <Icon name="bell" size={16} style={{ filter: "sepia(1) saturate(3) hue-rotate(30deg) brightness(0.7)" }} />
+            <h3>התראות</h3>
+          </div>
+          <div className="alerts-section">
+            {alerts.map((alert) => (
+              <AlertCard key={alert.title} {...alert} />
+            ))}
+          </div>
+        </div>
       </div>
+
+      <FunnelStagesEditor
+        open={editorOpen}
+        stages={stages}
+        onClose={() => setEditorOpen(false)}
+        onSave={(nextStages) => {
+          setStages(nextStages);
+          setEditorOpen(false);
+        }}
+      />
 
       <div className="grid grid-2 section">
         <div className="card padded" ref={barChartRef}>
@@ -197,17 +216,17 @@ export default function SalesFunnel() {
               <XAxis dataKey="stage" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="actual" fill="#5e7768" radius={[4, 4, 0, 0]} name="בפועל" />
-              <Bar dataKey="target" fill="#c5d5b5" radius={[4, 4, 0, 0]} name="יעד" />
+              <Bar dataKey="actual" fill="#DAFD68" radius={[4, 4, 0, 0]} name="בפועל" />
+              <Bar dataKey="target" fill="#c8ec55" radius={[4, 4, 0, 0]} name="יעד" />
             </BarChart>
           </ResponsiveContainer>
           <div className="bar-legend">
             <div className="bar-legend-item">
-              <div className="bar-legend-color" style={{ background: "#5e7768" }} />
+              <div className="bar-legend-color" style={{ background: "#DAFD68" }} />
               <span>בפועל</span>
             </div>
             <div className="bar-legend-item">
-              <div className="bar-legend-color" style={{ background: "#c5d5b5" }} />
+              <div className="bar-legend-color" style={{ background: "#c8ec55" }} />
               <span>יעד</span>
             </div>
           </div>

@@ -43,7 +43,7 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
               data-tooltip={item.label}
             >
               <span className="nav-icon-wrap">
-                <Icon name={item.icon} size={18} style={{ filter: "brightness(0) invert(1)" }} />
+                <Icon name={item.icon} size={18} style={{ filter: "none" }} />
               </span>
               <span className="nav-text">{item.label}</span>
               {item.badge && <span className="nav-badge">{item.badge}</span>}
@@ -59,7 +59,7 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
           type="button"
           data-tooltip="הגדרות"
         >
-          <Icon name="settings" size={16} style={{ filter: "brightness(0) invert(1)", opacity: 0.6 }} />
+          <Icon name="settings" size={16} style={{ filter: "none", opacity: 0.6 }} />
           <span className="nav-text">הגדרות</span>
         </button>
 

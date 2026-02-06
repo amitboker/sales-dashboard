@@ -331,16 +331,23 @@ function LandingPage() {
             { name: 'Scale', price: '₪ 1,290', note: 'למוקדים גדולים', features: ['נציגים ללא הגבלה', 'אוטומציות', 'CSM אישי'] },
           ].map((plan) => (
             <div className={`landing__plan ${plan.popular ? 'landing__plan--popular' : ''}`} key={plan.name}>
-              {plan.popular && <div className="landing__plan-badge">הכי פופולרי</div>}
-              <div className="landing__plan-name">{plan.name}</div>
-              <div className="landing__plan-price">{plan.price}<span> / חודש</span></div>
-              <div className="landing__plan-note">{plan.note}</div>
-              <ul className="landing__plan-list">
-                {plan.features.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
-              </ul>
-              <button className="landing__plan-cta" onClick={() => navigate('/login')}>התחל ניסיון</button>
+              <div className="landing__plan-top">
+                <div className="landing__plan-top-row">
+                  <span className="landing__plan-top-label">{plan.name}</span>
+                  {plan.popular && <span className="landing__plan-chip">פופולרי</span>}
+                </div>
+                <div className="landing__plan-price">{plan.price}</div>
+                <div className="landing__plan-period">לחודש</div>
+              </div>
+              <div className="landing__plan-body">
+                <div className="landing__plan-note">{plan.note}</div>
+                <ul className="landing__plan-list">
+                  {plan.features.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+                <button className="landing__plan-cta" onClick={() => navigate('/login')}>התחל ניסיון</button>
+              </div>
             </div>
           ))}
         </div>

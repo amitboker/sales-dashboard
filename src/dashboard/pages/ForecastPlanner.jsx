@@ -255,9 +255,9 @@ function FounderSnapshot() {
         {/* FINAL RESULTS */}
         <div className="fn-section fn-section-results">
           <div className="fn-section-header fn-results-header">
-            <Icon name="dollar" size={18} style={{ filter: "brightness(0) invert(1)" }} />
+            <Icon name="dollar" size={18} style={{ filter: "brightness(0)" }} />
             <span>FINAL RESULTS</span>
-            <span className="fn-section-sub" style={{ color: "rgba(255,255,255,0.7)" }}>תוצאות סופיות</span>
+            <span className="fn-section-sub">תוצאות סופיות</span>
           </div>
           <div className="fn-results-grid">
             <div className="fn-result-card">
@@ -376,7 +376,7 @@ export default function ForecastPlanner() {
               <Icon name="close" size={14} style={{ filter: "brightness(0.3)" }} /> אתחל
             </button>
             <button className="button primary">
-              <Icon name="file-download" size={14} style={{ filter: "brightness(0) invert(1)" }} /> ייצא PDF
+              <Icon name="file-download" size={14} style={{ filter: "brightness(0)" }} /> ייצא PDF
             </button>
           </>
         }

@@ -99,7 +99,7 @@ export const teamTable = {
       avgDeal: "₪34,700",
       closeTime: "3.2 ימים",
       status: "green",
-      color: "#5e7768",
+      color: "#DAFD68",
     },
     {
       id: 2,
@@ -112,7 +112,7 @@ export const teamTable = {
       avgDeal: "₪36,500",
       closeTime: "3.8 ימים",
       status: "green",
-      color: "#5e7768",
+      color: "#DAFD68",
     },
     {
       id: 3,

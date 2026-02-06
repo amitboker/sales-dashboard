@@ -49,11 +49,11 @@ export default function TeamPerformance() {
         subtitle="מעקב אחר ביצועי המוקדנים"
         actions={
           <>
-            <button className="button primary">
-              <Icon name="file-download" size={14} style={{ filter: "brightness(0) invert(1)" }} /> הורד דאטה
+            <button className="button">
+              <Icon name="file-download" size={14} style={{ filter: "brightness(0)" }} /> הורד דאטה
             </button>
             <button className="button primary" onClick={handleExportPDF}>
-              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0) invert(1)" }} /> ייצוא דוח PDF
+              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0)" }} /> ייצוא דוח PDF
             </button>
           </>
         }
@@ -61,21 +61,21 @@ export default function TeamPerformance() {
 
       <div className="grid grid-3 section">
         <div className="card team-stat-card">
-          <div className="team-stat-icon people"><Icon name="users" size={20} style={{ filter: "brightness(0) invert(1)" }} /></div>
+          <div className="team-stat-icon people"><Icon name="users" size={20} style={{ filter: "brightness(0)" }} /></div>
           <div className="team-stat-content">
             <div className="team-stat-label">מספר מוקדנים פעילים</div>
             <div className="team-stat-value">{teamStats.activeReps}</div>
           </div>
         </div>
         <div className="card team-stat-card">
-          <div className="team-stat-icon chart"><Icon name="trending-up" size={20} style={{ filter: "brightness(0) invert(1)" }} /></div>
+          <div className="team-stat-icon chart"><Icon name="trending-up" size={20} style={{ filter: "brightness(0)" }} /></div>
           <div className="team-stat-content">
             <div className="team-stat-label">שיעור המרה ממוצע צוות</div>
             <div className="team-stat-value">{teamStats.avgConversionRate}</div>
           </div>
         </div>
         <div className="card team-stat-card">
-          <div className="team-stat-icon trophy"><Icon name="zap" size={20} style={{ filter: "brightness(0) invert(1)" }} /></div>
+          <div className="team-stat-icon trophy"><Icon name="zap" size={20} style={{ filter: "brightness(0)" }} /></div>
           <div className="team-stat-content">
             <div className="team-stat-label">מוקדן הכוכב החודש</div>
             <div className="team-stat-value">{teamStats.starOfMonth}</div>
@@ -171,10 +171,10 @@ export default function TeamPerformance() {
               />
               <Tooltip formatter={(v) => [`${v}%`, ""]} />
               <Legend />
-              <Line type="monotone" dataKey="יוסי_כהן" stroke="#5e7768" strokeWidth={2} name="יוסי כהן" dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="שירה_לוי" stroke="#8fa98b" strokeWidth={2} name="שירה לוי" dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="דוד_מזרחי" stroke="#3d4f3f" strokeWidth={2} name="דוד מזרחי" dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="זיבי_שמש" stroke="#c5d5b5" strokeWidth={2} name="זיבי שמש" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="יוסי_כהן" stroke="#DAFD68" strokeWidth={2} name="יוסי כהן" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="שירה_לוי" stroke="#c8ec55" strokeWidth={2} name="שירה לוי" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="דוד_מזרחי" stroke="#b7dd4c" strokeWidth={2} name="דוד מזרחי" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="זיבי_שמש" stroke="#f3f9d6" strokeWidth={2} name="זיבי שמש" dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -202,13 +202,13 @@ export default function TeamPerformance() {
               <Tooltip cursor={{ strokeDasharray: "3 3" }} />
               <Scatter
                 data={callsVsDeals}
-                fill="#5e7768"
+                fill="#DAFD68"
               >
                 <LabelList dataKey="name" position="top" style={{ fontSize: 10 }} />
               </Scatter>
             </ScatterChart>
           </ResponsiveContainer>
-          <div style={{ textAlign: "center", fontSize: 12, color: "#6d7a77", marginTop: 4 }}>
+          <div style={{ textAlign: "center", fontSize: 12, color: "#828282", marginTop: 4 }}>
             מספר שיחות
           </div>
         </div>

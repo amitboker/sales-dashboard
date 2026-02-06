@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingOverlay from '../components/LoadingOverlay';
+import { createDemoUser } from '../lib/onboarding-api';
 import './LoginPage.css';
 
 const EyeIcon = () => (
@@ -70,6 +71,22 @@ function LoginPage() {
     navigate('/dashboard');
   };
 
+  const handleDemoOnboarding = async () => {
+    setIsLoading(true);
+    try {
+      const client = await createDemoUser();
+      sessionStorage.setItem('onboarding_client_id', client.id);
+      navigate('/onboarding');
+    } catch (err) {
+      console.error('Demo user creation failed:', err);
+      // Fallback: go to onboarding with a temp ID
+      sessionStorage.setItem('onboarding_client_id', 'demo-' + Date.now());
+      navigate('/onboarding');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = () => {
     console.log('Continue with Google clicked');
     // Add Google sign-in logic here
@@ -81,8 +98,7 @@ function LoginPage() {
   };
 
   const handleCreateAccount = () => {
-    console.log('Create Account clicked');
-    // Add create account logic here
+    navigate('/signup');
   };
 
   return (
@@ -159,8 +175,8 @@ function LoginPage() {
                 המשך עם Google
               </button>
 
-              <button type="button" className="login__btn-demo" onClick={handleDemoLogin} disabled={isLoading}>
-                {isLoading ? '...טוען את הדאשבורד' : 'כניסה לדמו'}
+              <button type="button" className="login__btn-demo" onClick={handleDemoOnboarding} disabled={isLoading}>
+                {isLoading ? '...טוען' : 'כניסה לדמו 🚀'}
               </button>
 
               <p className="login__signup-text">
@@ -176,19 +192,6 @@ function LoginPage() {
                 </a>
               </p>
             </form>
-          </div>
-        </section>
-
-        <section className="login__testimonials-side">
-          <div className="login__testimonials-list">
-            {testimonials.map((item) => (
-              <div className="login__tcard" key={item.handle}>
-                <img src={item.avatarSrc} className="login__tcard-avatar" alt={item.name} />
-                <div className="login__tcard-name">{item.name}</div>
-                <span className="login__tcard-handle">{item.handle}</span>
-                <div className="login__tcard-text">{item.text}</div>
-              </div>
-            ))}
           </div>
         </section>
       </div>

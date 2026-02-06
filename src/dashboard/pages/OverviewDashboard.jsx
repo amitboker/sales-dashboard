@@ -54,7 +54,7 @@ export default function OverviewDashboard() {
   }, [expanded]);
 
   return (
-    <div className="page-enter">
+    <div className="page-enter overview-page">
       <PageHeader
         title={`דאשבורד מנכ\u05F4ל`}
         subtitle="מעקב אחר ביצועי מכירות והכנסות"
@@ -64,9 +64,6 @@ export default function OverviewDashboard() {
               <Icon name="filter" size={14} style={{ filter: "brightness(0.3)" }} /> פילטרים
               <Icon name="chevron-down-sm" size={10} style={{ filter: "brightness(0.4)" }} />
             </button>
-            <button className="button primary">
-              <Icon name="zap" size={14} style={{ filter: "brightness(0) invert(1)" }} /> טען נתונים
-            </button>
           </>
         }
         actions={
@@ -75,7 +72,7 @@ export default function OverviewDashboard() {
               <Icon name="file-download" size={14} style={{ filter: "brightness(0.3)" }} /> הורד דאטה
             </button>
             <button className="button primary" onClick={handleExportPDF}>
-              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0) invert(1)" }} /> ייצוא דוח PDF
+              <Icon name="spreadsheet" size={14} style={{ filter: "brightness(0)" }} /> ייצוא דוח PDF
             </button>
           </>
         }
@@ -94,8 +91,8 @@ export default function OverviewDashboard() {
             <AreaChart data={monthlyRevenue} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6b8e6e" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#6b8e6e" stopOpacity={0.02} />
+                  <stop offset="5%" stopColor="#DAFD68" stopOpacity={0.18} />
+                  <stop offset="95%" stopColor="#DAFD68" stopOpacity={0.04} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e8ece5" />
@@ -111,10 +108,10 @@ export default function OverviewDashboard() {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#6b8e6e"
+                stroke="#DAFD68"
                 strokeWidth={2}
                 fill="url(#colorRevenue)"
-                dot={{ r: 3, fill: "#6b8e6e" }}
+                dot={{ r: 3, fill: "#DAFD68" }}
                 isAnimationActive={true}
                 animationDuration={1200}
                 animationEasing="ease-out"
@@ -139,7 +136,7 @@ export default function OverviewDashboard() {
 
       <div className="grid grid-2 section">
         <div className="card opportunities-card anim-fade-up" style={{ animationDelay: "0.15s" }}>
-          <div className="trend-icon"><Icon name="trend-up-lg" size={24} style={{ filter: "brightness(0) invert(1)" }} /></div>
+          <div className="trend-icon"><Icon name="trend-up-lg" size={24} style={{ filter: "brightness(0)" }} /></div>
           <h3>סך ערך ההזדמנויות פתוחות</h3>
           <div className="opportunities-value">{"\u20AA"} 15,374,050</div>
           <div className="opportunities-desc">ערך כולל של הזדמנויות פתוחות</div>
