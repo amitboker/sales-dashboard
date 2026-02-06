@@ -53,6 +53,61 @@
   color: #828282;
 }
 
+.landing__demo {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.landing__demo-frame {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  padding: 1.4rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.landing__demo-badge {
+  font-size: 0.75rem;
+  color: #000;
+  background: #DAFD68;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 0.8rem;
+}
+
+.landing__demo-screen {
+  border-radius: 14px;
+  border: 1px solid #eee;
+  background: #f7f7f7;
+  height: 240px;
+  display: grid;
+  place-items: center;
+}
+
+.landing__demo-placeholder {
+  font-size: 0.9rem;
+  color: #828282;
+}
+
+.landing__demo-points {
+  display: grid;
+  gap: 0.6rem;
+  color: #000;
+  font-size: 0.95rem;
+}
+
+.landing__demo-point {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
 .landing__badge {
   display: inline-flex;
   align-items: center;
@@ -206,6 +261,53 @@
   margin: 0 auto;
 }
 
+.landing__use-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing__use-card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+.landing__use-title {
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 0.4rem;
+}
+
+.landing__use-text {
+  color: #828282;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.landing__tutorial {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.landing__tutorial-frame {
+  border-radius: 18px;
+  border: 1px dashed #cfcfcf;
+  padding: 3rem 2rem;
+  background: #f7f7f7;
+  color: #828282;
+  font-size: 0.95rem;
+}
+
+.landing__tutorial-note {
+  margin-top: 0.8rem;
+  color: #828282;
+}
+
 .landing__step {
   display: flex;
   align-items: flex-start;
@@ -317,10 +419,98 @@
   color: #000;
 }
 
+.landing__pricing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing__plan {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 18px;
+  padding: 1.6rem;
+  position: relative;
+}
+
+.landing__plan--popular {
+  border-color: #DAFD68;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.25);
+}
+
+.landing__plan-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #DAFD68;
+  color: #000;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.landing__plan-name {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.landing__plan-price {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.landing__plan-price span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #828282;
+}
+
+.landing__plan-note {
+  color: #828282;
+  margin: 0.4rem 0 1rem;
+}
+
+.landing__plan-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #000;
+  font-size: 0.9rem;
+}
+
+.landing__plan-list li::before {
+  content: "✓";
+  color: #000;
+  margin-left: 0.4rem;
+}
+
+.landing__plan-cta {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: #DAFD68;
+  color: #000;
+  font-weight: 700;
+}
+
+.landing__plan-cta:hover {
+  background: #c8ec55;
+}
+
 @media (max-width: 900px) {
   .landing__cta-band {
     flex-direction: column;
     text-align: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .landing__demo {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -355,6 +545,39 @@
   text-align: center;
   backdrop-filter: blur(12px);
   transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.landing__card-stars {
+  color: #DAFD68;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.landing__proof {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.landing__proof-item {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.landing__proof-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 0.2rem;
+}
+
+.landing__proof-label {
+  color: #828282;
+  font-size: 0.85rem;
 }
 
 .landing__card:hover {

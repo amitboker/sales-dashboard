@@ -6,19 +6,22 @@ const testimonials = [
   {
     name: 'שרה כהן',
     handle: '@sarahdigital',
-    text: 'פלטפורמה מדהימה! חווית המשתמש חלקה והתכונות בדיוק מה שצריך.',
+    text: 'תוך שבוע ראינו שקיפות מלאה במשפך וזה שינה את ניהול היום.',
+    highlight: 'שקיפות מלאה במשפך',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
   },
   {
     name: 'מרקוס ג׳ונסון',
     handle: '@marcustech',
-    text: 'השירות הזה שינה את איך שאני עובד. עיצוב נקי, תכונות חזקות ותמיכה מעולה.',
+    text: 'הדשבורד ממקד את הנציגים על הפעולות הנכונות בכל בוקר.',
+    highlight: 'מיקוד יומי לנציגים',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
   },
   {
     name: 'דוד מרטינז',
     handle: '@davidcreates',
-    text: 'ניסיתי פלטפורמות רבות, אבל זו בולטת. אינטואיטיבית, אמינה ומועילה באמת.',
+    text: 'הצלחנו לזהות צווארי בקבוק תוך ימים במקום שבועות.',
+    highlight: 'זיהוי צווארי בקבוק',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
   },
 ];
@@ -79,9 +82,37 @@ function LandingPage() {
           </motion.button>
         </motion.div>
         <motion.div className="landing__hero-note" variants={fadeUp} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}>
-          כולל נתוני דמו להתרשמות מיידית
+          ניסיון חינמי עם נתוני דמו — בלי התחייבות
         </motion.div>
       </motion.section>
+
+      {/* Demo */}
+      <section className="landing__section landing__section--compact">
+        <motion.h3
+          className="landing__section-title"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5 }}
+        >
+          דמו קצר שממחיש מה קורה אצלכם
+        </motion.h3>
+        <div className="landing__demo">
+          <div className="landing__demo-frame">
+            <div className="landing__demo-badge">וידאו דמו • 48 שניות</div>
+            <div className="landing__demo-screen">
+              <div className="landing__demo-placeholder">
+                כאן יופיע דמו קצר של הדשבורד (וידאו/אנימציה).
+              </div>
+            </div>
+          </div>
+          <div className="landing__demo-points">
+            <div className="landing__demo-point">• תצוגת משפך והכנסות בפועל</div>
+            <div className="landing__demo-point">• זיהוי צווארי בקבוק בזמן אמת</div>
+            <div className="landing__demo-point">• רשימת פעולות מומלצות ליום עבודה</div>
+          </div>
+        </div>
+      </section>
 
       {/* Value Props */}
       <section className="landing__section">
@@ -121,6 +152,32 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Use cases */}
+      <section className="landing__section landing__section--compact">
+        <motion.h3
+          className="landing__section-title"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5 }}
+        >
+          מתאים במיוחד ל־
+        </motion.h3>
+        <div className="landing__use-cases">
+          {[
+            { title: 'מוקדי מכירות טלפוניים', text: 'מעקב אחר כל שיחה משלב לליד עד סגירה.' },
+            { title: 'צוותי SDR/BDR', text: 'שקיפות מלאה על סטטוסים ויעדים אישיים.' },
+            { title: 'מנהלי מכירות', text: 'תמונה אסטרטגית של המרות וביצועים.' },
+            { title: 'חברות שירות', text: 'ניהול לידים נכנסים והקצאת טיפול.' },
+          ].map((item) => (
+            <div className="landing__use-card" key={item.title}>
+              <div className="landing__use-title">{item.title}</div>
+              <p className="landing__use-text">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* How it works */}
       <section className="landing__section landing__section--compact">
         <motion.h3
@@ -154,6 +211,27 @@ function LandingPage() {
               <p className="landing__step-text">דשבורד ברור שממקד את היום‑יום של הצוות.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Tutorial */}
+      <section className="landing__section landing__section--compact">
+        <motion.h3
+          className="landing__section-title"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5 }}
+        >
+          סרטון הדרכה אמיתי (3 דקות)
+        </motion.h3>
+        <div className="landing__tutorial">
+          <div className="landing__tutorial-frame">
+            כאן נכניס סרטון Loom/YouTube שמראה שימוש אמיתי במערכת.
+          </div>
+          <p className="landing__tutorial-note">
+            מדריך קצר ולא ערוך שמסביר איך צוות מכירות משתמש בדשבורד בפועל.
+          </p>
         </div>
       </section>
 
@@ -209,11 +287,61 @@ function LandingPage() {
               transition={{ duration: 0.45, delay: i * 0.1, ease: [0.4, 0, 0.2, 1] }}
               whileHover={{ y: -4 }}
             >
+              <div className="landing__card-stars">★★★★★</div>
               <img className="landing__card-avatar" src={t.avatar} alt={t.name} />
               <h4 className="landing__card-name">{t.name}</h4>
               <span className="landing__card-handle">{t.handle}</span>
-              <p className="landing__card-text">{t.text}</p>
+              <p className="landing__card-text">
+                <strong>{t.highlight}</strong> — {t.text}
+              </p>
             </motion.div>
+          ))}
+        </div>
+        <div className="landing__proof">
+          <div className="landing__proof-item">
+            <div className="landing__proof-value">40%</div>
+            <div className="landing__proof-label">פחות זמן דיווח ידני</div>
+          </div>
+          <div className="landing__proof-item">
+            <div className="landing__proof-value">12 דק׳</div>
+            <div className="landing__proof-label">ממוצע ליישום ראשוני</div>
+          </div>
+          <div className="landing__proof-item">
+            <div className="landing__proof-value">+18%</div>
+            <div className="landing__proof-label">שיפור המרות ב‑90 יום</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="landing__section landing__section--compact" id="pricing">
+        <motion.h3
+          className="landing__section-title"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5 }}
+        >
+          תמחור ברור ופשוט
+        </motion.h3>
+        <div className="landing__pricing">
+          {[
+            { name: 'Starter', price: '₪ 0', note: 'דמו מלא ל‑7 ימים', features: ['דשבורד מלא', 'נתוני דמו', 'תמיכה בסיסית'] },
+            { name: 'Team', price: '₪ 490', note: 'לצוותים קטנים', features: ['עד 10 נציגים', 'דוחות מתקדמים', 'תמיכה מהירה'], popular: true },
+            { name: 'Scale', price: '₪ 1,290', note: 'למוקדים גדולים', features: ['נציגים ללא הגבלה', 'אוטומציות', 'CSM אישי'] },
+          ].map((plan) => (
+            <div className={`landing__plan ${plan.popular ? 'landing__plan--popular' : ''}`} key={plan.name}>
+              {plan.popular && <div className="landing__plan-badge">הכי פופולרי</div>}
+              <div className="landing__plan-name">{plan.name}</div>
+              <div className="landing__plan-price">{plan.price}<span> / חודש</span></div>
+              <div className="landing__plan-note">{plan.note}</div>
+              <ul className="landing__plan-list">
+                {plan.features.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+              <button className="landing__plan-cta" onClick={() => navigate('/login')}>התחל ניסיון</button>
+            </div>
           ))}
         </div>
       </section>
@@ -244,6 +372,13 @@ function LandingPage() {
             <span className="landing__footer-sep">|</span>
             <button className="landing__footer-demo" onClick={() => navigate('/login')}>
               בקש דמו
+            </button>
+            <span className="landing__footer-sep">|</span>
+            <button
+              className="landing__footer-demo"
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              למד עוד
             </button>
           </span>
           <span className="landing__footer-copy">&copy; 2026 כל הזכויות שמורות</span>
