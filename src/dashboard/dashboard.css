@@ -3338,6 +3338,121 @@ body.funnel-editor-open .funnel-editor-panel {
   border-radius: 10px;
 }
 
+/* ===== PRO UPGRADE CARD ===== */
+.pro-card {
+  position: relative;
+  margin-top: 18px;
+  border-radius: 16px;
+  padding: 20px 16px 16px;
+  background: linear-gradient(145deg, #2c4a32 0%, #3a6b40 55%, #4a8052 100%);
+  color: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity 300ms ease-in-out, padding 300ms ease-in-out, margin 300ms ease-in-out;
+}
+
+.pro-card-deco {
+  position: absolute;
+  left: -20px;
+  bottom: -16px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(218, 253, 104, 0.12);
+  pointer-events: none;
+}
+
+.pro-card-deco::after {
+  content: "";
+  position: absolute;
+  left: 30px;
+  top: -40px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(218, 253, 104, 0.08);
+}
+
+.pro-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.pro-card-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.pro-card-headline {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.pro-card-desc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pro-card-btn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2a33;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pro-card-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+
+.pro-card-btn:active {
+  transform: translateY(0);
+}
+
+/* Collapsed sidebar: hide card content, show compact version */
+.sidebar.collapsed .pro-card {
+  padding: 10px 6px;
+  margin-top: 12px;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar.collapsed .pro-card-deco {
+  display: none;
+}
+
+.sidebar.collapsed .pro-card-headline,
+.sidebar.collapsed .pro-card-desc {
+  display: none;
+}
+
+.sidebar.collapsed .pro-card-icon {
+  margin-bottom: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+.sidebar.collapsed .pro-card-btn {
+  font-size: 10px;
+  padding: 6px 4px;
+  border-radius: 8px;
+}
+
 /* ============================================
    SETTINGS PAGE
    ============================================ */

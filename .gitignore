@@ -2,5 +2,9 @@ node_modules
 # Keep environment variables out of version control
 .env
 
+# Build output (may contain inlined secrets from VITE_ env vars)
+dist/
+
 /generated/prisma
+src/generated/
 .vercel

@@ -81,6 +81,16 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
             <span className="nav-text">Dark</span>
           </button>
         </div>
+
+        <div className="pro-card">
+          <div className="pro-card-deco" />
+          <div className="pro-card-content">
+            <span className="pro-card-icon">🚀</span>
+            <div className="pro-card-headline">פתח תובנות מתקדמות</div>
+            <div className="pro-card-desc">שדרג עכשיו וקבל גישה למדדים ודוחות מתקדמים</div>
+          </div>
+          <button className="pro-card-btn" type="button">שדרג לפרו</button>
+        </div>
       </div>
     </aside>
   );
