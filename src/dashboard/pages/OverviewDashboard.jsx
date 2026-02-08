@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -6,8 +7,10 @@ import {
 import PageHeader from "../components/PageHeader.jsx";
 import StatCard from "../components/StatCard.jsx";
 import AlertCard from "../components/AlertCard.jsx";
+import { trackEvent } from "../../lib/tracking";
 import Icon from "../components/Icon.jsx";
-import { alerts, kpiCards, monthlyRevenue, revenueByService } from "../data/mockData.js";
+import { alerts, revenueByService } from "../data/mockData.js";
+import { getPeriodMetrics, getTimeRangeOptions } from "../data/periodMetrics.js";
 import { generatePDF } from "../utils/pdfExport.js";
 
 const breakdownData = [
@@ -24,20 +27,42 @@ export default function OverviewDashboard() {
   const areaChartRef = useRef(null);
   const pieChartRef = useRef(null);
   const [timeRange, setTimeRange] = useState("month");
+  const timeRangeOptions = getTimeRangeOptions();
+  const periodMetrics = useMemo(() => getPeriodMetrics(timeRange), [timeRange]);
+  const revenueTotal = useMemo(
+    () => revenueByService.reduce((sum, item) => sum + item.value, 0),
+    []
+  );
 
-  const timeRangeOptions = [
-    { value: "day", label: "יום" },
-    { value: "week", label: "שבוע" },
-    { value: "two-weeks", label: "שבועיים" },
-    { value: "month", label: "חודש אחרון" },
-  ];
+  const renderDonutLabel = ({ cx, cy, midAngle, outerRadius, value }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 22;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const percent = revenueTotal ? Math.round((value / revenueTotal) * 100) : 0;
+
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        className="donut-label"
+      >
+        <tspan className="donut-label-value">{percent}%</tspan>
+        <tspan x={x} dy="1.2em" className="donut-label-sub">
+          {value}
+        </tspan>
+      </text>
+    );
+  };
 
   const handleExportPDF = async () => {
     try {
       await generatePDF({
         pageTitle: "דוח ביצועים - סקירה כללית",
         reportType: "סקירה-כללית",
-        metrics: kpiCards,
+        metrics: periodMetrics.kpis,
         chartRefs: [
           { title: "הכנסות חודשיות", ref: areaChartRef },
           { title: "התפלגות הכנסות לפי סוג שירות", ref: pieChartRef },
@@ -49,6 +74,7 @@ export default function OverviewDashboard() {
           columnStyles: { 1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" } },
         }],
       });
+      trackEvent("export_pdf", { page: "/dashboard/command", feature: "overview_pdf" });
     } catch (e) {
       console.error("PDF export failed:", e);
       alert("שגיאה בייצוא PDF: " + e.message);
@@ -87,8 +113,13 @@ export default function OverviewDashboard() {
       />
 
       <div className="grid grid-4 section stagger-children">
-        {kpiCards.map((card, i) => (
-          <StatCard key={card.label} {...card} delay={i * 50} />
+        {periodMetrics.kpis.map((card, i) => (
+          <StatCard
+            key={card.key}
+            {...card}
+            animateKey={`${timeRange}-${card.key}`}
+            delay={i * 50}
+          />
         ))}
       </div>
 
@@ -110,8 +141,17 @@ export default function OverviewDashboard() {
               ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={380}>
-            <AreaChart data={monthlyRevenue} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={timeRange}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              style={{ height: 380 }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={periodMetrics.chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#DAFD68" stopOpacity={0.18} />
@@ -119,7 +159,7 @@ export default function OverviewDashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e8ece5" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis
                 tick={{ fontSize: 12 }}
                 tickFormatter={(v) => `\u20AA${(v / 1000000).toFixed(1)}M`}
@@ -139,8 +179,10 @@ export default function OverviewDashboard() {
                 animationDuration={1200}
                 animationEasing="ease-out"
               />
-            </AreaChart>
-          </ResponsiveContainer>
+                </AreaChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </AnimatePresence>
         </div>
         <div className="card padded anim-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="alerts-header">
@@ -220,36 +262,49 @@ export default function OverviewDashboard() {
 
         <div className="card padded anim-fade-up" ref={pieChartRef} style={{ animationDelay: "0.2s" }}>
           <div className="section-title">התפלגות הכנסות לפי סוג שירות</div>
-          <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
-            <PieChart width={340} height={300}>
-              <Pie
-                data={revenueByService}
-                cx={170}
-                cy={140}
-                innerRadius={70}
-                outerRadius={120}
-                dataKey="value"
-                paddingAngle={0}
-                stroke="none"
-                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                isAnimationActive={true}
-                animationDuration={800}
-                animationEasing="ease-out"
-              >
-                {revenueByService.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} stroke="none" />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v) => [`${v}%`, ""]} />
-            </PieChart>
+          <div className="donut-chart-wrap">
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={revenueByService}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="58%"
+                  outerRadius="78%"
+                  dataKey="value"
+                  paddingAngle={2}
+                  stroke="none"
+                  label={renderDonutLabel}
+                  labelLine={{ stroke: "#c7d3c5", strokeWidth: 1 }}
+                  isAnimationActive
+                  animationDuration={1000}
+                  animationEasing="ease-out"
+                >
+                  {revenueByService.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} stroke="none" />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => [`${v}%`, ""]} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
           <div className="donut-legend">
-            {revenueByService.map((item) => (
-              <div key={item.name} className="donut-legend-item">
-                <div className="donut-legend-color" style={{ background: item.color }} />
-                <span>{item.name}</span>
-              </div>
-            ))}
+            {revenueByService.map((item) => {
+              const percent = revenueTotal ? Math.round((item.value / revenueTotal) * 100) : 0;
+              return (
+                <div key={item.name} className="donut-legend-item">
+                  <div className="donut-legend-color" style={{ background: item.color }} />
+                  <div className="donut-legend-text">
+                    <div className="donut-legend-label">{item.name}</div>
+                    <div className="donut-legend-meta">
+                      <span className="donut-legend-value">{item.value}%</span>
+                      <span className="donut-legend-sep">•</span>
+                      <span className="donut-legend-percent">{percent}%</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

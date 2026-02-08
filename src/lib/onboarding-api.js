@@ -77,6 +77,29 @@ export async function createDemoUser() {
   return data;
 }
 
+// ── Onboarding Client ──
+
+export async function createOnboardingClient({ email }) {
+  const { data, error } = await db()
+    .from('clients')
+    .insert({
+      id: crypto.randomUUID(),
+      email,
+      passwordHash: 'supabase-auth',
+      companyName: '',
+      salesReps: 1,
+      onboardingStep: 0,
+      isActive: true,
+      createdAt: now(),
+      updatedAt: now(),
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 // ── Step 1: Company Details ──
 
 export async function saveCompanyDetails(clientId, { companyName, salesReps, industry, employees, companyTypes }) {

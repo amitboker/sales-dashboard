@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../lib/auth";
+import { usePageTracking } from "../lib/usePageTracking";
+import { trackEvent } from "../lib/tracking";
 import SideNav from "./components/SideNav.jsx";
 import TopBar from "./components/TopBar.jsx";
 import DashboardPageWrapper from "./components/DashboardPageWrapper.jsx";
@@ -20,14 +24,26 @@ const pageMap = {
 };
 
 export default function DashboardApp() {
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
+  usePageTracking("/dashboard");
   const [activePage, setActivePage] = useState("command");
   const [profileName] = useState(() => {
     const demoName = localStorage.getItem("demo_first_name");
-    return demoName && demoName.trim() ? demoName.trim() : "עמית בוקר";
+    if (demoName && demoName.trim()) return demoName.trim();
+    return user?.email ?? "עמית בוקר";
   });
   const [profileRole] = useState("מנהל");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (_) { /* ignore */ }
+    localStorage.removeItem("demo_first_name");
+    navigate("/login");
+  };
 
   const ActiveComponent = pageMap[activePage] || OverviewDashboard;
   const isSettings = activePage === "settings";
@@ -41,6 +57,8 @@ export default function DashboardApp() {
             profileRole={profileRole}
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
+            onLogout={handleLogout}
+            isAdmin={isAdmin || !!localStorage.getItem('demo_first_name')}
           />
           <DashboardPageWrapper routeKey={activePage}>
             {isSettings ? (

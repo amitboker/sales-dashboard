@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader.jsx";
 import AlertCard from "../components/AlertCard.jsx";
 import Icon from "../components/Icon.jsx";
 import FunnelStagesEditor from "../components/FunnelStagesEditor.jsx";
+import { trackEvent } from "../../lib/tracking";
 import useFunnelStages from "../hooks/useFunnelStages.js";
 import {
   alerts, overallConversion, criticalLeaks,
@@ -102,6 +103,7 @@ export default function SalesFunnel() {
           },
         ],
       });
+      trackEvent("export_pdf", { page: "/dashboard/funnel", feature: "funnel_pdf" });
     } catch (e) {
       console.error("PDF export failed:", e);
       alert("שגיאה בייצוא PDF: " + e.message);
@@ -114,7 +116,7 @@ export default function SalesFunnel() {
         title="משפך מכירות"
         subtitle="ניתוח שלבי המשפך וזיהוי דליפות"
         actions={
-          <button className="button" onClick={() => setEditorOpen(true)}>
+          <button className="button" onClick={() => { setEditorOpen(true); trackEvent("funnel_edit", { page: "/dashboard/funnel", feature: "funnel_editor" }); }}>
             <Icon name="settings" size={14} style={{ filter: "brightness(0.3)" }} /> עריכת משפך
           </button>
         }

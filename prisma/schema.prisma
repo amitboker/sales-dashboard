@@ -104,3 +104,38 @@ model SyncLog {
   @@index([clientId, startedAt])
   @@map("sync_logs")
 }
+
+model Profile {
+  id        String    @id @default(uuid())
+  authId    String    @unique
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  isAdmin   Boolean   @default(false)
+  isActive  Boolean   @default(true)
+  lastSeen  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([authId])
+  @@index([email])
+  @@map("profiles")
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  eventName String
+  page      String?
+  feature   String?
+  sessionId String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventName])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@map("analytics_events")
+}

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "./Icon.jsx";
 
-export default function TopBar({ profileName, profilePhoto, profileRole, onNavigate }) {
+export default function TopBar({ profileName, profilePhoto, profileRole, onNavigate, onLogout, isAdmin }) {
+  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -91,12 +93,28 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
             >
               הצג פרופיל
             </button>
+            {isAdmin && (
+              <>
+                <div className="topbar-dropdown-divider" />
+                <button
+                  className="topbar-dropdown-item"
+                  type="button"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    navigate("/admin");
+                  }}
+                >
+                  פאנל ניהול
+                </button>
+              </>
+            )}
             <div className="topbar-dropdown-divider" />
             <button
               className="topbar-dropdown-item"
               type="button"
               onClick={() => {
                 setDropdownOpen(false);
+                if (onLogout) onLogout();
               }}
             >
               התנתק

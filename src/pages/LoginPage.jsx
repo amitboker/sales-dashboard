@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoadingOverlay from '../components/LoadingOverlay';
+import { useAuth } from '../lib/auth';
+import { trackEvent } from '../lib/tracking';
 import './LoginPage.css';
 
 const EyeIcon = () => (
@@ -50,20 +51,37 @@ const testimonials = [
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoPrompt, setShowDemoPrompt] = useState(false);
   const [demoName, setDemoName] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    console.log('Sign In submitted:', data);
-    
+    const email = formData.get('email');
+    const password = formData.get('password');
+
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1800));
-    navigate('/dashboard');
+    try {
+      const result = await signIn(email, password);
+      trackEvent('login', { page: '/login', userId: result.user?.id });
+      navigate('/dashboard');
+    } catch (err) {
+      const msg = err.message || '';
+      if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
+        setError('האימייל טרם אומת. בדוק את תיבת הדואר שלך ולחץ על קישור האימות.');
+      } else if (msg === 'Invalid login credentials') {
+        setError('אימייל או סיסמה שגויים');
+      } else {
+        setError('שגיאה בהתחברות. נסה שוב.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDemoLogin = () => {
@@ -75,6 +93,7 @@ function LoginPage() {
     const trimmed = demoName.trim();
     if (!trimmed) return;
     localStorage.setItem('demo_first_name', trimmed);
+    trackEvent('demo_login', { page: '/login' });
     navigate('/dashboard');
   };
 
@@ -93,8 +112,6 @@ function LoginPage() {
   };
 
   return (
-    <>
-      <LoadingOverlay isVisible={isLoading} />
       <div className="login">
         <section className="login__form-side">
           <div className="login__form-card">
@@ -169,6 +186,8 @@ function LoginPage() {
                 </a>
               </div>
 
+              {error && <p className="login__error">{error}</p>}
+
               <button type="submit" className="login__btn-primary" disabled={isLoading}>
                 {isLoading ? (
                   <span className="login__btn-loading">
@@ -209,7 +228,6 @@ function LoginPage() {
           </div>
         </section>
       </div>
-    </>
   );
 }
 
