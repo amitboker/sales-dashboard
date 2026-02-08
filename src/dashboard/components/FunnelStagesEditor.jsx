@@ -81,6 +81,22 @@ export default function FunnelStagesEditor({ open, stages, onClose, onSave }) {
     }
   }, [open, stages]);
 
+  useEffect(() => {
+    const body = document.body;
+    const root = document.documentElement;
+    if (open) {
+      body.classList.add("funnel-editor-open");
+      root.classList.add("funnel-editor-open");
+    } else {
+      body.classList.remove("funnel-editor-open");
+      root.classList.remove("funnel-editor-open");
+    }
+    return () => {
+      body.classList.remove("funnel-editor-open");
+      root.classList.remove("funnel-editor-open");
+    };
+  }, [open]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
   );

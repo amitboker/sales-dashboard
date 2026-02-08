@@ -171,7 +171,7 @@ function FunnelInput({ label, value, onChange, prefix }) {
 /* ══════════════════════════════════════════
    FOUNDER SNAPSHOT
    ══════════════════════════════════════════ */
-function ProjectionBuilderView() {
+export function ProjectionBuilderView({ resetToken }) {
   const initialSpend = formatNumberInput("100000");
   const initialApps = formatNumberInput("1000");
   const initialAvgDeal = formatNumberInput("10000");
@@ -200,6 +200,7 @@ function ProjectionBuilderView() {
   });
   const finalResultsRef = useRef(null);
   const didInitRef = useRef(false);
+  const resetPendingRef = useRef(false);
 
   const calc = useMemo(() => {
     const s = parseFloat(stripCommas(spend)) || 0;
@@ -232,6 +233,36 @@ function ProjectionBuilderView() {
     setViewScenario(scenario);
     setLastComputedScenario(scenario);
   }, [calc, scenario]);
+
+  useEffect(() => {
+    if (!resetToken) return;
+    setScenario("realistic");
+    setSpend(initialSpend);
+    setApps(initialApps);
+    setAvgDealValue(initialAvgDeal);
+    setAppToCallPct(initialAppToCall);
+    setShowRatePct(initialShowRate);
+    setCloseRatePct(initialCloseRate);
+    setLastCalculatedInputs({
+      spend: initialSpend,
+      apps: initialApps,
+      avgDealValue: initialAvgDeal,
+      appToCallPct: initialAppToCall,
+      showRatePct: initialShowRate,
+      closeRatePct: initialCloseRate,
+    });
+    setViewScenario("realistic");
+    setResultsByScenario({});
+    setLastComputedScenario(null);
+    resetPendingRef.current = true;
+  }, [resetToken, initialSpend, initialApps, initialAvgDeal, initialAppToCall, initialShowRate, initialCloseRate]);
+
+  useEffect(() => {
+    if (!resetPendingRef.current) return;
+    setResultsByScenario({ realistic: calc });
+    setLastComputedScenario("realistic");
+    resetPendingRef.current = false;
+  }, [calc]);
 
   const pendingChanges = [
     spend !== lastCalculatedInputs.spend,
@@ -507,37 +538,20 @@ function ProjectionBuilderView() {
   );
 }
 
-function FounderSnapshot() {
-  return (
-    <div className="projections-tab forecast-view-enter">
-      <div className="card padded" style={{ textAlign: "right" }}>
-        <div className="section-title">Founder Snapshot</div>
-        <div style={{ color: "var(--color-muted)", fontSize: 14 }}>
-          בקרוב — סיכום הנהלה ותובנות מרכזיות
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProjectionsBuilder() {
-  return <ProjectionBuilderView />;
-}
-
 /* ══════════════════════════════════════════
    MAIN EXPORT
    ══════════════════════════════════════════ */
 export default function ForecastPlanner() {
-  const [mode, setMode] = useState("snapshot");
+  const [resetToken, setResetToken] = useState(0);
 
   return (
     <div className="page-enter">
       <PageHeader
-        title="תכנון תחזית"
-        subtitle="מחשבון אינטראקטיבי לתכנון יעדי מכירות ומשאבים נדרשים"
+        title="Founder Snapshot"
+        subtitle="סקירה ניהולית על ביצועים, תחזית ותובנות מרכזיות"
         actions={
           <>
-            <button className="button">
+            <button className="button" onClick={() => setResetToken((t) => t + 1)}>
               אתחל נתונים
             </button>
             <button className="button primary">
@@ -546,32 +560,8 @@ export default function ForecastPlanner() {
           </>
         }
       />
-
-      <div className="forecast-toggle-wrap">
-        <div className="forecast-toggle">
-          <div
-            className="forecast-toggle-slider"
-            style={{ transform: mode === "snapshot" ? "translateX(100%)" : "translateX(0)" }}
-          />
-          <button
-            type="button"
-            className={`forecast-toggle-btn ${mode === "projections" ? "active" : ""}`}
-            onClick={() => setMode("projections")}
-          >
-            Projections Builder
-          </button>
-          <button
-            type="button"
-            className={`forecast-toggle-btn ${mode === "snapshot" ? "active" : ""}`}
-            onClick={() => setMode("snapshot")}
-          >
-            Founder Snapshot
-          </button>
-        </div>
-      </div>
-
-      <div className="forecast-view-content" key={mode}>
-        {mode === "snapshot" ? <FounderSnapshot /> : <ProjectionsBuilder />}
+      <div className="forecast-view-content">
+        <ProjectionBuilderView resetToken={resetToken} />
       </div>
 
       <div className="footer">

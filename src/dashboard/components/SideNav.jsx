@@ -3,11 +3,11 @@ import Icon from "./Icon.jsx";
 import logo from "../../assets/images/logo.png";
 
 const navItems = [
-  { id: "overview", label: "סקירת מכירות", icon: "bar-chart" },
+  { id: "command", label: "Command Center", icon: "bar-chart" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
   { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },
-  { id: "forecast", label: "תכנון תחזית", icon: "calculator" },
+  { id: "projection", label: "Projection Builder", icon: "calculator" },
 ];
 
 export default function SideNav({ activeId, onSelect, collapsed, onToggleCollapse }) {

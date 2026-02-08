@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingOverlay from '../components/LoadingOverlay';
-import { createDemoUser } from '../lib/onboarding-api';
 import './LoginPage.css';
 
 const EyeIcon = () => (
@@ -53,6 +52,8 @@ function LoginPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDemoPrompt, setShowDemoPrompt] = useState(false);
+  const [demoName, setDemoName] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -65,26 +66,16 @@ function LoginPage() {
     navigate('/dashboard');
   };
 
-  const handleDemoLogin = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1800));
-    navigate('/dashboard');
+  const handleDemoLogin = () => {
+    setShowDemoPrompt(true);
   };
 
-  const handleDemoOnboarding = async () => {
-    setIsLoading(true);
-    try {
-      const client = await createDemoUser();
-      sessionStorage.setItem('onboarding_client_id', client.id);
-      navigate('/onboarding');
-    } catch (err) {
-      console.error('Demo user creation failed:', err);
-      // Fallback: go to onboarding with a temp ID
-      sessionStorage.setItem('onboarding_client_id', 'demo-' + Date.now());
-      navigate('/onboarding');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDemoContinue = (e) => {
+    e.preventDefault();
+    const trimmed = demoName.trim();
+    if (!trimmed) return;
+    localStorage.setItem('demo_first_name', trimmed);
+    navigate('/dashboard');
   };
 
   const handleGoogleSignIn = () => {
@@ -107,10 +98,31 @@ function LoginPage() {
       <div className="login">
         <section className="login__form-side">
           <div className="login__form-card">
-            <h1 className="login__title">ברוכים הבאים</h1>
-            <p className="login__subtitle">היכנס לחשבון שלך והמשך במסע איתנו</p>
+            {showDemoPrompt ? (
+              <>
+                <h1 className="login__title">איך קוראים לך?</h1>
+                <p className="login__subtitle">נשמח להכיר לפני שמתחילים</p>
+                <form onSubmit={handleDemoContinue}>
+                  <label className="login__label">שם מלא</label>
+                  <input
+                    type="text"
+                    className="login__input"
+                    placeholder="הזן שם מלא"
+                    dir="rtl"
+                    value={demoName}
+                    onChange={(e) => setDemoName(e.target.value)}
+                  />
+                  <button type="submit" className="login__btn-primary" disabled={!demoName.trim()}>
+                    המשך
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <h1 className="login__title">ברוכים הבאים</h1>
+                <p className="login__subtitle">היכנס לחשבון שלך והמשך במסע איתנו</p>
 
-            <form onSubmit={handleLogin}>
+                <form onSubmit={handleLogin}>
               <label className="login__label">כתובת אימייל</label>
               <input
                 name="email"
@@ -175,9 +187,9 @@ function LoginPage() {
                 המשך עם Google
               </button>
 
-              <button type="button" className="login__btn-demo" onClick={handleDemoOnboarding} disabled={isLoading}>
-                {isLoading ? '...טוען' : 'כניסה לדמו 🚀'}
-              </button>
+                <button type="button" className="login__btn-demo" onClick={handleDemoLogin} disabled={isLoading}>
+                  {isLoading ? '...טוען' : 'כניסה לדמו 🚀'}
+                </button>
 
               <p className="login__signup-text">
                 חדש בפלטפורמה?{' '}
@@ -191,7 +203,9 @@ function LoginPage() {
                   צור חשבון
                 </a>
               </p>
-            </form>
+                </form>
+              </>
+            )}
           </div>
         </section>
       </div>

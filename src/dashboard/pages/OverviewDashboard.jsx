@@ -64,8 +64,8 @@ export default function OverviewDashboard() {
   return (
     <div className="page-enter overview-page">
       <PageHeader
-        title={`דאשבורד מנכ\u05F4ל`}
-        subtitle="מעקב אחר ביצועי מכירות והכנסות"
+        title="Command Center"
+        subtitle="סקירה ניהולית של ביצועים והכנסות"
         filters={
           <>
             <button className="button">

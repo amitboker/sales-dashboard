@@ -1,26 +1,30 @@
 import { useState } from "react";
 import SideNav from "./components/SideNav.jsx";
 import TopBar from "./components/TopBar.jsx";
+import DashboardPageWrapper from "./components/DashboardPageWrapper.jsx";
 import OverviewDashboard from "./pages/OverviewDashboard.jsx";
 import TeamPerformance from "./pages/TeamPerformance.jsx";
 import SalesFunnel from "./pages/SalesFunnel.jsx";
-import ForecastPlanner from "./pages/ForecastPlanner.jsx";
+import ProjectionBuilder from "./pages/ProjectionBuilder.jsx";
 import AIWorkspace from "./pages/AIWorkspace.jsx";
 import Settings from "./pages/Settings.jsx";
 import "./dashboard.css";
 
 const pageMap = {
-  overview: OverviewDashboard,
+  command: OverviewDashboard,
   funnel: SalesFunnel,
   team: TeamPerformance,
   ai: AIWorkspace,
-  forecast: ForecastPlanner,
+  projection: ProjectionBuilder,
   settings: Settings,
 };
 
 export default function DashboardApp() {
-  const [activePage, setActivePage] = useState("overview");
-  const [profileName] = useState("עמית בוקר");
+  const [activePage, setActivePage] = useState("command");
+  const [profileName] = useState(() => {
+    const demoName = localStorage.getItem("demo_first_name");
+    return demoName && demoName.trim() ? demoName.trim() : "עמית בוקר";
+  });
   const [profileRole] = useState("מנהל");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,15 +42,17 @@ export default function DashboardApp() {
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
           />
-          {isSettings ? (
-            <ActiveComponent
-              profileName={profileName}
-              profilePhoto={profilePhoto}
-              onPhotoChange={setProfilePhoto}
-            />
-          ) : (
-            <ActiveComponent />
-          )}
+          <DashboardPageWrapper routeKey={activePage}>
+            {isSettings ? (
+              <ActiveComponent
+                profileName={profileName}
+                profilePhoto={profilePhoto}
+                onPhotoChange={setProfilePhoto}
+              />
+            ) : (
+              <ActiveComponent />
+            )}
+          </DashboardPageWrapper>
         </main>
         <SideNav
           activeId={activePage}

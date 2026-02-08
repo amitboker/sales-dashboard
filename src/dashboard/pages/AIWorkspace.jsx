@@ -3,6 +3,12 @@ import PageHeader from "../components/PageHeader.jsx";
 import Icon from "../components/Icon.jsx";
 
 export default function AIWorkspace() {
+  const demoName = typeof window !== "undefined"
+    ? localStorage.getItem("demo_first_name")
+    : null;
+  const displayName = demoName && demoName.trim()
+    ? demoName.trim().split(" ")[0]
+    : "שם פרטי";
   const [chatInput, setChatInput] = useState("");
   const [promptSeed, setPromptSeed] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -32,7 +38,7 @@ export default function AIWorkspace() {
         <div className="ai-main">
           <div className="ai-hero">
             <div className="ai-orb" />
-            <div className="ai-title">היי {`{firstName}`}, בוא נצלול לדאטה 📊</div>
+            <div className="ai-title">היי {displayName}, בוא נצלול לדאטה 📊</div>
             <div className="ai-subtitle">
               ספר לנו מה אתה צריך — ונטפל בכל השאר
             </div>
@@ -41,26 +47,20 @@ export default function AIWorkspace() {
           <div className="ai-cards">
             <div className="ai-card ai-card--dark">
               <div className="ai-card-tag">Data Assistant</div>
-              <div className="ai-card-title">Sam Lee</div>
+              <div className="ai-card-title">Your RevOps Co-Pilot</div>
               <div className="ai-card-text">
-                עוזר שמנהל תהליכי מכירה ומקסם מעורבות לקוחות בצורה חכמה.
+                עוזר חכם שמבין את נתוני ההכנסות שלך,
+                מחבר בין המספרים,
+                ועוזר לך לחשוב בצורה מסודרת
+                על מה שבאמת חשוב.
               </div>
-            </div>
-            <div className="ai-card ai-card--list">
-              <div className="ai-card-title">משימות מומלצות</div>
-              <ul className="ai-card-list">
-                <li>מענה על RFP באופן אוטומטי</li>
-                <li>ניתוח מתחרים חכם</li>
-                <li>טיוב מסרים מול לקוח</li>
-              </ul>
-              <button className="ai-link">צפה בכל המשימות</button>
             </div>
             <div className="ai-card ai-card--prompt">
-              <div className="ai-card-title">שאלת דוגמה</div>
+              <div className="ai-card-title">שאלות שכדאי לשאול עכשיו</div>
               <div className="ai-card-text">
-                מה היתרונות המרכזיים שכדאי להדגיש ללקוחות פוטנציאליים?
+                הצעות חכמות לשאלות שיעזרו לך להבין את מצב המכירות
+                ולקבל החלטות טובות יותר.
               </div>
-              <div className="ai-card-meta">Suggested prompt</div>
             </div>
           </div>
 

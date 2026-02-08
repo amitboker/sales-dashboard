@@ -268,6 +268,11 @@
   margin-bottom: 32px;
 }
 
+/* ===== DASHBOARD PAGE TRANSITION ===== */
+.dashboard-page-wrapper {
+  position: relative;
+}
+
 .page-header-text {
   text-align: right;
   margin-bottom: 16px;
@@ -1135,6 +1140,58 @@ tbody tr:hover {
   margin-top: 4px;
 }
 
+/* ===== REVENUE BLUEPRINT TYPOGRAPHY ===== */
+.revenue-blueprint .section-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+.revenue-blueprint .input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5f5f5f;
+  margin-bottom: 8px;
+}
+
+.revenue-blueprint .input-box {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.revenue-blueprint .input-row {
+  margin-bottom: 22px;
+}
+
+.revenue-blueprint .fn-input-group {
+  margin-bottom: 22px;
+}
+
+.revenue-blueprint .card.padded .section-title + * {
+  margin-top: 18px;
+}
+
+.revenue-blueprint .fn-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5f5f5f;
+  margin-bottom: 8px;
+}
+
+.revenue-blueprint .fn-input-box {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.revenue-blueprint .summary-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.revenue-blueprint .summary-value {
+  font-size: 19px;
+}
+
 
 /* ===== OPEN OPPORTUNITIES ===== */
 .opportunities-card {
@@ -1373,8 +1430,9 @@ tbody tr:hover {
 
 .ai-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 360px));
   gap: 16px;
+  justify-content: center;
 }
 
 .ai-card {
@@ -1699,6 +1757,21 @@ tbody tr:hover {
   justify-content: center;
   padding: 32px;
   z-index: 400;
+}
+
+body.funnel-editor-open,
+html.funnel-editor-open {
+  overflow: hidden;
+}
+
+body.funnel-editor-open .content {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body.funnel-editor-open .funnel-editor-overlay,
+body.funnel-editor-open .funnel-editor-panel {
+  pointer-events: auto;
 }
 
 .funnel-editor-panel {
@@ -3031,6 +3104,192 @@ tbody tr:hover {
 .settings-card {
   max-width: 520px;
   margin: 0 auto;
+}
+
+.settings-section {
+  max-width: 960px;
+  margin: 20px auto 0;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.settings-section-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.settings-section-header p {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field label {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.settings-field input,
+.settings-field select {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.settings-field.checkbox {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-logo-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.settings-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.settings-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-table-header,
+.settings-table-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.8fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.settings-table-header {
+  font-size: 12px;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-table-row {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.settings-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.settings-status.active {
+  background: var(--color-primary-light);
+  color: #000;
+}
+
+.settings-status.inactive {
+  background: #f2f2f2;
+  color: var(--color-muted);
+}
+
+.settings-row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  z-index: 9998;
+}
+
+.settings-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  width: min(420px, 92vw);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  opacity: 1;
+  isolation: isolate;
+}
+
+.settings-modal-header h3,
+.settings-modal-header [data-radix-dialog-title] {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.settings-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+body.settings-modal-open,
+html.settings-modal-open {
+  overflow: hidden;
+}
+
+body.settings-modal-open .content {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body.settings-modal-open .settings-modal,
+body.settings-modal-open .settings-modal-overlay {
+  pointer-events: auto;
 }
 
 .settings-profile-section {
