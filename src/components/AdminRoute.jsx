@@ -1,10 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
-const OWNER_EMAIL = 'amitboker@gmail.com';
-
 export default function AdminRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -14,7 +12,7 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  if (!user || user.email !== OWNER_EMAIL) {
+  if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

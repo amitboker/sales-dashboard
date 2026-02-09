@@ -3,6 +3,8 @@ import { supabase } from './supabase';
 
 const AuthContext = createContext(null);
 
+const ADMIN_EMAIL = 'amitboker@gmail.com';
+
 async function syncProfile(authUser) {
   if (!supabase || !authUser) return null;
 
@@ -148,7 +150,7 @@ export function AuthProvider({ children }) {
     user,
     session,
     profile,
-    isAdmin: profile?.isAdmin || false,
+    isAdmin: !!user && user.email === ADMIN_EMAIL,
     loading,
     signUp,
     signIn,

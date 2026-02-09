@@ -25,7 +25,7 @@ const pageMap = {
 
 export default function DashboardApp() {
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   usePageTracking("/dashboard");
   const [activePage, setActivePage] = useState("ai");
   const profileName = (() => {
@@ -65,7 +65,7 @@ export default function DashboardApp() {
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
             onLogout={handleLogout}
-            isAdmin={user?.email === 'amitboker@gmail.com'}
+            isAdmin={isAdmin}
           />
           <DashboardPageWrapper routeKey={activePage}>
             {isSettings ? (
