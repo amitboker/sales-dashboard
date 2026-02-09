@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "../components/Icon.jsx";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage, isAIConfigured } from "../../ai/service";
+import { useAuth } from "../../lib/auth";
 
 const allPromptCards = [
   { title: "ניתוח משפך", desc: "צווארי בקבוק ונקודות חיכוך במשפך המכירות", prompt: "מהם 3 צווארי הבקבוק העיקריים במשפך המכירות?" },
@@ -15,12 +16,19 @@ const allPromptCards = [
 ];
 
 export default function AIWorkspace() {
-  const demoName = typeof window !== "undefined"
-    ? localStorage.getItem("demo_first_name")
-    : null;
-  const displayName = demoName && demoName.trim()
-    ? demoName.trim().split(" ")[0]
-    : "שם פרטי";
+  const { user, profile } = useAuth();
+  const displayName = (() => {
+    if (user && profile) {
+      const first = profile.firstName || "";
+      const last = profile.lastName || "";
+      const full = `${first} ${last}`.trim();
+      if (full) return full.split(" ")[0];
+      return user.email.split("@")[0];
+    }
+    const demoName = localStorage.getItem("demo_first_name");
+    if (demoName && demoName.trim()) return demoName.trim().split(" ")[0];
+    return "שם פרטי";
+  })();
 
   const [chatInput, setChatInput] = useState("");
   const [promptSeed, setPromptSeed] = useState(0);

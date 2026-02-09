@@ -25,14 +25,21 @@ const pageMap = {
 
 export default function DashboardApp() {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   usePageTracking("/dashboard");
   const [activePage, setActivePage] = useState("ai");
-  const [profileName] = useState(() => {
+  const profileName = (() => {
+    if (user && profile) {
+      const first = profile.firstName || "";
+      const last = profile.lastName || "";
+      const full = `${first} ${last}`.trim();
+      if (full) return full;
+      return user.email;
+    }
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim();
-    return user?.email ?? "עמית בוקר";
-  });
+    return "משתמש";
+  })();
   const [profileRole] = useState("מנהל");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

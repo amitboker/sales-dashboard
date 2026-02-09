@@ -19,13 +19,20 @@ const pageMap = {
 
 export default function AdminApp() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [activePage, setActivePage] = useState("users");
-  const [profileName] = useState(() => {
+  const profileName = (() => {
+    if (user && profile) {
+      const first = profile.firstName || "";
+      const last = profile.lastName || "";
+      const full = `${first} ${last}`.trim();
+      if (full) return full;
+      return user.email;
+    }
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim();
-    return user?.email ?? "Admin";
-  });
+    return "Admin";
+  })();
 
   usePageTracking("/admin");
 
