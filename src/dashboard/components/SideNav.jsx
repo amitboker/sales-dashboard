@@ -1,16 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "./Icon.jsx";
 import logo from "../../assets/images/logo.png";
 
 const navItems = [
-  { id: "command", label: "Command Center", icon: "bar-chart" },
-  { id: "funnel", label: "משפך מכירות", icon: "funnel" },
-  { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },
+  { id: "command", label: "Command Center", icon: "bar-chart" },
+  { id: "team", label: "ביצועי צוות", icon: "users" },
+  { id: "funnel", label: "משפך מכירות", icon: "funnel" },
   { id: "projection", label: "Projection Builder", icon: "calculator" },
 ];
 
 export default function SideNav({ activeId, onSelect, collapsed, onToggleCollapse }) {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState("light");
 
   return (
@@ -89,7 +91,7 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
             <div className="pro-card-headline">פתח תובנות מתקדמות</div>
             <div className="pro-card-desc">שדרג עכשיו וקבל גישה למדדים ודוחות מתקדמים</div>
           </div>
-          <button className="pro-card-btn" type="button">שדרג לפרו</button>
+          <button className="pro-card-btn" type="button" onClick={() => navigate('/pricing')}>שדרג לפרו</button>
         </div>
       </div>
     </aside>

@@ -27,7 +27,7 @@ export default function DashboardApp() {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   usePageTracking("/dashboard");
-  const [activePage, setActivePage] = useState("command");
+  const [activePage, setActivePage] = useState("ai");
   const [profileName] = useState(() => {
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim();
@@ -45,7 +45,7 @@ export default function DashboardApp() {
     navigate("/login");
   };
 
-  const ActiveComponent = pageMap[activePage] || OverviewDashboard;
+  const ActiveComponent = pageMap[activePage] || AIWorkspace;
   const isSettings = activePage === "settings";
 
   return (
@@ -58,7 +58,7 @@ export default function DashboardApp() {
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
             onLogout={handleLogout}
-            isAdmin={isAdmin || !!localStorage.getItem('demo_first_name')}
+            isAdmin={user?.email === 'amitboker@gmail.com'}
           />
           <DashboardPageWrapper routeKey={activePage}>
             {isSettings ? (

@@ -3,6 +3,17 @@ import Icon from "../components/Icon.jsx";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage, isAIConfigured } from "../../ai/service";
 
+const allPromptCards = [
+  { title: "ניתוח משפך", desc: "צווארי בקבוק ונקודות חיכוך במשפך המכירות", prompt: "מהם 3 צווארי הבקבוק העיקריים במשפך המכירות?" },
+  { title: "ביצועי צוות", desc: "סיכום ביצועי נציגים וחריגות מהיעד", prompt: "סכם ביצועי נציגים עם חריגה מהיעד" },
+  { title: "תובנות KPI", desc: "מדדים וגרפים חשובים להצגה בישיבות", prompt: "המלץ על גרף KPI להציג בישיבת הנהלה" },
+  { title: "ירידת המרה", desc: "ניתוח שינויים ומגמות ביחסי המרה", prompt: "תן לי תובנות על ירידת ההמרה בשבוע האחרון" },
+  { title: "לידים להצעות", desc: "יחס לידים להצעות מחיר לפי חודש", prompt: "תנתח את יחס הלידים להצעות מחיר לפי חודש" },
+  { title: "צמיחה ברבעון", desc: "צוותים מובילים ומגמות צמיחה", prompt: "איזה צוות הוביל את הצמיחה ברבעון האחרון?" },
+  { title: "חריגות SLA", desc: "נקודות סיכון ובעיות תפעוליות", prompt: "תזהה חריגות ב‑SLA ונקודות סיכון תפעוליות" },
+  { title: "זמן סגירה", desc: "שינויים בממוצע זמני סגירת עסקאות", prompt: "סכם את השינוי בממוצע זמן הסגירה השבוע" },
+];
+
 export default function AIWorkspace() {
   const demoName = typeof window !== "undefined"
     ? localStorage.getItem("demo_first_name")
@@ -14,36 +25,23 @@ export default function AIWorkspace() {
   const [chatInput, setChatInput] = useState("");
   const [promptSeed, setPromptSeed] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [messages, setMessages] = useState([]); // {role, content}
+  const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState("");
   const abortRef = useRef(null);
   const chatEndRef = useRef(null);
 
-  const quickPrompts = [
-    "תן לי תובנות על ירידת ההמרה בשבוע האחרון",
-    "מהם 3 צווארי הבקבוק העיקריים במשפך המכירות?",
-    "המלץ על גרף KPI להציג בישיבת הנהלה",
-    "סכם ביצועי נציגים עם חריגה מהיעד",
-    "תנתח את יחס הלידים להצעות מחיר לפי חודש",
-    "איזה צוות הוביל את הצמיחה ברבעון האחרון?",
-    "תזהה חריגות ב‑SLA ונקודות סיכון תפעוליות",
-    "סכם את השינוי בממוצע זמן הסגירה השבוע",
-  ];
-
   const displayedPrompts = useMemo(() => {
-    const start = (promptSeed * 4) % quickPrompts.length;
+    const start = (promptSeed * 3) % allPromptCards.length;
     return [
-      quickPrompts[start],
-      quickPrompts[(start + 1) % quickPrompts.length],
-      quickPrompts[(start + 2) % quickPrompts.length],
-      quickPrompts[(start + 3) % quickPrompts.length],
+      allPromptCards[start],
+      allPromptCards[(start + 1) % allPromptCards.length],
+      allPromptCards[(start + 2) % allPromptCards.length],
     ];
-  }, [promptSeed, quickPrompts]);
+  }, [promptSeed]);
 
   const hasChat = messages.length > 0;
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -61,13 +59,9 @@ export default function AIWorkspace() {
     const userMsg = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Build history for API (exclude the new user message, it's passed separately)
     const history = messages.map(({ role, content }) => ({ role, content }));
 
     setIsStreaming(true);
-
-    // Add a placeholder assistant message that will be filled by streaming
-    const assistantIdx = messages.length + 1; // index after adding userMsg
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     const controller = new AbortController();
@@ -96,7 +90,6 @@ export default function AIWorkspace() {
       if (err.name === "AbortError") return;
       const msg = err.message || "שגיאה בתקשורת עם השרת";
       setError(msg);
-      // Remove empty assistant message on error
       setMessages((prev) => {
         const last = prev[prev.length - 1];
         if (last && last.role === "assistant" && !last.content) {
@@ -130,71 +123,102 @@ export default function AIWorkspace() {
     setIsStreaming(false);
   };
 
+  const handleRefresh = () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setPromptSeed((s) => s + 1);
+      setIsRefreshing(false);
+    }, 220);
+  };
+
+  const chatbarJSX = (
+    <div className="ai-chat-input">
+      <input
+        placeholder="שאל משהו על הנתונים..."
+        value={chatInput}
+        onChange={(e) => setChatInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={isStreaming}
+      />
+    </div>
+  );
+
+  const sendBtnJSX = (
+    <div className="ai-chat-actions">
+      <button
+        className="ai-chat-btn primary"
+        aria-label="שליחה"
+        onClick={() => handleSend()}
+        disabled={isStreaming || !chatInput.trim()}
+      >
+        {isStreaming ? (
+          <span className="ai-btn-spinner" />
+        ) : (
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5l-7 7 7 7" />
+            <path d="M5 12h14" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className="ai-page">
       <div className="ai-shell">
         {!hasChat ? (
-          <>
-            {/* Hero — shown when no chat yet */}
-            <div className="ai-main">
-              <div className="ai-hero">
-                <div className="ai-orb" />
-                <div className="ai-title">היי {displayName}, בוא נצלול לדאטה 📊</div>
-                <div className="ai-subtitle">
-                  ספר לנו מה אתה צריך — ונטפל בכל השאר
-                </div>
-              </div>
-
-              <div className="ai-cards">
-                <div className="ai-card ai-card--dark">
-                  <div className="ai-card-tag">Data Assistant</div>
-                  <div className="ai-card-title">Your RevOps Co-Pilot</div>
-                  <div className="ai-card-text">
-                    עוזר חכם שמבין את נתוני ההכנסות שלך,
-                    מחבר בין המספרים,
-                    ועוזר לך לחשוב בצורה מסודרת
-                    על מה שבאמת חשוב.
-                  </div>
-                </div>
-                <div className="ai-card ai-card--prompt">
-                  <div className="ai-card-title">שאלות שכדאי לשאול עכשיו</div>
-                  <div className="ai-card-text">
-                    הצעות חכמות לשאלות שיעזרו לך להבין את מצב המכירות
-                    ולקבל החלטות טובות יותר.
-                  </div>
-                </div>
-              </div>
+          <div className="ai-landing">
+            <div className="ai-hero">
+              <div className="ai-orb" />
+              <h1 className="ai-title">היי {displayName}, במה אוכל לעזור?</h1>
+              <p className="ai-subtitle">
+                ספר לנו מה אתה צריך — ונטפל בכל השאר
+              </p>
             </div>
 
-            {/* Quick prompts */}
-            <div className={`ai-prompt-row ${isRefreshing ? "is-refreshing" : ""}`}>
+            <div className="ai-chatbar ai-chatbar--hero">
+              {chatbarJSX}
+              {sendBtnJSX}
+            </div>
+
+            {error && <div className="ai-error">{error}</div>}
+            {!isAIConfigured() && !error && (
+              <div className="ai-warning">
+                VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את העוזר.
+              </div>
+            )}
+
+            <div className="ai-prompt-section">
+              <div className={`ai-prompt-cards ${isRefreshing ? "is-refreshing" : ""}`}>
+                {displayedPrompts.map((card) => (
+                  <button
+                    key={card.prompt}
+                    className="ai-prompt-card"
+                    onClick={() => handlePromptClick(card.prompt)}
+                  >
+                    <span className="ai-prompt-card-title">{card.title}</span>
+                    <span className="ai-prompt-card-desc">{card.desc}</span>
+                  </button>
+                ))}
+              </div>
               <button
-                className="ai-refresh"
-                onClick={() => {
-                  if (isRefreshing) return;
-                  setIsRefreshing(true);
-                  setTimeout(() => {
-                    setPromptSeed((s) => s + 1);
-                    setIsRefreshing(false);
-                  }, 220);
-                }}
+                className="ai-prompt-refresh"
+                onClick={handleRefresh}
+                aria-label="רענון הצעות"
+                type="button"
               >
-                רענן פרומפטים
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 2v6h-6" />
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                  <path d="M3 22v-6h6" />
+                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                </svg>
               </button>
-              {displayedPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  className="ai-prompt-pill"
-                  onClick={() => handlePromptClick(prompt)}
-                >
-                  {prompt}
-                </button>
-              ))}
             </div>
-          </>
+          </div>
         ) : (
           <>
-            {/* Chat conversation view */}
             <div className="ai-conversation">
               <div className="ai-conversation-header">
                 <button className="ai-new-chat-btn" onClick={handleNewChat}>
@@ -234,53 +258,15 @@ export default function AIWorkspace() {
                 <div ref={chatEndRef} />
               </div>
             </div>
+
+            {error && <div className="ai-error">{error}</div>}
+
+            <div className="ai-chatbar ai-chatbar--wide">
+              {chatbarJSX}
+              {sendBtnJSX}
+            </div>
           </>
         )}
-
-        {/* Error display */}
-        {error && (
-          <div className="ai-error">
-            {error}
-          </div>
-        )}
-
-        {/* API key warning */}
-        {!isAIConfigured() && !error && (
-          <div className="ai-warning">
-            ⚠ VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את העוזר.
-          </div>
-        )}
-
-        {/* Chat input bar — always visible */}
-        <div className="ai-chatbar ai-chatbar--wide">
-          <div className="ai-chat-input">
-            <Icon name="filter" size={16} style={{ filter: "brightness(0.5)" }} />
-            <input
-              placeholder="שאל משהו..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isStreaming}
-            />
-          </div>
-          <div className="ai-chat-actions">
-            <button
-              className="ai-chat-btn primary"
-              aria-label="שליחה"
-              onClick={() => handleSend()}
-              disabled={isStreaming || !chatInput.trim()}
-            >
-              {isStreaming ? (
-                <span className="ai-btn-spinner" />
-              ) : (
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5l-7 7 7 7" />
-                  <path d="M5 12h14" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
 
         <div className="footer">
           Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
