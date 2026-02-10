@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, session } = useAuth();
   const isDemoMode = !!localStorage.getItem('demo_first_name');
   const [timedOut, setTimedOut] = useState(false);
 
@@ -22,7 +22,9 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  if (!user && !isDemoMode) {
+  // Allow access if we have a session (even if user state hasn't synced yet)
+  // or if in demo mode
+  if (!user && !isDemoMode && !session) {
     return <Navigate to="/login" replace />;
   }
 

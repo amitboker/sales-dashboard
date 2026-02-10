@@ -1,19 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Icon from "../components/Icon.jsx";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage, isAIConfigured } from "../../ai/service";
 import { useAuth } from "../../lib/auth";
-
-const allPromptCards = [
-  { title: "ניתוח משפך", desc: "צווארי בקבוק ונקודות חיכוך במשפך המכירות", prompt: "מהם 3 צווארי הבקבוק העיקריים במשפך המכירות?" },
-  { title: "ביצועי צוות", desc: "סיכום ביצועי נציגים וחריגות מהיעד", prompt: "סכם ביצועי נציגים עם חריגה מהיעד" },
-  { title: "תובנות KPI", desc: "מדדים וגרפים חשובים להצגה בישיבות", prompt: "המלץ על גרף KPI להציג בישיבת הנהלה" },
-  { title: "ירידת המרה", desc: "ניתוח שינויים ומגמות ביחסי המרה", prompt: "תן לי תובנות על ירידת ההמרה בשבוע האחרון" },
-  { title: "לידים להצעות", desc: "יחס לידים להצעות מחיר לפי חודש", prompt: "תנתח את יחס הלידים להצעות מחיר לפי חודש" },
-  { title: "צמיחה ברבעון", desc: "צוותים מובילים ומגמות צמיחה", prompt: "איזה צוות הוביל את הצמיחה ברבעון האחרון?" },
-  { title: "חריגות SLA", desc: "נקודות סיכון ובעיות תפעוליות", prompt: "תזהה חריגות ב‑SLA ונקודות סיכון תפעוליות" },
-  { title: "זמן סגירה", desc: "שינויים בממוצע זמני סגירת עסקאות", prompt: "סכם את השינוי בממוצע זמן הסגירה השבוע" },
-];
+import ChatInput from "../../components/chat/ChatInput";
+import ModeSelector from "../../components/chat/ModeSelector";
+import { MODELS, SUGGESTION_CARDS } from "../../components/chat/modes";
 
 export default function AIWorkspace() {
   const { user, profile } = useAuth();
@@ -30,23 +21,13 @@ export default function AIWorkspace() {
     return "שם פרטי";
   })();
 
-  const [chatInput, setChatInput] = useState("");
-  const [promptSeed, setPromptSeed] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeMode, setActiveMode] = useState(null);
+  const [selectedModel, setSelectedModel] = useState(MODELS[0]);
   const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState("");
   const abortRef = useRef(null);
   const chatEndRef = useRef(null);
-
-  const displayedPrompts = useMemo(() => {
-    const start = (promptSeed * 3) % allPromptCards.length;
-    return [
-      allPromptCards[start],
-      allPromptCards[(start + 1) % allPromptCards.length],
-      allPromptCards[(start + 2) % allPromptCards.length],
-    ];
-  }, [promptSeed]);
 
   const hasChat = messages.length > 0;
 
@@ -56,229 +37,255 @@ export default function AIWorkspace() {
     }
   }, [messages]);
 
-  const handleSend = useCallback(async (text) => {
-    const trimmed = (text || chatInput).trim();
-    if (!trimmed || isStreaming) return;
+  const handleSend = useCallback(
+    async (text) => {
+      const trimmed = (typeof text === "string" ? text : "").trim();
+      if (!trimmed || isStreaming) return;
 
-    setError("");
-    setChatInput("");
-    trackEvent("ai_workspace_use", { page: "/dashboard/ai", feature: "ai_chat" });
-
-    const userMsg = { role: "user", content: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
-
-    const history = messages.map(({ role, content }) => ({ role, content }));
-
-    setIsStreaming(true);
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      await sendChatMessage(
-        history,
-        trimmed,
-        (chunk) => {
-          setMessages((prev) => {
-            const updated = [...prev];
-            const last = updated[updated.length - 1];
-            if (last && last.role === "assistant") {
-              updated[updated.length - 1] = {
-                ...last,
-                content: last.content + chunk,
-              };
-            }
-            return updated;
-          });
-        },
-        controller.signal
-      );
-    } catch (err) {
-      if (err.name === "AbortError") return;
-      const msg = err.message || "שגיאה בתקשורת עם השרת";
-      setError(msg);
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last && last.role === "assistant" && !last.content) {
-          return prev.slice(0, -1);
-        }
-        return prev;
+      setError("");
+      trackEvent("ai_workspace_use", {
+        page: "/dashboard/ai",
+        feature: "ai_chat",
       });
-    } finally {
-      setIsStreaming(false);
-      abortRef.current = null;
-    }
-  }, [chatInput, isStreaming, messages]);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+      const userMsg = { role: "user", content: trimmed };
+      setMessages((prev) => [...prev, userMsg]);
+
+      const history = messages.map(({ role, content }) => ({ role, content }));
+
+      setIsStreaming(true);
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        await sendChatMessage(
+          history,
+          trimmed,
+          (chunk) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const last = updated[updated.length - 1];
+              if (last && last.role === "assistant") {
+                updated[updated.length - 1] = {
+                  ...last,
+                  content: last.content + chunk,
+                };
+              }
+              return updated;
+            });
+          },
+          controller.signal
+        );
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        const msg = err.message || "שגיאה בתקשורת עם השרת";
+        setError(msg);
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === "assistant" && !last.content) {
+            return prev.slice(0, -1);
+          }
+          return prev;
+        });
+      } finally {
+        setIsStreaming(false);
+        abortRef.current = null;
+      }
+    },
+    [isStreaming, messages]
+  );
+
+  const handleSubmit = (payload) => {
+    handleSend(payload.text);
   };
 
-  const handlePromptClick = (prompt) => {
-    trackEvent("ai_workspace_use", { page: "/dashboard/ai", feature: "ai_quick_prompt" });
-    handleSend(prompt);
+  const handleSuggestionClick = (text) => {
+    trackEvent("ai_workspace_use", {
+      page: "/dashboard/ai",
+      feature: "ai_quick_prompt",
+    });
+    handleSend(text);
   };
 
   const handleNewChat = () => {
     if (abortRef.current) abortRef.current.abort();
     setMessages([]);
     setError("");
-    setChatInput("");
     setIsStreaming(false);
   };
 
-  const handleRefresh = () => {
-    if (isRefreshing) return;
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setPromptSeed((s) => s + 1);
-      setIsRefreshing(false);
-    }, 220);
-  };
-
-  const chatbarJSX = (
-    <div className="ai-chat-input">
-      <input
-        placeholder="שאל משהו על הנתונים..."
-        value={chatInput}
-        onChange={(e) => setChatInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={isStreaming}
-      />
-    </div>
-  );
-
-  const sendBtnJSX = (
-    <div className="ai-chat-actions">
-      <button
-        className="ai-chat-btn primary"
-        aria-label="שליחה"
-        onClick={() => handleSend()}
-        disabled={isStreaming || !chatInput.trim()}
+  /* ── Landing state (no messages) ── */
+  if (!hasChat) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center px-4"
+        style={{ minHeight: "calc(100vh - 140px)" }}
       >
-        {isStreaming ? (
-          <span className="ai-btn-spinner" />
-        ) : (
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5l-7 7 7 7" />
-            <path d="M5 12h14" />
-          </svg>
-        )}
-      </button>
-    </div>
-  );
+        <div className="w-full max-w-3xl flex flex-col items-center gap-6">
+          {/* Heading */}
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-2" style={{ color: "var(--color-text, #000)" }}>
+            מה תרצו לבנות היום?
+          </h1>
 
-  return (
-    <div className="ai-page">
-      <div className="ai-shell">
-        {!hasChat ? (
-          <div className="ai-landing">
-            <div className="ai-hero">
-              <div className="ai-orb" />
-              <h1 className="ai-title">היי {displayName}, במה אוכל לעזור?</h1>
-              <p className="ai-subtitle">
-                ספר לנו מה אתה צריך — ונטפל בכל השאר
-              </p>
+          {/* Chat input */}
+          <ChatInput
+            activeMode={activeMode}
+            onClearMode={() => setActiveMode(null)}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+            onSubmit={handleSubmit}
+            onProClick={() => {}}
+          />
+
+          {/* Error / warning */}
+          {error && (
+            <div className="w-full rounded-xl border px-4 py-3 text-sm text-center" style={{ borderColor: "var(--color-danger-border, #f5cccc)", backgroundColor: "var(--color-danger-bg, #fce8e8)", color: "var(--color-danger, #d9534f)" }}>
+              {error}
             </div>
-
-            <div className="ai-chatbar ai-chatbar--hero">
-              {chatbarJSX}
-              {sendBtnJSX}
+          )}
+          {!isAIConfigured() && !error && (
+            <div className="w-full rounded-xl border px-4 py-3 text-sm text-center" style={{ borderColor: "var(--color-warning-border, #f5e6b8)", backgroundColor: "var(--color-warning-bg, #fef4d9)", color: "var(--color-warning, #f0ad4e)" }}>
+              VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את
+              העוזר.
             </div>
+          )}
 
-            {error && <div className="ai-error">{error}</div>}
-            {!isAIConfigured() && !error && (
-              <div className="ai-warning">
-                VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את העוזר.
-              </div>
-            )}
+          {/* Mode selector */}
+          <ModeSelector activeMode={activeMode} onSelect={setActiveMode} />
 
-            <div className="ai-prompt-section">
-              <div className={`ai-prompt-cards ${isRefreshing ? "is-refreshing" : ""}`}>
-                {displayedPrompts.map((card) => (
-                  <button
-                    key={card.prompt}
-                    className="ai-prompt-card"
-                    onClick={() => handlePromptClick(card.prompt)}
-                  >
-                    <span className="ai-prompt-card-title">{card.title}</span>
-                    <span className="ai-prompt-card-desc">{card.desc}</span>
-                  </button>
-                ))}
-              </div>
+          {/* Suggestion cards */}
+          <div className="w-full grid grid-cols-2 gap-3 mt-2">
+            {SUGGESTION_CARDS.map((text) => (
               <button
-                className="ai-prompt-refresh"
-                onClick={handleRefresh}
-                aria-label="רענון הצעות"
-                type="button"
+                key={text}
+                onClick={() => handleSuggestionClick(text)}
+                className="text-start px-5 py-4 rounded-xl border transition-all duration-200 cursor-pointer text-sm"
+                style={{
+                  borderColor: "var(--color-border, #e5e5e5)",
+                  backgroundColor: "var(--color-surface, #fff)",
+                  color: "var(--color-muted, #828282)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--color-text, #000)";
+                  e.currentTarget.style.borderColor = "var(--color-primary, #DAFD68)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--color-muted, #828282)";
+                  e.currentTarget.style.borderColor = "var(--color-border, #e5e5e5)";
+                }}
               >
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 2v6h-6" />
-                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                  <path d="M3 22v-6h6" />
-                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                </svg>
+                {text}
               </button>
-            </div>
+            ))}
           </div>
-        ) : (
-          <>
-            <div className="ai-conversation">
-              <div className="ai-conversation-header">
-                <button className="ai-new-chat-btn" onClick={handleNewChat}>
-                  שיחה חדשה
-                </button>
-              </div>
-              <div className="ai-messages">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`ai-message ai-message--${msg.role}`}>
-                    <div className="ai-message-avatar">
-                      {msg.role === "user" ? (
-                        <span className="ai-avatar-user">
-                          {displayName.slice(0, 1)}
-                        </span>
-                      ) : (
-                        <span className="ai-avatar-bot" />
-                      )}
-                    </div>
-                    <div className="ai-message-content">
-                      {msg.role === "assistant" && !msg.content && isStreaming ? (
-                        <span className="ai-typing-indicator">
-                          <span /><span /><span />
-                        </span>
-                      ) : (
-                        <div className="ai-message-text" dir="auto">
-                          {msg.content.split("\n").map((line, j) => (
-                            <span key={j}>
-                              {line}
-                              {j < msg.content.split("\n").length - 1 && <br />}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <div ref={chatEndRef} />
-              </div>
-            </div>
+        </div>
 
-            {error && <div className="ai-error">{error}</div>}
-
-            <div className="ai-chatbar ai-chatbar--wide">
-              {chatbarJSX}
-              {sendBtnJSX}
-            </div>
-          </>
-        )}
-
-        <div className="footer">
+        {/* Footer */}
+        <div className="mt-auto pt-8 pb-4 text-xs text-center" style={{ color: "var(--color-muted, #828282)", opacity: 0.5 }}>
           Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
         </div>
+      </div>
+    );
+  }
+
+  /* ── Conversation state ── */
+  return (
+    <div
+      className="flex flex-col"
+      style={{ minHeight: "calc(100vh - 140px)" }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={handleNewChat}
+          className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 cursor-pointer"
+          style={{
+            backgroundColor: "var(--color-primary, #DAFD68)",
+            color: "#0A0A0A",
+          }}
+        >
+          שיחה חדשה
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-4 pb-6">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`flex gap-3 ${
+              msg.role === "user" ? "flex-row-reverse" : ""
+            }`}
+          >
+            {/* Avatar */}
+            <div
+              className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={
+                msg.role === "user"
+                  ? { backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A" }
+                  : { backgroundColor: "var(--color-surface-muted, #f5f5f5)", border: "1px solid var(--color-border, #e5e5e5)", color: "var(--color-muted, #828282)" }
+              }
+            >
+              {msg.role === "user" ? displayName.slice(0, 1) : "AI"}
+            </div>
+
+            {/* Bubble */}
+            <div
+              className="max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
+              dir="auto"
+              style={
+                msg.role === "user"
+                  ? {
+                      backgroundColor: "var(--color-primary-light, #f8fde8)",
+                      border: "1px solid var(--color-primary-soft, #f3f9d6)",
+                      color: "var(--color-text, #000)",
+                    }
+                  : {
+                      backgroundColor: "var(--color-surface, #fff)",
+                      border: "1px solid var(--color-border, #e5e5e5)",
+                      color: "var(--color-text, #000)",
+                    }
+              }
+            >
+              {msg.role === "assistant" && !msg.content && isStreaming ? (
+                <span className="flex gap-1 py-1">
+                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:0ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
+                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:150ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
+                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:300ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
+                </span>
+              ) : (
+                msg.content.split("\n").map((line, j) => (
+                  <span key={j}>
+                    {line}
+                    {j < msg.content.split("\n").length - 1 && <br />}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+        ))}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="rounded-xl border px-4 py-3 text-sm text-center mb-4" style={{ borderColor: "var(--color-danger-border)", backgroundColor: "var(--color-danger-bg)", color: "var(--color-danger)" }}>
+          {error}
+        </div>
+      )}
+
+      {/* Chat input (sticky bottom) */}
+      <div className="pt-2 pb-4">
+        <ChatInput
+          activeMode={activeMode}
+          onClearMode={() => setActiveMode(null)}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          onSubmit={handleSubmit}
+          onProClick={() => {}}
+        />
       </div>
     </div>
   );

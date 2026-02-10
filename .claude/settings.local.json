@@ -23,7 +23,8 @@
       "Bash(brew install:*)",
       "Bash(npm init:*)",
       "Bash(npx prisma db pull:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

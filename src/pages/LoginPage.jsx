@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { trackEvent } from '../lib/tracking';
@@ -58,6 +58,15 @@ function LoginPage() {
   const [demoName, setDemoName] = useState("");
   const [error, setError] = useState("");
 
+  // Check if Supabase is configured
+  useEffect(() => {
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!supabaseKey) {
+      console.warn('[LoginPage] VITE_SUPABASE_ANON_KEY is not set');
+      setError('המערכת לא מוגדרת כראוי. אנא פנה למנהל המערכת.');
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -65,21 +74,37 @@ function LoginPage() {
     const email = formData.get('email');
     const password = formData.get('password');
 
+    if (!email || !password) {
+      setError('אנא מלא את כל השדות');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log('[LoginPage] Attempting sign in...');
       const result = await signIn(email, password);
+      console.log('[LoginPage] Sign in successful', result.user?.id);
+      
       trackEvent('login', { page: '/login', userId: result.user?.id });
+      
+      // Wait a bit for auth state to update before navigating
+      // This ensures ProtectedRoute sees the authenticated user
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      console.log('[LoginPage] Navigating to dashboard...');
       navigate('/dashboard');
     } catch (err) {
+      console.error('[LoginPage] Sign in error:', err);
       const msg = err.message || '';
       if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
         setError('האימייל טרם אומת. בדוק את תיבת הדואר שלך ולחץ על קישור האימות.');
-      } else if (msg === 'Invalid login credentials') {
+      } else if (msg === 'Invalid login credentials' || msg.includes('Invalid login')) {
         setError('אימייל או סיסמה שגויים');
+      } else if (msg.includes('Supabase not configured')) {
+        setError('המערכת לא מוגדרת כראוי. אנא פנה לתמיכה.');
       } else {
-        setError('שגיאה בהתחברות. נסה שוב.');
+        setError(`שגיאה בהתחברות: ${msg || 'נסה שוב'}`);
       }
-    } finally {
       setIsLoading(false);
     }
   };

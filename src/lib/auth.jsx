@@ -133,9 +133,36 @@ export function AuthProvider({ children }) {
   }
 
   async function signIn(email, password) {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!supabase) {
+      console.error('[auth] Supabase not configured - check VITE_SUPABASE_ANON_KEY');
+      throw new Error('Supabase not configured');
+    }
+    
+    console.log('[auth] Calling signInWithPassword...');
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    
+    if (error) {
+      console.error('[auth] Sign in error:', error);
+      throw error;
+    }
+    
+    console.log('[auth] Sign in successful, updating state...');
+    
+    // Immediately update state after successful sign in
+    if (data.user) {
+      setSession(data.session);
+      setUser(data.user);
+      try {
+        const p = await syncProfile(data.user);
+        setProfile(p);
+        console.log('[auth] Profile synced:', p?.id);
+      } catch (err) {
+        console.warn('[auth] syncProfile failed after signIn', err?.message || err);
+        // Don't fail the login if profile sync fails
+      }
+      setLoading(false);
+    }
+    
     return data;
   }
 
