@@ -81,20 +81,10 @@ function LoginPage() {
 
     setIsLoading(true);
     try {
-      console.log('[LoginPage] Attempting sign in...');
       const result = await signIn(email, password);
-      console.log('[LoginPage] Sign in successful', result.user?.id);
-      
       trackEvent('login', { page: '/login', userId: result.user?.id });
-      
-      // Wait a bit for auth state to update before navigating
-      // This ensures ProtectedRoute sees the authenticated user
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      console.log('[LoginPage] Navigating to dashboard...');
       navigate('/dashboard');
     } catch (err) {
-      console.error('[LoginPage] Sign in error:', err);
       const msg = err.message || '';
       if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
         setError('האימייל טרם אומת. בדוק את תיבת הדואר שלך ולחץ על קישור האימות.');

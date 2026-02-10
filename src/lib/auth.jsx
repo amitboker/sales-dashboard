@@ -82,18 +82,16 @@ export function AuthProvider({ children }) {
     }, 6000);
 
     supabase.auth.getSession()
-      .then(async ({ data: { session: s } }) => {
+      .then(({ data: { session: s } }) => {
         setSession(s);
         setUser(s?.user ?? null);
-        if (s?.user) {
-          try {
-            const p = await syncProfile(s.user);
-            setProfile(p);
-          } catch (err) {
-            console.warn('[auth] syncProfile failed', err?.message || err);
-          }
-        }
         setLoading(false);
+        // Sync profile in background — don't block loading
+        if (s?.user) {
+          syncProfile(s.user)
+            .then((p) => setProfile(p))
+            .catch((err) => console.warn('[auth] syncProfile failed', err?.message || err));
+        }
       })
       .catch((err) => {
         console.warn('[auth] getSession failed', err?.message || err);
@@ -101,20 +99,17 @@ export function AuthProvider({ children }) {
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, s) => {
+      (_event, s) => {
         setSession(s);
         setUser(s?.user ?? null);
+        setLoading(false);
         if (s?.user) {
-          try {
-            const p = await syncProfile(s.user);
-            setProfile(p);
-          } catch (err) {
-            console.warn('[auth] syncProfile failed (state change)', err?.message || err);
-          }
+          syncProfile(s.user)
+            .then((p) => setProfile(p))
+            .catch((err) => console.warn('[auth] syncProfile failed (state change)', err?.message || err));
         } else {
           setProfile(null);
         }
-        setLoading(false);
       }
     );
 
@@ -146,23 +141,17 @@ export function AuthProvider({ children }) {
       throw error;
     }
     
-    console.log('[auth] Sign in successful, updating state...');
-    
-    // Immediately update state after successful sign in
+    // Immediately update state — don't block on profile sync
     if (data.user) {
       setSession(data.session);
       setUser(data.user);
-      try {
-        const p = await syncProfile(data.user);
-        setProfile(p);
-        console.log('[auth] Profile synced:', p?.id);
-      } catch (err) {
-        console.warn('[auth] syncProfile failed after signIn', err?.message || err);
-        // Don't fail the login if profile sync fails
-      }
       setLoading(false);
+      // Sync profile in background
+      syncProfile(data.user)
+        .then((p) => setProfile(p))
+        .catch((err) => console.warn('[auth] syncProfile failed after signIn', err?.message || err));
     }
-    
+
     return data;
   }
 
