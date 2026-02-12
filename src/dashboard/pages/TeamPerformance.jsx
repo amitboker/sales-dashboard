@@ -86,6 +86,9 @@ export default function TeamPerformance() {
       <div className="section">
         <div className="card table-card">
           <div className="table-header">
+            <h3>
+              <Icon name="bar-chart" size={16} style={{ filter: "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)", marginLeft: 6 }} /> טבלת מוקדנים
+            </h3>
             <div className="table-legend">
               <div className="legend-item">
                 <span className="legend-dot green" />
@@ -100,21 +103,17 @@ export default function TeamPerformance() {
                 <span>מתחת ליעד ({"<"}15%)</span>
               </div>
             </div>
-            <h3>
-              <Icon name="bar-chart" size={16} style={{ filter: "sepia(1) saturate(5) hue-rotate(90deg) brightness(0.6)", marginLeft: 6 }} /> טבלת מוקדנים
-            </h3>
           </div>
           <table>
             <thead>
               <tr>
-                <th>סטטוס</th>
-                <th>זמן סגירה</th>
-                <th>ממוצע עסקה</th>
-                <th>שיעור המרה</th>
-                <th>הכנסות</th>
-                <th>עסקאות</th>
                 <th>שם מוקדן</th>
-                <th>#</th>
+                <th>עסקאות</th>
+                <th>הכנסות</th>
+                <th>שיעור המרה</th>
+                <th>ממוצע עסקה</th>
+                <th>זמן סגירה</th>
+                <th>סטטוס</th>
               </tr>
             </thead>
             <tbody>
@@ -123,19 +122,8 @@ export default function TeamPerformance() {
                 return (
                   <tr key={row.id}>
                     <td>
-                      <span className={`status-dot ${row.status}`} />
-                    </td>
-                    <td className={isRed && parseFloat(row.closeTime) > 5.5 ? "close-time-red" : ""}>
-                      {row.closeTime}
-                    </td>
-                    <td>{row.avgDeal}</td>
-                    <td className={isRed ? "close-rate-red" : ""}>
-                      {row.closeRate}
-                    </td>
-                    <td>{row.revenue}</td>
-                    <td>{row.deals}</td>
-                    <td>
                       <div className="team-name-cell">
+                        <span className="team-row-num">{row.id}</span>
                         <div className="team-avatar" style={{ background: row.color }}>
                           {row.initials}
                         </div>
@@ -148,7 +136,18 @@ export default function TeamPerformance() {
                         )}
                       </div>
                     </td>
-                    <td>{row.id}</td>
+                    <td>{row.deals}</td>
+                    <td>{row.revenue}</td>
+                    <td className={isRed ? "close-rate-red" : ""}>
+                      {row.closeRate}
+                    </td>
+                    <td>{row.avgDeal}</td>
+                    <td className={isRed && parseFloat(row.closeTime) > 5.5 ? "close-time-red" : ""}>
+                      {row.closeTime}
+                    </td>
+                    <td>
+                      <span className={`status-dot ${row.status}`} />
+                    </td>
                   </tr>
                 );
               })}

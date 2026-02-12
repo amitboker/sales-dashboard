@@ -28,14 +28,32 @@ export default function DashboardApp() {
   const { user, profile, isAdmin, signOut } = useAuth();
   usePageTracking("/dashboard");
   const [activePage, setActivePage] = useState("ai");
+  const KNOWN_NAMES = {
+    "amitbokershud@gmail.com": "עמית בוקר",
+    "amitboker@gmail.com": "עמית בוקר",
+  };
+
   const profileName = (() => {
-    if (user && profile) {
-      const first = profile.firstName || "";
-      const last = profile.lastName || "";
-      const full = `${first} ${last}`.trim();
-      if (full) return full;
-      return user.email;
+    // Authenticated user — never fall through to stale localStorage
+    if (user) {
+      // Known users — guaranteed Hebrew display name
+      const known = KNOWN_NAMES[user.email];
+      if (known) return known;
+      if (profile) {
+        const first = profile.firstName || "";
+        const last = profile.lastName || "";
+        const full = `${first} ${last}`.trim();
+        if (full) return full;
+      }
+      // Try auth metadata as fallback
+      const meta = user.user_metadata;
+      if (meta) {
+        const metaName = meta.full_name || `${meta.first_name || ""} ${meta.last_name || ""}`.trim();
+        if (metaName) return metaName;
+      }
+      return "משתמש";
     }
+    // Demo mode only
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim();
     return "משתמש";
@@ -65,7 +83,7 @@ export default function DashboardApp() {
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
             onLogout={handleLogout}
-            isAdmin={isAdmin}
+            isAdmin={isAdmin || !!localStorage.getItem("demo_first_name")}
           />
           <DashboardPageWrapper routeKey={activePage}>
             {isSettings ? (

@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 const AuthContext = createContext(null);
 
-const ADMIN_EMAIL = 'amitboker@gmail.com';
+const ADMIN_EMAIL = 'amitbokershud@gmail.com';
 
 async function syncProfile(authUser) {
   if (!supabase || !authUser) return null;

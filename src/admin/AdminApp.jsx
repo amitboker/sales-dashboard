@@ -21,13 +21,22 @@ export default function AdminApp() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [activePage, setActivePage] = useState("users");
+  const KNOWN_NAMES = {
+    "amitbokershud@gmail.com": "עמית בוקר",
+    "amitboker@gmail.com": "עמית בוקר",
+  };
+
   const profileName = (() => {
-    if (user && profile) {
-      const first = profile.firstName || "";
-      const last = profile.lastName || "";
-      const full = `${first} ${last}`.trim();
-      if (full) return full;
-      return user.email;
+    if (user) {
+      const known = KNOWN_NAMES[user.email];
+      if (known) return known;
+      if (profile) {
+        const first = profile.firstName || "";
+        const last = profile.lastName || "";
+        const full = `${first} ${last}`.trim();
+        if (full) return full;
+      }
+      return "משתמש";
     }
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim();

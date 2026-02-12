@@ -14,64 +14,48 @@ import {
 } from "../data/mockData.js";
 import { generatePDF } from "../utils/pdfExport.js";
 
-function FunnelStageRow({ stage, maxValue }) {
-  const barWidth = (stage.value / maxValue) * 100;
+function FunnelStageRow({ stage, isLast }) {
   return (
-    <div className="funnel-stage">
-      <div className="funnel-stage-header">
-        <div className="funnel-stage-left">
-          <span className="funnel-percent">{stage.percent}</span>
-          <span className="funnel-value">{stage.value}</span>
+    <>
+      <div className={`funnel-card ${stage.critical ? "critical" : ""}`}>
+        <div className={`funnel-card-icon ${stage.iconType}`}>
+          {stage.iconType === "people" && <Icon name="users" size={14} />}
+          {stage.iconType === "warning" && <Icon name="alert-triangle" size={14} />}
+          {stage.iconType === "error" && <Icon name="alert-triangle" size={14} />}
+          {stage.iconType === "check" && <Icon name="check-circle" size={14} />}
         </div>
-        <div className="funnel-label-row">
-          <span className="funnel-stage-name">{stage.label}</span>
-          <div className={`funnel-stage-icon ${stage.iconType}`}>
-            {stage.iconType === "people" && <Icon name="users" size={14} />}
-            {stage.iconType === "warning" && <Icon name="alert-triangle" size={14} />}
-            {stage.iconType === "error" && <Icon name="alert-triangle" size={14} />}
-            {stage.iconType === "check" && <Icon name="check-circle" size={14} />}
-          </div>
+        <span className="funnel-card-name">{stage.label}</span>
+        <div className="funnel-card-stats">
+          <span className="funnel-card-value">{stage.value}</span>
+          <span className="funnel-card-percent">{stage.percent}</span>
         </div>
-      </div>
-      <div className="funnel-bar-wrap">
-        <div
-          className={`funnel-bar ${stage.critical ? "lighter" : ""}`}
-          style={{ width: `${barWidth}%` }}
-        />
-      </div>
-      {stage.conversionRate && (
-        <>
-          <div className={`funnel-conversion ${stage.critical ? "critical" : ""}`}>
-            {stage.critical && <span style={{ color: "#c44" }}>{"\u25CF"}</span>}
-            <span className="rate">{stage.conversionRate} המרה</span>
-            <span>{"\u2193"}</span>
+        {stage.conversionRate && (
+          <div className="funnel-card-conversion">
+            <span className="funnel-card-rate">{stage.conversionRate} המרה</span>
           </div>
+        )}
+        {stage.insight && (
+          <div className="funnel-card-insight">
+            <Icon name="alert-circle" size={12} /> {stage.insight}
+          </div>
+        )}
+      </div>
+      {!isLast && (
+        <div className="funnel-connector">
+          <div className="funnel-connector-line" />
           {stage.dropped !== null && stage.dropped > 0 && (
-            <div className={`funnel-dropped ${stage.critical ? "critical" : ""}`}>
-              ({stage.droppedPercent}) {stage.dropped} נשרו
+            <div className={`funnel-dropoff-badge ${stage.critical ? "critical" : ""}`}>
+              {stage.dropped} נשרו ({stage.droppedPercent})
             </div>
           )}
-          {stage.dropped === 0 && stage.droppedPercent && (
-            <div className="funnel-dropped">
-              ({stage.droppedPercent}) 0 נשרו
-            </div>
-          )}
-        </>
-      )}
-      {stage.insight && (
-        <div style={{ textAlign: "center" }}>
-          <span className="funnel-insight">
-            <Icon name="alert-circle" size={12} style={{ filter: "sepia(1) saturate(3) hue-rotate(180deg) brightness(0.7)" }} /> {stage.insight}
-          </span>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
 export default function SalesFunnel() {
   const { stages, setStages, activeStages } = useFunnelStages();
-  const maxVal = Math.max(1, ...activeStages.map((s) => s.value));
   const barChartRef = useRef(null);
   const [editorOpen, setEditorOpen] = useState(false);
 
@@ -132,23 +116,23 @@ export default function SalesFunnel() {
         }
       />
 
-      <div className="grid grid-2 section" style={{ gridTemplateColumns: "2fr 1fr" }}>
-        <div className="card padded">
+      <div className="section">
+        <div className="card padded funnel-wrapper">
           <div className="section-title">משפך מכירות</div>
           <div className="funnel-badge">{activeStages.length} שלבים</div>
           <div className="funnel-container">
-            {activeStages.map((stage) => (
-              <FunnelStageRow key={stage.id} stage={stage} maxValue={maxVal} />
+            {activeStages.map((stage, i) => (
+              <FunnelStageRow key={stage.id} stage={stage} isLast={i === activeStages.length - 1} />
             ))}
           </div>
 
-          <div className="card overall-conversion" style={{ marginTop: 20 }}>
+          <div className="overall-conversion">
             <div className="overall-header">
               <div>
                 <span className="overall-target">יעד {overallConversion.target} / </span>
                 <span className="overall-rate">{overallConversion.rate}</span>
               </div>
-              <div style={{ fontWeight: 700 }}>שיעור המרה כולל</div>
+              <div style={{ fontWeight: 600 }}>שיעור המרה כולל</div>
             </div>
             <div className="progress-bar-bg">
               <div
@@ -185,8 +169,10 @@ export default function SalesFunnel() {
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="card padded">
+      <div className="section">
+        <div className="card padded funnel-alerts-card">
           <div className="alerts-header">
             <Icon name="bell" size={16} style={{ filter: "sepia(1) saturate(3) hue-rotate(30deg) brightness(0.7)" }} />
             <h3>התראות</h3>

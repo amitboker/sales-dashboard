@@ -85,13 +85,9 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
         </div>
 
         <div className="pro-card">
-          <div className="pro-card-deco" />
-          <div className="pro-card-content">
-            <span className="pro-card-icon">🚀</span>
-            <div className="pro-card-headline">פתח תובנות מתקדמות</div>
-            <div className="pro-card-desc">שדרג עכשיו וקבל גישה למדדים ודוחות מתקדמים</div>
-          </div>
-          <button className="pro-card-btn" type="button" onClick={() => navigate('/pricing')}>שדרג לפרו</button>
+          <div className="pro-card-headline">שדרג לגרסת Pro</div>
+          <div className="pro-card-desc">אתה משתמש בגרסה חינמית</div>
+          <button className="pro-card-btn" type="button" onClick={() => navigate('/pricing')}>שדרג</button>
         </div>
       </div>
     </aside>

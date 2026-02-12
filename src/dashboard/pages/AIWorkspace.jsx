@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage, isAIConfigured } from "../../ai/service";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SUGGESTION_CARDS } from "../../components/chat/modes";
 
 export default function AIWorkspace() {
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const displayName = (() => {
     if (user && profile) {
@@ -120,12 +122,18 @@ export default function AIWorkspace() {
   if (!hasChat) {
     return (
       <div
-        className="flex flex-col items-center justify-center px-4"
-        style={{ minHeight: "calc(100vh - 140px)" }}
+        style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
       >
-        <div className="w-full max-w-3xl flex flex-col items-center gap-6">
+        <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
+          {/* Plan badge */}
+          <div className="ai-plan-badge" style={{ marginBottom: "-12px" }}>
+            <span>אתה משתמש בתוכנית חינמית</span>
+            <span className="ai-plan-badge-sep">&bull;</span>
+            <span className="ai-plan-upgrade" onClick={() => navigate("/pricing")}>שדרג לגרסת Pro</span>
+          </div>
+
           {/* Heading */}
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-2" style={{ color: "var(--color-text, #000)" }}>
+          <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 300, letterSpacing: "-0.02em", textAlign: "center", marginBottom: "8px", color: "var(--color-text, #000)" }}>
             מה תרצו לבנות היום?
           </h1>
 
@@ -141,12 +149,12 @@ export default function AIWorkspace() {
 
           {/* Error / warning */}
           {error && (
-            <div className="w-full rounded-xl border px-4 py-3 text-sm text-center" style={{ borderColor: "var(--color-danger-border, #f5cccc)", backgroundColor: "var(--color-danger-bg, #fce8e8)", color: "var(--color-danger, #d9534f)" }}>
+            <div style={{ width: "100%", borderRadius: "12px", border: "1px solid var(--color-danger-border, #f5cccc)", padding: "12px 16px", fontSize: "14px", textAlign: "center", backgroundColor: "var(--color-danger-bg, #fce8e8)", color: "var(--color-danger, #d9534f)" }}>
               {error}
             </div>
           )}
           {!isAIConfigured() && !error && (
-            <div className="w-full rounded-xl border px-4 py-3 text-sm text-center" style={{ borderColor: "var(--color-warning-border, #f5e6b8)", backgroundColor: "var(--color-warning-bg, #fef4d9)", color: "var(--color-warning, #f0ad4e)" }}>
+            <div style={{ width: "100%", borderRadius: "12px", border: "1px solid var(--color-warning-border, #f5e6b8)", padding: "12px 16px", fontSize: "14px", textAlign: "center", backgroundColor: "var(--color-warning-bg, #fef4d9)", color: "var(--color-warning, #f0ad4e)" }}>
               VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את
               העוזר.
             </div>
@@ -156,16 +164,21 @@ export default function AIWorkspace() {
           <ModeSelector activeMode={activeMode} onSelect={setActiveMode} />
 
           {/* Suggestion cards */}
-          <div className="w-full grid grid-cols-2 gap-3 mt-2">
+          <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "8px" }}>
             {SUGGESTION_CARDS.map((text) => (
               <button
                 key={text}
                 onClick={() => handleSuggestionClick(text)}
-                className="text-start px-5 py-4 rounded-xl border transition-all duration-200 cursor-pointer text-sm"
                 style={{
-                  borderColor: "var(--color-border, #e5e5e5)",
+                  textAlign: "start",
+                  padding: "16px 20px",
+                  borderRadius: "12px",
+                  border: "1px solid var(--color-border, #e5e5e5)",
                   backgroundColor: "var(--color-surface, #fff)",
                   color: "var(--color-muted, #828282)",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "var(--color-text, #000)";
@@ -183,7 +196,7 @@ export default function AIWorkspace() {
         </div>
 
         {/* Footer */}
-        <div className="mt-auto pt-8 pb-4 text-xs text-center" style={{ color: "var(--color-muted, #828282)", opacity: 0.5 }}>
+        <div style={{ marginTop: "auto", paddingTop: "32px", paddingBottom: "16px", fontSize: "12px", textAlign: "center", color: "var(--color-muted, #828282)", opacity: 0.5 }}>
           Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
         </div>
       </div>
