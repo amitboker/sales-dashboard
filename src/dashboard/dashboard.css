@@ -56,7 +56,7 @@
   --color-warning-border: #f5e6b8;
   --color-success-bg: #f8fde8;
   --color-success-border: #f3f9d6;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
   --radius-lg: 12px;
   --radius-md: 10px;
   --radius-sm: 6px;
@@ -408,16 +408,15 @@
 /* ===== STAT CARDS ===== */
 .stat-card {
   display: flex;
-  gap: 16px;
-  padding: 24px;
+  gap: 14px;
+  padding: 22px;
   align-items: flex-start;
-  min-height: 140px;
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: var(--color-primary-light);
   display: grid;
   place-items: center;
@@ -432,15 +431,17 @@
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-muted);
+  font-weight: 400;
   line-height: 1.3;
 }
 
 .stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 8px 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 6px 0;
   line-height: 1.1;
 }
 
@@ -557,8 +558,8 @@
 
 .alerts-header h3 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 /* ===== GRID ===== */
@@ -715,9 +716,9 @@ table {
 
 th {
   padding: 12px 10px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   text-align: right;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-muted);
   font-size: 12px;
   white-space: nowrap;
@@ -1200,21 +1201,21 @@ tbody tr:hover {
 
 /* ===== REVENUE BLUEPRINT TYPOGRAPHY ===== */
 .revenue-blueprint .section-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.1px;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .revenue-blueprint .input-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: #5f5f5f;
   margin-bottom: 8px;
 }
 
 .revenue-blueprint .input-box {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .revenue-blueprint .input-row {
@@ -1253,37 +1254,38 @@ tbody tr:hover {
 
 /* ===== OPEN OPPORTUNITIES ===== */
 .opportunities-card {
-  padding: 32px 28px;
+  padding: 28px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 360px;
 }
 
 .opportunities-card .trend-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   background: var(--color-primary-light);
   color: var(--color-primary);
   display: inline-grid;
   place-items: center;
-  margin-bottom: 20px;
-  font-size: 20px;
+  margin-bottom: 16px;
+  font-size: 18px;
 }
 
 .opportunities-card h3 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  font-weight: 700;
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-muted);
 }
 
 .opportunities-value {
-  font-size: 38px;
-  font-weight: 700;
-  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
 }
 
 .opportunities-desc {
@@ -2141,8 +2143,8 @@ body.funnel-editor-open .funnel-editor-panel {
 
 .donut-legend-label {
   font-size: 12px;
-  font-weight: 600;
-  color: #253124;
+  font-weight: 500;
+  color: #333;
 }
 
 .donut-legend-meta {
@@ -2154,8 +2156,8 @@ body.funnel-editor-open .funnel-editor-panel {
 }
 
 .donut-legend-value {
-  font-weight: 600;
-  color: #586858;
+  font-weight: 500;
+  color: #666;
 }
 
 .donut-legend-percent {
@@ -2258,37 +2260,25 @@ body.funnel-editor-open .funnel-editor-panel {
 
 /* --- Card hover --- */
 .card {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* --- Alert hover --- */
 .alert-item {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 .alert-item:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* --- Button interactions --- */
 .button {
-  transition: all 0.2s ease;
-}
-
-.button:hover {
-  transform: scale(1.02);
-  filter: brightness(1.05);
-}
-
-.button:active {
-  transform: scale(0.98);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 /* --- Sidebar nav hover --- */
@@ -2365,8 +2355,8 @@ body.funnel-editor-open .funnel-editor-panel {
 
 .breakdown-table th {
   padding: 10px 10px;
-  border-bottom: 2px solid var(--color-border);
-  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 500;
   color: var(--color-muted);
   font-size: 12px;
   text-align: right;
@@ -3856,28 +3846,27 @@ body.settings-modal-open .settings-modal-overlay {
   }
 
   .stat-card {
-    padding: 18px;
-    min-height: 120px;
-    gap: 12px;
+    padding: 16px;
+    gap: 10px;
   }
 
   .stat-icon {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 
   .stat-value {
-    font-size: 26px;
-    margin: 6px 0;
+    font-size: 22px;
+    margin: 4px 0;
   }
 
   .stat-label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .stat-delta {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .card.padded {
