@@ -30,7 +30,7 @@ const GoogleIcon = () => (
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoPrompt, setShowDemoPrompt] = useState(false);
@@ -91,9 +91,14 @@ function LoginPage() {
     navigate('/dashboard');
   };
 
-  const handleGoogleSignIn = () => {
-    console.log('Continue with Google clicked');
-    // Add Google sign-in logic here
+  const handleGoogleSignIn = async () => {
+    setError('');
+    try {
+      await signInWithGoogle();
+      // Supabase redirects to Google — page will navigate away
+    } catch (err) {
+      setError('שגיאה בהתחברות עם Google. נסה שוב.');
+    }
   };
 
   const handleResetPassword = () => {

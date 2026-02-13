@@ -143,6 +143,48 @@
   cursor: not-allowed;
 }
 
+/* ── Divider ── */
+.signup__divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+  font-size: 13px;
+  color: #c5c5c5;
+}
+
+.signup__divider::before,
+.signup__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e5e5;
+}
+
+/* ── Google button ── */
+.signup__google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.signup__google:hover {
+  border-color: #ccc;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
 .signup__link {
   margin-top: 20px;
   background: transparent;

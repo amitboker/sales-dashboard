@@ -29,12 +29,30 @@ async function syncProfile(authUser) {
     .select('id', { count: 'exact', head: true });
 
   const now = new Date().toISOString();
+  // Extract name — handle both email/password and Google OAuth metadata
+  const meta = authUser.user_metadata || {};
+  let firstName = meta.first_name || null;
+  let lastName = meta.last_name || null;
+
+  // Google OAuth provides full_name instead of first/last
+  if (!firstName && meta.full_name) {
+    const parts = meta.full_name.trim().split(/\s+/);
+    firstName = parts[0] || null;
+    lastName = parts.slice(1).join(' ') || null;
+  }
+  // Fallback to name field (some providers)
+  if (!firstName && meta.name) {
+    const parts = meta.name.trim().split(/\s+/);
+    firstName = parts[0] || null;
+    lastName = parts.slice(1).join(' ') || null;
+  }
+
   const newProfile = {
     id: crypto.randomUUID(),
     authId: authUser.id,
     email: authUser.email,
-    firstName: authUser.user_metadata?.first_name || null,
-    lastName: authUser.user_metadata?.last_name || null,
+    firstName,
+    lastName,
     isAdmin: count === 0,
     isActive: true,
     lastSeen: now,
@@ -155,6 +173,18 @@ export function AuthProvider({ children }) {
     return data;
   }
 
+  async function signInWithGoogle() {
+    if (!supabase) throw new Error('Supabase not configured');
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+    return data;
+  }
+
   async function signOut() {
     if (!supabase) return;
     const { error } = await supabase.auth.signOut();
@@ -170,6 +200,7 @@ export function AuthProvider({ children }) {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
   };
 
