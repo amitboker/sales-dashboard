@@ -1,6 +1,10 @@
-import { useState, useEffect, useRef } from "react";
-import { Mic, Paperclip, Sparkles, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Mic, Paperclip, Sparkles, X, RotateCcw } from "lucide-react";
 import ModelSelector from "./ModelSelector";
+import RecordingOverlay from "./RecordingOverlay";
+import Toast from "./Toast";
+import { useVoiceRecorder } from "./useVoiceRecorder";
+import { useTranscription } from "./useTranscription";
 import type { Mode, Model, ChatSubmitPayload } from "./types";
 import { MODELS } from "./modes";
 
@@ -84,7 +88,13 @@ export default function ChatInput({
   const [isTyping, setIsTyping] = useState(true);
   const [showProBanner, setShowProBanner] = useState(true);
   const [model, setModel] = useState<Model>(selectedModel || MODELS[0]);
+  const [toast, setToast] = useState<{ message: string; type: "error" | "warning" | "info" } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Voice recording & transcription
+  const recorder = useVoiceRecorder();
+  const transcription = useTranscription();
+  const isVoiceActive = recorder.state === "recording" || transcription.state === "transcribing";
 
   /* sync controlled model prop */
   useEffect(() => {
@@ -127,16 +137,23 @@ export default function ChatInput({
     return () => clearTimeout(timeout);
   }, [currentPromptIndex, isTyping]);
 
+  /* Show recorder errors as toasts */
+  useEffect(() => {
+    if (recorder.error) {
+      setToast({ message: recorder.error, type: "error" });
+    }
+  }, [recorder.error]);
+
   const handleModelChange = (newModel: Model) => {
     setModel(newModel);
     onModelChange?.(newModel);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!inputValue.trim()) return;
     onSubmit?.({ text: inputValue.trim(), mode: activeMode, model });
     setInputValue("");
-  };
+  }, [inputValue, activeMode, model, onSubmit]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -145,11 +162,72 @@ export default function ChatInput({
     }
   };
 
+  /* ── Voice recording handlers ────────────────────────────────── */
+  const handleMicClick = useCallback(async () => {
+    if (recorder.state === "recording") return; // already recording
+    transcription.reset();
+    await recorder.startRecording();
+  }, [recorder, transcription]);
+
+  const handleVoiceStop = useCallback(async () => {
+    // Check minimum duration
+    if (recorder.elapsedSeconds < 1) {
+      recorder.cancelRecording();
+      setToast({ message: "הקליטו הודעה ארוכה יותר", type: "warning" });
+      return;
+    }
+
+    const blob = await recorder.stopRecording();
+    if (!blob) return;
+
+    const text = await transcription.transcribe(blob);
+    if (text) {
+      // Auto-fill and auto-send
+      onSubmit?.({ text, mode: activeMode, model });
+      transcription.reset();
+    }
+  }, [recorder, transcription, activeMode, model, onSubmit]);
+
+  const handleVoiceCancel = useCallback(() => {
+    recorder.cancelRecording();
+    transcription.reset();
+  }, [recorder, transcription]);
+
+  const handleTranscriptionRetry = useCallback(async () => {
+    const text = await transcription.retry();
+    if (text) {
+      onSubmit?.({ text, mode: activeMode, model });
+      transcription.reset();
+    }
+  }, [transcription, activeMode, model, onSubmit]);
+
+  /* ── Determine what to show in the content area ──────────────── */
+  const showRecordingUI = recorder.state === "recording";
+  const showProcessingUI = transcription.state === "transcribing";
+  const showRetryUI = transcription.state === "error";
+  const showTextarea = !showRecordingUI && !showProcessingUI && !showRetryUI;
+  const isInputEmpty = !inputValue.trim();
+
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="relative rounded-[22px] bg-white border border-[var(--color-border,#e5e5e5)] shadow-sm transition-all duration-300 hover:shadow-md focus-within:border-[var(--color-primary,#DAFD68)]/40 focus-within:shadow-[0_0_30px_-10px_rgba(218,253,104,0.15)]">
+      {/* Toast notifications */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      <div
+        className={`relative rounded-[22px] bg-white border shadow-sm transition-all duration-300 hover:shadow-md ${
+          showRecordingUI
+            ? "border-[var(--color-primary,#DAFD68)]/60 shadow-[0_0_24px_-8px_rgba(183,221,76,0.25)]"
+            : "border-[var(--color-border,#e5e5e5)] focus-within:border-[var(--color-primary,#DAFD68)]/40 focus-within:shadow-[0_0_30px_-10px_rgba(218,253,104,0.15)]"
+        }`}
+      >
         {/* ── Pro banner ─────────────────────────────────────── */}
-        {showProBanner && (
+        {showProBanner && !isVoiceActive && (
           <div
             onClick={onProClick}
             className="group flex items-center justify-between px-5 py-3 border-b border-[var(--color-border,#e5e5e5)] cursor-pointer transition-all duration-200 hover:bg-[var(--color-surface-muted,#f5f5f5)]/50"
@@ -175,44 +253,140 @@ export default function ChatInput({
           </div>
         )}
 
-        {/* ── Textarea ───────────────────────────────────────── */}
-        <div className="px-5 pt-5 pb-2">
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={inputValue ? "" : placeholderText || "תארו את המשימה שלכם..."}
-            className="w-full bg-transparent text-[var(--color-text,#000)] placeholder:text-[var(--color-muted,#828282)]/60 outline-none text-base resize-none min-h-[60px] max-h-[120px] leading-relaxed"
-            dir="rtl"
-            rows={2}
-          />
+        {/* ── Content area: textarea / recording / processing / retry ── */}
+        <div
+          className={showTextarea ? "px-5 pt-5 pb-2" : ""}
+          style={!showTextarea ? { position: "relative", minHeight: "88px" } : undefined}
+        >
+          {showRecordingUI && (
+            <RecordingOverlay
+              isRecording
+              isProcessing={false}
+              elapsedSeconds={recorder.elapsedSeconds}
+              analyserNode={recorder.analyserNode}
+              onStop={handleVoiceStop}
+              onCancel={handleVoiceCancel}
+            />
+          )}
+
+          {showProcessingUI && (
+            <RecordingOverlay
+              isRecording={false}
+              isProcessing
+              elapsedSeconds={0}
+              analyserNode={null}
+              onStop={() => {}}
+              onCancel={() => {}}
+            />
+          )}
+
+          {showRetryUI && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "12px",
+                minHeight: "60px",
+                direction: "rtl",
+              }}
+            >
+              <span
+                style={{
+                  color: "var(--color-danger, #d9534f)",
+                  fontSize: "14px",
+                }}
+              >
+                {transcription.error}
+              </span>
+              <button
+                onClick={handleTranscriptionRetry}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid var(--color-border, #e5e5e5)",
+                  backgroundColor: "transparent",
+                  color: "var(--color-text, #000)",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <RotateCcw style={{ width: "14px", height: "14px" }} />
+                נסו שוב
+              </button>
+              <button
+                onClick={handleVoiceCancel}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid var(--color-border, #e5e5e5)",
+                  backgroundColor: "transparent",
+                  color: "var(--color-muted, #828282)",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                }}
+              >
+                ביטול
+              </button>
+            </div>
+          )}
+
+          {showTextarea && (
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={inputValue ? "" : placeholderText || "תארו את המשימה שלכם..."}
+              className="w-full bg-transparent text-[var(--color-text,#000)] placeholder:text-[var(--color-muted,#828282)]/60 outline-none text-base resize-none min-h-[60px] max-h-[120px] leading-relaxed"
+              dir="rtl"
+              rows={2}
+            />
+          )}
         </div>
 
         {/* ── Bottom toolbar ─────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 pb-4 pt-1">
           {/* Right (RTL start): attach · mic · active-mode chip */}
           <div className="flex items-center gap-1">
-            <Tooltip text="העלאת קבצים">
-              <button
-                className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
-                aria-label="העלאת קבצים"
-              >
-                <Paperclip className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
-              </button>
-            </Tooltip>
+            {!isVoiceActive && (
+              <Tooltip text="העלאת קבצים">
+                <button
+                  className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
+                  aria-label="העלאת קבצים"
+                >
+                  <Paperclip className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
+                </button>
+              </Tooltip>
+            )}
 
-            <Tooltip text="הקלטת הודעה קולית">
+            <Tooltip text={recorder.state === "recording" ? "מקליט..." : "הקלטת הודעה קולית"}>
               <button
-                className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
+                onClick={handleMicClick}
+                className={`group relative p-2 rounded-2xl transition-all duration-200 cursor-pointer ${
+                  recorder.state === "recording"
+                    ? "bg-[var(--color-primary,#DAFD68)]/20"
+                    : "hover:bg-[var(--color-surface-muted,#f5f5f5)]"
+                }`}
                 aria-label="הקלטת הודעה קולית"
+                disabled={transcription.state === "transcribing"}
               >
-                <Mic className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
+                <Mic
+                  className={`h-5 w-5 transition-colors ${
+                    recorder.state === "recording"
+                      ? "text-[var(--color-primary-darker,#b7dd4c)]"
+                      : "text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)]"
+                  }`}
+                />
               </button>
             </Tooltip>
 
             {/* active-mode chip */}
-            {activeMode && (
+            {activeMode && !isVoiceActive && (
               <div className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface-muted,#f5f5f5)] border border-[var(--color-border,#e5e5e5)] px-2.5 py-1 ms-1">
                 <activeMode.icon className="h-3.5 w-3.5 text-[var(--color-primary-darker,#b7dd4c)]" strokeWidth={1.5} />
                 <span className="text-xs text-[var(--color-text,#000)] font-medium">{activeMode.label}</span>
@@ -228,16 +402,25 @@ export default function ChatInput({
 
           {/* Left (RTL end): model selector · send */}
           <div className="flex items-center gap-2.5">
-            <ModelSelector value={model} onChange={handleModelChange} />
+            {!isVoiceActive && (
+              <ModelSelector value={model} onChange={handleModelChange} />
+            )}
 
-            <Tooltip text="שליחה">
-              <button
-                onClick={handleSubmit}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary,#DAFD68)] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow transition-all duration-200 cursor-pointer active:scale-95"
-              >
-                <SendArrow />
-              </button>
-            </Tooltip>
+            {!isVoiceActive && (
+              <Tooltip text="שליחה">
+                <button
+                  onClick={handleSubmit}
+                  disabled={isInputEmpty}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
+                    isInputEmpty
+                      ? "bg-[var(--color-surface-muted,#f0f0f0)] cursor-default"
+                      : "bg-[var(--color-primary,#DAFD68)] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow cursor-pointer active:scale-95"
+                  }`}
+                >
+                  <SendArrow />
+                </button>
+              </Tooltip>
+            )}
           </div>
         </div>
       </div>
