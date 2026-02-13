@@ -9,6 +9,7 @@ const navItems = [
   { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
   { id: "projection", label: "Projection Builder", icon: "calculator" },
+  { id: "academy", label: "אקדמיית Clario", icon: "book" },
 ];
 
 export default function SideNav({ activeId, onSelect, collapsed, onToggleCollapse }) {

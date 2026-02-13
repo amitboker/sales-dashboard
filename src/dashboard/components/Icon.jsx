@@ -22,6 +22,7 @@ import checkCircle from "../../assets/icons/check-circle.svg";
 import trendUpLg from "../../assets/icons/trend-up-lg.svg";
 import chevronDownSm from "../../assets/icons/chevron-down-sm.svg";
 import close from "../../assets/icons/close.svg";
+import book from "../../assets/icons/book.svg";
 
 const icons = {
   "bar-chart": barChart,
@@ -48,6 +49,7 @@ const icons = {
   "trend-up-lg": trendUpLg,
   "chevron-down-sm": chevronDownSm,
   close,
+  book,
 };
 
 export default function Icon({ name, size = 20, className = "", style = {} }) {

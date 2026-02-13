@@ -12,6 +12,7 @@ import SalesFunnel from "./pages/SalesFunnel.jsx";
 import ProjectionBuilder from "./pages/ProjectionBuilder.jsx";
 import AIWorkspace from "./pages/AIWorkspace.jsx";
 import Settings from "./pages/Settings.jsx";
+import ClarioAcademy from "./pages/ClarioAcademy.jsx";
 import "./dashboard.css";
 
 const pageMap = {
@@ -20,6 +21,7 @@ const pageMap = {
   team: TeamPerformance,
   ai: AIWorkspace,
   projection: ProjectionBuilder,
+  academy: ClarioAcademy,
   settings: Settings,
 };
 

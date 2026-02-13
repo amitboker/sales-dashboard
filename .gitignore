@@ -1,10 +1,18 @@
 node_modules
-# Keep environment variables out of version control
-.env
-
-# Build output (may contain inlined secrets from VITE_ env vars)
 dist/
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Generated
 /generated/prisma
 src/generated/
+
+# Vercel
 .vercel
+
+# Tool configs
+.mcp.json
+.claude/settings.local.json
