@@ -1,8 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Mic, Paperclip, Sparkles, X } from "lucide-react";
+import { Mic, Paperclip, Sparkles, X } from "lucide-react";
 import ModelSelector from "./ModelSelector";
 import type { Mode, Model, ChatSubmitPayload } from "./types";
 import { MODELS } from "./modes";
+
+/* ── Send arrow icon (Utari-style) ───────────────────────────── */
+const SendArrow = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M5 5h7a4 4 0 0 1 4 4v8" />
+    <polyline points="12 13 16 17 20 13" />
+  </svg>
+);
 
 /* ── Animated placeholder prompts ──────────────────────────────── */
 const PLACEHOLDER_PROMPTS = [
@@ -129,7 +146,7 @@ export default function ChatInput({
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="relative rounded-2xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-sm transition-all duration-300 hover:shadow-md focus-within:border-[var(--color-primary,#DAFD68)]/40 focus-within:shadow-[0_0_30px_-10px_rgba(218,253,104,0.15)]">
+      <div className="relative rounded-[22px] bg-white border border-[var(--color-border,#e5e5e5)] shadow-sm transition-all duration-300 hover:shadow-md focus-within:border-[var(--color-primary,#DAFD68)]/40 focus-within:shadow-[0_0_30px_-10px_rgba(218,253,104,0.15)]">
         {/* ── Pro banner ─────────────────────────────────────── */}
         {showProBanner && (
           <div
@@ -177,7 +194,7 @@ export default function ChatInput({
           <div className="flex items-center gap-1">
             <Tooltip text="העלאת קבצים">
               <button
-                className="group relative p-2 rounded-xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
+                className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
                 aria-label="העלאת קבצים"
               >
                 <Paperclip className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
@@ -186,7 +203,7 @@ export default function ChatInput({
 
             <Tooltip text="הקלטת הודעה קולית">
               <button
-                className="group relative p-2 rounded-xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
+                className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
                 aria-label="הקלטת הודעה קולית"
               >
                 <Mic className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
@@ -215,9 +232,9 @@ export default function ChatInput({
             <Tooltip text="שליחה">
               <button
                 onClick={handleSubmit}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary,#DAFD68)] hover:bg-[var(--color-primary-dark,#c8ec55)] transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary,#DAFD68)] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow transition-all duration-200 cursor-pointer active:scale-95"
               >
-                <ArrowLeft className="h-4 w-4 text-[#0A0A0A]" />
+                <SendArrow />
               </button>
             </Tooltip>
           </div>

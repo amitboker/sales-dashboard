@@ -112,11 +112,4 @@ const categories = [
   "שימור",
 ];
 
-const sidebarNav = [
-  { id: "all", label: "כל הקורסים", icon: "grid" },
-  { id: "featured", label: "מומלצים", icon: "star" },
-  { id: "new", label: "נוספו לאחרונה", icon: "clock" },
-  { id: "revenue", label: "חשובים להכנסות", icon: "trending" },
-];
-
-export { academyCourses, categories, sidebarNav };
+export { academyCourses, categories };
