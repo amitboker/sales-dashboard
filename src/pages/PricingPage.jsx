@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import './PricingPage.css';
 
 const plans = [
@@ -24,8 +24,8 @@ const plans = [
     id: 'pro',
     name: 'Pro',
     description: 'לצוותי מכירות שרוצים שליטה מלאה בנתונים ותובנות מתקדמות.',
-    monthly: { price: '₪199', period: '/חודש' },
-    yearly: { price: '₪179', period: '/חודש' },
+    monthly: { price: '₪199', period: '/חודש', numeric: 199 },
+    yearly: { price: '₪179', period: '/חודש', numeric: 179 },
     features: [
       'כל מה שיש ב-Starter',
       'גרפים וייצוא נתונים',
@@ -64,6 +64,34 @@ const fadeUp = {
 const stagger = {
   animate: { transition: { staggerChildren: 0.1 } },
 };
+
+/* ── Animated price counter ── */
+function AnimatedPrice({ value, prefix = '₪' }) {
+  const spring = useSpring(value, { stiffness: 120, damping: 20 });
+  const display = useTransform(spring, (v) => `${prefix}${Math.round(v)}`);
+  const scale = useSpring(1, { stiffness: 300, damping: 15 });
+  const isFirst = useRef(true);
+
+  useEffect(() => {
+    if (isFirst.current) {
+      isFirst.current = false;
+      return;
+    }
+    spring.set(value);
+    scale.set(1.08);
+    const t = setTimeout(() => scale.set(1), 80);
+    return () => clearTimeout(t);
+  }, [value, spring, scale]);
+
+  return (
+    <motion.span
+      className="pricing__price-value"
+      style={{ scale, fontVariantNumeric: 'tabular-nums', display: 'inline-block' }}
+    >
+      {display}
+    </motion.span>
+  );
+}
 
 export default function PricingPage() {
   const navigate = useNavigate();
@@ -167,9 +195,11 @@ export default function PricingPage() {
             </span>
             <p className="pricing__plan-desc">{plan.description}</p>
             <div className="pricing__price">
-              <span key={billing} className="pricing__price-value">
-                {plan[billing].price}
-              </span>
+              {plan[billing].numeric ? (
+                <AnimatedPrice value={plan[billing].numeric} />
+              ) : (
+                <span className="pricing__price-value">{plan[billing].price}</span>
+              )}
               {plan[billing].period && (
                 <span className="pricing__price-period">{plan[billing].period}</span>
               )}
