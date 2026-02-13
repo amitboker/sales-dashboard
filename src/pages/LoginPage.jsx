@@ -28,27 +28,6 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const testimonials = [
-  {
-    avatarSrc: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-    name: 'שרה כהן',
-    handle: '@sarahdigital',
-    text: 'פלטפורמה מדהימה! חווית המשתמש חלקה והתכונות בדיוק מה שצריך.',
-  },
-  {
-    avatarSrc: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
-    name: 'מרקוס ג׳ונסון',
-    handle: '@marcustech',
-    text: 'השירות הזה שינה את איך שאני עובד. עיצוב נקי, תכונות חזקות ותמיכה מעולה.',
-  },
-  {
-    avatarSrc: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
-    name: 'דוד מרטינז',
-    handle: '@davidcreates',
-    text: 'ניסיתי פלטפורמות רבות, אבל זו בולטת. אינטואיטיבית, אמינה ומועילה באמת.',
-  },
-];
-
 function LoginPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
@@ -127,122 +106,126 @@ function LoginPage() {
   };
 
   return (
-      <div className="login">
-        <section className="login__form-side">
-          <div className="login__form-card">
-            {showDemoPrompt ? (
-              <>
-                <h1 className="login__title">איך קוראים לך?</h1>
-                <p className="login__subtitle">נשמח להכיר לפני שמתחילים</p>
-                <form onSubmit={handleDemoContinue}>
-                  <label className="login__label">שם מלא</label>
-                  <input
-                    type="text"
-                    className="login__input"
-                    placeholder="הזן שם מלא"
-                    dir="rtl"
-                    value={demoName}
-                    onChange={(e) => setDemoName(e.target.value)}
-                  />
-                  <button type="submit" className="login__btn-primary" disabled={!demoName.trim()}>
-                    המשך
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <h1 className="login__title">ברוכים הבאים</h1>
-                <p className="login__subtitle">היכנס לחשבון שלך והמשך במסע איתנו</p>
+    <div className="login">
+      <div className="login__topbar">
+        <span className="login__logo">Clario</span>
+        <a
+          href="#"
+          className="login__topbar-link"
+          onClick={(e) => { e.preventDefault(); handleCreateAccount(); }}
+        >
+          צור חשבון
+        </a>
+      </div>
 
-                <form onSubmit={handleLogin}>
-              <label className="login__label">כתובת אימייל</label>
-              <input
-                name="email"
-                type="email"
-                className="login__input"
-                placeholder="הזן את כתובת האימייל שלך"
-                dir="rtl"
-              />
-
-              <label className="login__label">סיסמה</label>
-              <div className="login__password-wrap">
+      <section className="login__form-side">
+        <div className="login__form-card">
+          {showDemoPrompt ? (
+            <>
+              <h1 className="login__title">איך קוראים לך?</h1>
+              <p className="login__subtitle">נשמח להכיר לפני שמתחילים</p>
+              <form onSubmit={handleDemoContinue}>
+                <label className="login__label">שם מלא</label>
                 <input
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type="text"
                   className="login__input"
-                  placeholder="הזן את הסיסמה שלך"
+                  placeholder="הזן שם מלא"
+                  dir="rtl"
+                  value={demoName}
+                  onChange={(e) => setDemoName(e.target.value)}
+                />
+                <button type="submit" className="login__btn-primary" disabled={!demoName.trim()}>
+                  המשך
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <h1 className="login__title">ברוכים הבאים</h1>
+              <p className="login__subtitle">היכנס לחשבון שלך כדי להמשיך</p>
+
+              <form onSubmit={handleLogin}>
+                <label className="login__label">כתובת אימייל</label>
+                <input
+                  name="email"
+                  type="email"
+                  className="login__input"
+                  placeholder="הזן כתובת אימייל"
                   dir="rtl"
                 />
-                <button
-                  type="button"
-                  className="login__eye"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
-                >
-                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+
+                <label className="login__label">סיסמה</label>
+                <div className="login__password-wrap">
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="login__input"
+                    placeholder="הזן סיסמה"
+                    dir="rtl"
+                  />
+                  <button
+                    type="button"
+                    className="login__eye"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
+                  >
+                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+
+                <div className="login__options">
+                  <label className="login__remember">
+                    <input type="checkbox" name="rememberMe" />
+                    <span className="login__checkbox" />
+                    זכור אותי
+                  </label>
+                  <a
+                    href="#"
+                    className="login__forgot"
+                    onClick={(e) => { e.preventDefault(); handleResetPassword(); }}
+                  >
+                    שחזור סיסמה
+                  </a>
+                </div>
+
+                {error && <p className="login__error">{error}</p>}
+
+                <button type="submit" className="login__btn-primary" disabled={isLoading}>
+                  {isLoading ? (
+                    <span className="login__btn-loading">
+                      <span className="login__btn-spinner" />
+                      מתחבר...
+                    </span>
+                  ) : (
+                    'כניסה'
+                  )}
                 </button>
-              </div>
 
-              <div className="login__options">
-                <label className="login__remember">
-                  <input type="checkbox" name="rememberMe" />
-                  <span className="login__checkbox" />
-                  זכור אותי
-                </label>
-                <a
-                  href="#"
-                  className="login__forgot"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleResetPassword();
-                  }}
-                >
-                  שחזור סיסמה
-                </a>
-              </div>
+                <div className="login__divider">או</div>
 
-              {error && <p className="login__error">{error}</p>}
-
-              <button type="submit" className="login__btn-primary" disabled={isLoading}>
-                {isLoading ? (
-                  <span className="login__btn-loading">
-                    <span className="login__btn-spinner" />
-                    טוען...
-                  </span>
-                ) : (
-                  'התחבר'
-                )}
-              </button>
-
-              <div className="login__divider">או המשך עם</div>
-
-              <button type="button" className="login__btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
-                <GoogleIcon />
-                המשך עם Google
-              </button>
+                <button type="button" className="login__btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
+                  <GoogleIcon />
+                  המשך עם Google
+                </button>
 
                 <button type="button" className="login__btn-demo" onClick={handleDemoLogin} disabled={isLoading}>
-                  {isLoading ? '...טוען' : 'כניסה לדמו 🚀'}
+                  {isLoading ? 'מתחבר...' : 'נסה את הדמו'}
                 </button>
 
-              <p className="login__signup-text">
-                חדש בפלטפורמה?{' '}
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleCreateAccount();
-                  }}
-                >
-                  צור חשבון
-                </a>
-              </p>
-                </form>
-              </>
-            )}
-          </div>
-        </section>
-      </div>
+                <p className="login__signup-text">
+                  עדיין אין לך חשבון?{' '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleCreateAccount(); }}>
+                    הרשם עכשיו
+                  </a>
+                </p>
+              </form>
+            </>
+          )}
+        </div>
+      </section>
+
+      <div className="login__footer">Clario</div>
+    </div>
   );
 }
 

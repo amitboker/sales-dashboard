@@ -46,64 +46,77 @@ function SignUpPage() {
   };
 
   return (
-      <div className="signup">
-        <div className="signup__card">
-          {confirmationSent ? (
-            <>
-              <h1 className="signup__title">בדוק את האימייל שלך</h1>
-              <p className="signup__subtitle">
-                שלחנו קישור אימות לכתובת האימייל שלך. לחץ על הקישור כדי להפעיל את החשבון, ואז חזור להתחבר.
-              </p>
-              <button className="signup__submit" type="button" onClick={() => navigate('/login')}>
-                חזור להתחברות
-              </button>
-            </>
-          ) : (
-            <>
-              <h1 className="signup__title">צור חשבון</h1>
-              <p className="signup__subtitle">כמה פרטים קצרים ומתחילים לעבוד</p>
-
-              <form className="signup__form" onSubmit={handleSubmit}>
-                <div className="signup__row">
-                  <div className="signup__field">
-                    <label className="signup__label">שם פרטי</label>
-                    <input className="signup__input" name="firstName" type="text" placeholder="שם פרטי" required />
-                  </div>
-                  <div className="signup__field">
-                    <label className="signup__label">שם משפחה</label>
-                    <input className="signup__input" name="lastName" type="text" placeholder="שם משפחה" required />
-                  </div>
-                </div>
-
-                <div className="signup__field">
-                  <label className="signup__label">אימייל</label>
-                  <input className="signup__input" name="email" type="email" placeholder="you@company.com" required dir="ltr" />
-                </div>
-
-                <div className="signup__field">
-                  <label className="signup__label">טלפון</label>
-                  <input className="signup__input" type="tel" placeholder="050-000-0000" />
-                </div>
-
-                <div className="signup__field">
-                  <label className="signup__label">סיסמה</label>
-                  <input className="signup__input" name="password" type="password" placeholder="בחר סיסמה" required dir="ltr" />
-                </div>
-
-                {error && <p className="signup__error">{error}</p>}
-
-                <button className="signup__submit" type="submit" disabled={isLoading}>
-                  {isLoading ? 'יוצר חשבון...' : 'צור חשבון'}
-                </button>
-              </form>
-
-              <button className="signup__link" type="button" onClick={() => navigate('/login')}>
-                כבר יש לך חשבון? התחבר
-              </button>
-            </>
-          )}
-        </div>
+    <div className="signup">
+      <div className="signup__topbar">
+        <span className="signup__logo">Clario</span>
+        <a
+          href="#"
+          className="signup__topbar-link"
+          onClick={(e) => { e.preventDefault(); navigate('/login'); }}
+        >
+          כניסה
+        </a>
       </div>
+
+      <div className="signup__card">
+        {confirmationSent ? (
+          <>
+            <h1 className="signup__title">בדוק את האימייל שלך</h1>
+            <p className="signup__subtitle">
+              שלחנו קישור אימות לכתובת האימייל שלך. לחץ על הקישור כדי להפעיל את החשבון.
+            </p>
+            <button className="signup__submit" type="button" onClick={() => navigate('/login')}>
+              חזור להתחברות
+            </button>
+          </>
+        ) : (
+          <>
+            <h1 className="signup__title">צור חשבון</h1>
+            <p className="signup__subtitle">כמה פרטים קצרים ומתחילים</p>
+
+            <form className="signup__form" onSubmit={handleSubmit}>
+              <div className="signup__row">
+                <div className="signup__field">
+                  <label className="signup__label">שם פרטי</label>
+                  <input className="signup__input" name="firstName" type="text" placeholder="שם פרטי" required />
+                </div>
+                <div className="signup__field">
+                  <label className="signup__label">שם משפחה</label>
+                  <input className="signup__input" name="lastName" type="text" placeholder="שם משפחה" required />
+                </div>
+              </div>
+
+              <div className="signup__field">
+                <label className="signup__label">אימייל</label>
+                <input className="signup__input" name="email" type="email" placeholder="you@company.com" required dir="ltr" />
+              </div>
+
+              <div className="signup__field">
+                <label className="signup__label">טלפון</label>
+                <input className="signup__input" type="tel" placeholder="050-000-0000" />
+              </div>
+
+              <div className="signup__field">
+                <label className="signup__label">סיסמה</label>
+                <input className="signup__input" name="password" type="password" placeholder="בחר סיסמה" required dir="ltr" />
+              </div>
+
+              {error && <p className="signup__error">{error}</p>}
+
+              <button className="signup__submit" type="submit" disabled={isLoading}>
+                {isLoading ? 'יוצר חשבון...' : 'צור חשבון'}
+              </button>
+            </form>
+
+            <button className="signup__link" type="button" onClick={() => navigate('/login')}>
+              כבר יש לך חשבון? התחבר
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="signup__footer">Clario</div>
+    </div>
   );
 }
 
