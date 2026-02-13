@@ -9,7 +9,7 @@ export default function ProjectionBuilder() {
   return (
     <div className="page-enter">
       <PageHeader
-        title="Projection Builder"
+        title="בניית תחזית"
         subtitle="כלי תחזית ותכנון לפי יעדים"
       />
 
@@ -31,7 +31,7 @@ export default function ProjectionBuilder() {
             className={`forecast-toggle-btn ${mode === "forecast" ? "active" : ""}`}
             onClick={() => setMode("forecast")}
           >
-            Projection Builder
+            בניית תחזית
           </button>
         </div>
       </div>

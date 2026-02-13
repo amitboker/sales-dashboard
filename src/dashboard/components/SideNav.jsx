@@ -5,10 +5,10 @@ import logo from "../../assets/images/logo.png";
 
 const navItems = [
   { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },
-  { id: "command", label: "Command Center", icon: "bar-chart" },
+  { id: "command", label: "מרכז שליטה", icon: "bar-chart" },
   { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
-  { id: "projection", label: "Projection Builder", icon: "calculator" },
+  { id: "projection", label: "בניית תחזית", icon: "calculator" },
   { id: "academy", label: "אקדמיית Clario", icon: "book" },
 ];
 

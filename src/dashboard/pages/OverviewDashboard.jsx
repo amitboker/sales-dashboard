@@ -90,7 +90,7 @@ export default function OverviewDashboard() {
   return (
     <div className="page-enter overview-page">
       <PageHeader
-        title="Command Center"
+        title="מרכז שליטה"
         subtitle="סקירה ניהולית של ביצועים והכנסות"
         filters={
           <>

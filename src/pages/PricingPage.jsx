@@ -33,7 +33,7 @@ const plans = [
       'ניתוח משפכי מכירה',
       'ריענון נתונים בעדיפות גבוהה',
       'עוזר AI ללא הגבלה',
-      'Projection Builder',
+      'בניית תחזית',
     ],
     cta: 'שדרג ל-Pro',
     recommended: true,
