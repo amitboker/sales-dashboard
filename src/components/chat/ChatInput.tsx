@@ -4,7 +4,7 @@ import ModelSelector from "./ModelSelector";
 import type { Mode, Model, ChatSubmitPayload } from "./types";
 import { MODELS } from "./modes";
 
-/* ── Send arrow icon (Utari-style) ───────────────────────────── */
+/* ── Send arrow icon (Utari-style: down → curve → right) ───── */
 const SendArrow = () => (
   <svg
     width="18"
@@ -15,9 +15,10 @@ const SendArrow = () => (
     strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+    style={{ display: "block" }}
   >
-    <path d="M5 5h7a4 4 0 0 1 4 4v8" />
-    <polyline points="12 13 16 17 20 13" />
+    <path d="M6 5v6a4 4 0 0 0 4 4h8" />
+    <polyline points="14 11 18 15 14 19" />
   </svg>
 );
 
@@ -46,14 +47,14 @@ function Tooltip({ text, children }: TooltipProps) {
     >
       {children}
       <div
-        className={`absolute bottom-full mb-2 start-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-white border border-[var(--color-border,#e5e5e5)] px-3 py-1.5 text-xs text-[var(--color-text,#000)] shadow-lg z-50 transition-all duration-200 ${
+        className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-white border border-[var(--color-border,#e5e5e5)] px-3 py-1.5 text-xs text-[var(--color-text,#000)] shadow-lg z-50 transition-all duration-200 ${
           isVisible
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-1 pointer-events-none"
         }`}
       >
         {text}
-        <div className="absolute top-full start-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
       </div>
     </div>
   );

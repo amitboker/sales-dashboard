@@ -39,11 +39,11 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full mb-2 end-0 rounded-xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-xl py-1.5 z-[60] min-w-[200px] overflow-hidden"
+            className="absolute top-full mt-2 end-0 rounded-xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-xl py-1.5 z-[60] min-w-[200px] overflow-hidden"
           >
             {MODELS.map((model) => (
               <button
