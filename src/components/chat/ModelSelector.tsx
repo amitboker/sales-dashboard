@@ -27,10 +27,14 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface-muted,#f5f5f5)] border border-[var(--color-border,#e5e5e5)] px-3 py-1.5 text-sm text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:border-[var(--color-primary,#DAFD68)]/40 transition-all duration-200 cursor-pointer"
+        className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm transition-all duration-200 cursor-pointer ${
+          isOpen
+            ? "bg-[var(--color-primary-light,#f8fde8)] border-[var(--color-primary,#DAFD68)] text-[var(--color-text,#000)]"
+            : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:border-[var(--color-primary,#DAFD68)]/40"
+        }`}
       >
         <value.icon className="h-3.5 w-3.5 text-[var(--color-primary-darker,#b7dd4c)]" />
-        <span>{value.label}</span>
+        <span className="font-medium">{value.label}</span>
         <ChevronDown
           className={`h-3 w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
@@ -39,11 +43,11 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="absolute top-full mt-2 end-0 rounded-xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-xl py-1.5 z-[60] min-w-[200px] overflow-hidden"
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute top-full mt-2 end-0 rounded-xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-lg py-1.5 z-[60] min-w-[210px] overflow-hidden"
           >
             {MODELS.map((model) => (
               <button
@@ -54,7 +58,7 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
                 }}
                 className={`flex items-center gap-3 w-full text-start px-4 py-2.5 text-sm transition-all duration-150 cursor-pointer ${
                   value.id === model.id
-                    ? "text-[var(--color-primary-darker,#b7dd4c)] bg-[var(--color-primary-light,#f8fde8)]"
+                    ? "text-[var(--color-text,#000)] bg-[var(--color-primary-light,#f8fde8)]"
                     : "text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#f5f5f5)]"
                 }`}
               >

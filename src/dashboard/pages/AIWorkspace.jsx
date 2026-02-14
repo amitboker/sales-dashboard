@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpLeft, RefreshCw } from "lucide-react";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage, isAIConfigured } from "../../ai/service";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
-import { MODELS, SUGGESTION_CARDS } from "../../components/chat/modes";
+import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
 
 export default function AIWorkspace() {
   const navigate = useNavigate();
@@ -32,6 +34,34 @@ export default function AIWorkspace() {
   const chatEndRef = useRef(null);
 
   const hasChat = messages.length > 0;
+
+  // Prompt rotation: track offset per mode to cycle through the pool
+  const [promptOffset, setPromptOffset] = useState({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const getVisiblePrompts = useCallback((modeId) => {
+    const pool = SAMPLE_PROMPTS[modeId] || [];
+    const offset = promptOffset[modeId] || 0;
+    const count = PROMPTS_PER_PAGE;
+    // Wrap around the pool
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(pool[(offset + i) % pool.length]);
+    }
+    return result;
+  }, [promptOffset]);
+
+  const handleRefreshPrompts = useCallback((modeId) => {
+    setIsRefreshing(true);
+    setPromptOffset((prev) => {
+      const pool = SAMPLE_PROMPTS[modeId] || [];
+      const current = prev[modeId] || 0;
+      const next = (current + PROMPTS_PER_PAGE) % pool.length;
+      return { ...prev, [modeId]: next };
+    });
+    // Stop spin animation after 400ms
+    setTimeout(() => setIsRefreshing(false), 400);
+  }, []);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -160,39 +190,120 @@ export default function AIWorkspace() {
             </div>
           )}
 
-          {/* Mode selector */}
+          {/* Mode selector chips */}
           <ModeSelector activeMode={activeMode} onSelect={setActiveMode} />
 
-          {/* Suggestion cards */}
-          <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "8px" }}>
-            {SUGGESTION_CARDS.map((text) => (
-              <button
-                key={text}
-                onClick={() => handleSuggestionClick(text)}
-                style={{
-                  textAlign: "start",
-                  padding: "16px 20px",
-                  borderRadius: "12px",
-                  border: "1px solid var(--color-border, #e5e5e5)",
-                  backgroundColor: "var(--color-surface, #fff)",
-                  color: "var(--color-muted, #828282)",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "var(--color-text, #000)";
-                  e.currentTarget.style.borderColor = "var(--color-primary, #DAFD68)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "var(--color-muted, #828282)";
-                  e.currentTarget.style.borderColor = "var(--color-border, #e5e5e5)";
-                }}
+          {/* Conditional sample prompts — only when a chip is selected */}
+          <AnimatePresence mode="wait">
+            {activeMode && SAMPLE_PROMPTS[activeMode.id] && (
+              <motion.div
+                key={activeMode.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{ width: "100%", marginTop: "8px" }}
               >
-                {text}
-              </button>
-            ))}
-          </div>
+                {/* Header row: label + refresh button */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                  <p style={{ fontSize: "13px", color: "var(--color-muted, #828282)", fontWeight: 400, margin: 0 }}>
+                    הצעות ל{activeMode.label}
+                  </p>
+                  <button
+                    onClick={() => handleRefreshPrompts(activeMode.id)}
+                    title="הצעות חדשות"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--color-border, #e5e5e5)",
+                      backgroundColor: "var(--color-surface, #fff)",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      padding: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "var(--color-primary, #DAFD68)";
+                      e.currentTarget.style.backgroundColor = "var(--color-surface-muted, #fafafa)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "var(--color-border, #e5e5e5)";
+                      e.currentTarget.style.backgroundColor = "var(--color-surface, #fff)";
+                    }}
+                  >
+                    <RefreshCw
+                      style={{
+                        width: "13px",
+                        height: "13px",
+                        color: "var(--color-muted, #828282)",
+                        transition: "transform 0.4s ease",
+                        transform: isRefreshing ? "rotate(360deg)" : "rotate(0deg)",
+                      }}
+                    />
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <AnimatePresence mode="wait">
+                    {getVisiblePrompts(activeMode.id).map((text, i) => (
+                      <motion.button
+                        key={text}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2, delay: i * 0.05, ease: "easeOut" }}
+                        onClick={() => handleSuggestionClick(text)}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          justifyContent: "space-between",
+                          gap: "12px",
+                          textAlign: "start",
+                          padding: "14px 16px",
+                          borderRadius: "14px",
+                          border: "1px solid var(--color-border, #e5e5e5)",
+                          backgroundColor: "var(--color-surface, #fff)",
+                          color: "var(--color-muted, #828282)",
+                          fontSize: "13px",
+                          lineHeight: "1.5",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          fontFamily: "inherit",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "var(--color-text, #000)";
+                          e.currentTarget.style.borderColor = "var(--color-primary, #DAFD68)";
+                          e.currentTarget.style.boxShadow = "0 2px 12px -4px rgba(218, 253, 104, 0.2)";
+                          e.currentTarget.style.transform = "translateY(-1px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "var(--color-muted, #828282)";
+                          e.currentTarget.style.borderColor = "var(--color-border, #e5e5e5)";
+                          e.currentTarget.style.boxShadow = "none";
+                          e.currentTarget.style.transform = "translateY(0)";
+                        }}
+                      >
+                        <span>{text}</span>
+                        <ArrowUpLeft
+                          style={{
+                            width: "14px",
+                            height: "14px",
+                            flexShrink: 0,
+                            marginTop: "2px",
+                            opacity: 0.4,
+                            transition: "opacity 0.2s",
+                          }}
+                        />
+                      </motion.button>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Footer */}

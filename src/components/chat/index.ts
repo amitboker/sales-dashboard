@@ -4,7 +4,7 @@ export { default as ModeSelector } from "./ModeSelector";
 export { default as ChatDemo } from "./ChatDemo";
 export { default as RecordingOverlay } from "./RecordingOverlay";
 export { default as Toast } from "./Toast";
-export { MODES, MODELS, SUGGESTION_CARDS } from "./modes";
+export { MODES, MODELS, SUGGESTION_CARDS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "./modes";
 export { useVoiceRecorder } from "./useVoiceRecorder";
 export { useTranscription } from "./useTranscription";
 export type { Mode, Model, ChatSubmitPayload } from "./types";
