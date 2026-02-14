@@ -11,6 +11,7 @@ interface ModelSelectorProps {
 
 export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,23 +24,60 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Compute trigger styles based on state — using inline styles to guarantee rendering
+  const triggerStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    height: "36px",
+    borderRadius: "14px",
+    border: "1px solid",
+    padding: "0 14px",
+    fontSize: "13px",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    fontFamily: "inherit",
+    borderColor: isOpen
+      ? "rgba(183, 221, 76, 0.6)"
+      : isHovered
+        ? "rgba(183, 221, 76, 0.45)"
+        : "#d4d4d4",
+    backgroundColor: isOpen
+      ? "rgba(218, 253, 104, 0.1)"
+      : isHovered
+        ? "rgba(218, 253, 104, 0.05)"
+        : "#fff",
+    color: isOpen || isHovered ? "#1a1a1a" : "#828282",
+  };
+
   return (
-    <div className="relative" ref={ref}>
+    <div style={{ position: "relative" }} ref={ref}>
+      {/* ── Trigger — rounded rectangle ── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 h-9 rounded-xl border px-3 text-sm transition-all duration-200 cursor-pointer ${
-          isOpen
-            ? "bg-[var(--color-primary-light,#f8fde8)] border-[var(--color-primary,#DAFD68)] text-[var(--color-text,#000)]"
-            : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:border-[var(--color-primary,#DAFD68)]/40 active:bg-[var(--color-surface-muted,#f0f0f0)]"
-        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={triggerStyle}
       >
-        <value.icon className="h-3.5 w-3.5 text-[var(--color-primary-darker,#b7dd4c)]" />
-        <span className="font-medium">{value.label}</span>
+        <value.icon
+          style={{ width: "16px", height: "16px", color: "#b7dd4c" }}
+          strokeWidth={1.8}
+        />
+        <span>{value.label}</span>
         <ChevronDown
-          className={`h-3 w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          style={{
+            width: "14px",
+            height: "14px",
+            color: "#aaa",
+            transition: "transform 0.2s ease",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+          strokeWidth={2}
         />
       </button>
 
+      {/* ── Dropdown ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -47,38 +85,102 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full mt-2 end-0 rounded-xl bg-white border border-[var(--color-border,#e5e5e5)] shadow-lg py-1.5 z-[60] min-w-[210px] overflow-hidden"
+            style={{
+              position: "absolute",
+              top: "100%",
+              marginTop: "8px",
+              right: 0,
+              borderRadius: "14px",
+              backgroundColor: "#fff",
+              border: "1px solid #e5e5e5",
+              boxShadow: "0 4px 20px -4px rgba(0, 0, 0, 0.08)",
+              padding: "6px 0",
+              zIndex: 60,
+              minWidth: "220px",
+              overflow: "hidden",
+            }}
           >
-            {MODELS.map((model) => (
-              <button
-                key={model.id}
-                onClick={() => {
-                  onChange(model);
-                  setIsOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full text-start px-4 py-2.5 text-sm transition-all duration-150 cursor-pointer ${
-                  value.id === model.id
-                    ? "text-[var(--color-text,#000)] bg-[var(--color-primary-light,#f8fde8)]"
-                    : "text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#f5f5f5)]"
-                }`}
-              >
-                <model.icon
-                  className={`h-4 w-4 ${
-                    value.id === model.id ? "text-[var(--color-primary-darker,#b7dd4c)]" : "text-[var(--color-muted,#828282)]"
-                  }`}
+            {MODELS.map((model) => {
+              const isSelected = value.id === model.id;
+              return (
+                <DropdownItem
+                  key={model.id}
+                  model={model}
+                  isSelected={isSelected}
+                  onClick={() => {
+                    onChange(model);
+                    setIsOpen(false);
+                  }}
                 />
-                <div className="flex flex-col">
-                  <span className="font-medium">{model.label}</span>
-                  <span className="text-xs text-[var(--color-muted,#828282)]/60">{model.description}</span>
-                </div>
-                {value.id === model.id && (
-                  <div className="ms-auto h-1.5 w-1.5 rounded-full bg-[var(--color-primary,#DAFD68)]" />
-                )}
-              </button>
-            ))}
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/* ── Dropdown item (separate component for hover state) ── */
+function DropdownItem({
+  model,
+  isSelected,
+  onClick,
+}: {
+  model: Model;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        width: "100%",
+        textAlign: "start",
+        padding: "10px 16px",
+        fontSize: "13px",
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+        border: "none",
+        fontFamily: "inherit",
+        backgroundColor: isSelected
+          ? "rgba(218, 253, 104, 0.1)"
+          : hovered
+            ? "#f5f5f5"
+            : "transparent",
+        color: isSelected || hovered ? "#1a1a1a" : "#828282",
+      }}
+    >
+      <model.icon
+        style={{
+          width: "16px",
+          height: "16px",
+          color: isSelected ? "#b7dd4c" : "#828282",
+        }}
+        strokeWidth={1.8}
+      />
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontWeight: 500 }}>{model.label}</span>
+        <span style={{ fontSize: "11px", color: "#aaa" }}>{model.description}</span>
+      </div>
+      {isSelected && (
+        <div
+          style={{
+            marginInlineStart: "auto",
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            backgroundColor: "#b7dd4c",
+          }}
+        />
+      )}
+    </button>
   );
 }
