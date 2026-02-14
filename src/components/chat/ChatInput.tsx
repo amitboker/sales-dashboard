@@ -8,7 +8,7 @@ import { useTranscription } from "./useTranscription";
 import type { Mode, Model, ChatSubmitPayload } from "./types";
 import { MODELS } from "./modes";
 
-/* ── Send arrow icon (Utari-style: down → curve → right) ───── */
+/* ── Send arrow icon (RTL-aware: curves left) ───────────────────── */
 const SendArrow = () => (
   <svg
     width="18"
@@ -64,6 +64,11 @@ function Tooltip({ text, children }: TooltipProps) {
   );
 }
 
+/* ── Shared button pill style (consistent height / radius / padding) ── */
+const PILL_BASE =
+  "flex items-center justify-center h-9 rounded-xl border transition-all duration-200 cursor-pointer";
+const PILL_NEUTRAL = `${PILL_BASE} bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:border-[var(--color-primary,#DAFD68)]/50 hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#fafafa)] active:bg-[var(--color-surface-muted,#f0f0f0)]`;
+
 /* ── ChatInput ─────────────────────────────────────────────────── */
 interface ChatInputProps {
   onSubmit?: (payload: ChatSubmitPayload) => void;
@@ -72,6 +77,10 @@ interface ChatInputProps {
   onClearMode?: () => void;
   selectedModel?: Model;
   onModelChange?: (model: Model) => void;
+  /** Controlled prefill value from parent (e.g. suggestion click) */
+  prefillValue?: string;
+  /** Called when prefill has been consumed (so parent can clear it) */
+  onPrefillConsumed?: () => void;
 }
 
 export default function ChatInput({
@@ -81,6 +90,8 @@ export default function ChatInput({
   onClearMode,
   selectedModel,
   onModelChange,
+  prefillValue,
+  onPrefillConsumed,
 }: ChatInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
@@ -100,6 +111,16 @@ export default function ChatInput({
   useEffect(() => {
     if (selectedModel) setModel(selectedModel);
   }, [selectedModel]);
+
+  /* consume prefill from parent (suggestion click) */
+  useEffect(() => {
+    if (prefillValue !== undefined && prefillValue !== null && prefillValue !== "") {
+      setInputValue(prefillValue);
+      onPrefillConsumed?.();
+      // Focus the textarea so user can immediately edit or press Enter
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [prefillValue, onPrefillConsumed]);
 
   /* animated typing placeholder */
   useEffect(() => {
@@ -164,13 +185,12 @@ export default function ChatInput({
 
   /* ── Voice recording handlers ────────────────────────────────── */
   const handleMicClick = useCallback(async () => {
-    if (recorder.state === "recording") return; // already recording
+    if (recorder.state === "recording") return;
     transcription.reset();
     await recorder.startRecording();
   }, [recorder, transcription]);
 
   const handleVoiceStop = useCallback(async () => {
-    // Check minimum duration
     if (recorder.elapsedSeconds < 1) {
       recorder.cancelRecording();
       setToast({ message: "הקליטו הודעה ארוכה יותר", type: "warning" });
@@ -182,7 +202,6 @@ export default function ChatInput({
 
     const text = await transcription.transcribe(blob);
     if (text) {
-      // Auto-fill and auto-send
       onSubmit?.({ text, mode: activeMode, model });
       transcription.reset();
     }
@@ -349,17 +368,17 @@ export default function ChatInput({
           )}
         </div>
 
-        {/* ── Bottom toolbar ─────────────────────────────────── */}
+        {/* ── Bottom toolbar — uniform rounded-rectangle pills ── */}
         <div className="flex items-center justify-between px-4 pb-4 pt-1">
           {/* Right (RTL start): attach · mic · active-mode chip */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {!isVoiceActive && (
               <Tooltip text="העלאת קבצים">
                 <button
-                  className="group relative p-2 rounded-2xl hover:bg-[var(--color-surface-muted,#f5f5f5)] transition-all duration-200 cursor-pointer"
+                  className={`${PILL_NEUTRAL} w-9 px-0`}
                   aria-label="העלאת קבצים"
                 >
-                  <Paperclip className="h-5 w-5 text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors" />
+                  <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.8} />
                 </button>
               </Tooltip>
             )}
@@ -367,32 +386,26 @@ export default function ChatInput({
             <Tooltip text={recorder.state === "recording" ? "מקליט..." : "הקלטת הודעה קולית"}>
               <button
                 onClick={handleMicClick}
-                className={`group relative p-2 rounded-2xl transition-all duration-200 cursor-pointer ${
+                className={`${PILL_BASE} w-9 px-0 ${
                   recorder.state === "recording"
-                    ? "bg-[var(--color-primary,#DAFD68)]/20"
-                    : "hover:bg-[var(--color-surface-muted,#f5f5f5)]"
+                    ? "bg-[var(--color-primary,#DAFD68)]/15 border-[var(--color-primary-darker,#b7dd4c)] text-[var(--color-primary-darker,#b7dd4c)]"
+                    : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:border-[var(--color-primary,#DAFD68)]/50 hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#fafafa)] active:bg-[var(--color-surface-muted,#f0f0f0)]"
                 }`}
                 aria-label="הקלטת הודעה קולית"
                 disabled={transcription.state === "transcribing"}
               >
-                <Mic
-                  className={`h-5 w-5 transition-colors ${
-                    recorder.state === "recording"
-                      ? "text-[var(--color-primary-darker,#b7dd4c)]"
-                      : "text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)]"
-                  }`}
-                />
+                <Mic className="h-[18px] w-[18px]" strokeWidth={1.8} />
               </button>
             </Tooltip>
 
             {/* active-mode chip */}
             {activeMode && !isVoiceActive && (
-              <div className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface-muted,#f5f5f5)] border border-[var(--color-border,#e5e5e5)] px-2.5 py-1 ms-1">
+              <div className="flex items-center gap-1.5 h-9 rounded-xl bg-[var(--color-primary,#DAFD68)]/10 border border-[var(--color-primary-darker,#b7dd4c)] px-2.5 ms-0.5">
                 <activeMode.icon className="h-3.5 w-3.5 text-[var(--color-primary-darker,#b7dd4c)]" strokeWidth={1.5} />
                 <span className="text-xs text-[var(--color-text,#000)] font-medium">{activeMode.label}</span>
                 <button
                   onClick={onClearMode}
-                  className="p-0.5 rounded-full hover:bg-[var(--color-border,#e5e5e5)] transition-colors cursor-pointer"
+                  className="p-0.5 rounded-lg hover:bg-[var(--color-border,#e5e5e5)] transition-colors cursor-pointer"
                 >
                   <X className="h-3 w-3 text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)]" />
                 </button>
@@ -401,7 +414,7 @@ export default function ChatInput({
           </div>
 
           {/* Left (RTL end): model selector · send */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
             {!isVoiceActive && (
               <ModelSelector value={model} onChange={handleModelChange} />
             )}
@@ -411,10 +424,10 @@ export default function ChatInput({
                 <button
                   onClick={handleSubmit}
                   disabled={isInputEmpty}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
+                  className={`${PILL_BASE} w-9 px-0 ${
                     isInputEmpty
-                      ? "bg-[var(--color-surface-muted,#f0f0f0)] cursor-default"
-                      : "bg-[var(--color-primary,#DAFD68)] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow cursor-pointer active:scale-95"
+                      ? "bg-[var(--color-surface-muted,#f0f0f0)] border-transparent text-[var(--color-muted,#828282)]/40 cursor-default"
+                      : "bg-[var(--color-primary,#DAFD68)] border-[var(--color-primary-darker,#b7dd4c)]/30 text-[#1a1a1a] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow active:scale-95"
                   }`}
                 >
                   <SendArrow />

@@ -27,10 +27,10 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm transition-all duration-200 cursor-pointer ${
+        className={`flex items-center gap-1.5 h-9 rounded-xl border px-3 text-sm transition-all duration-200 cursor-pointer ${
           isOpen
             ? "bg-[var(--color-primary-light,#f8fde8)] border-[var(--color-primary,#DAFD68)] text-[var(--color-text,#000)]"
-            : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:border-[var(--color-primary,#DAFD68)]/40"
+            : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:text-[var(--color-text,#000)] hover:border-[var(--color-primary,#DAFD68)]/40 active:bg-[var(--color-surface-muted,#f0f0f0)]"
         }`}
       >
         <value.icon className="h-3.5 w-3.5 text-[var(--color-primary-darker,#b7dd4c)]" />

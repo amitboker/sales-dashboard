@@ -30,6 +30,7 @@ export default function AIWorkspace() {
   const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState("");
+  const [prefillValue, setPrefillValue] = useState("");
   const abortRef = useRef(null);
   const chatEndRef = useRef(null);
 
@@ -138,7 +139,8 @@ export default function AIWorkspace() {
       page: "/dashboard/ai",
       feature: "ai_quick_prompt",
     });
-    handleSend(text);
+    // Populate input only — do NOT auto-submit
+    setPrefillValue(text);
   };
 
   const handleNewChat = () => {
@@ -155,11 +157,38 @@ export default function AIWorkspace() {
         style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
       >
         <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
-          {/* Plan badge */}
-          <div className="ai-plan-badge" style={{ marginBottom: "-12px" }}>
-            <span>אתה משתמש בתוכנית חינמית</span>
-            <span className="ai-plan-badge-sep">&bull;</span>
-            <span className="ai-plan-upgrade" onClick={() => navigate("/pricing")}>שדרג לגרסת Pro</span>
+          {/* Plan badge — subtle green pill */}
+          <div
+            onClick={() => navigate("/pricing")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "5px 14px",
+              borderRadius: "999px",
+              border: "1px solid rgba(183, 221, 76, 0.3)",
+              backgroundColor: "rgba(218, 253, 104, 0.1)",
+              cursor: "pointer",
+              marginBottom: "-8px",
+              transition: "all 0.2s ease",
+              letterSpacing: "0.01em",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(218, 253, 104, 0.16)";
+              e.currentTarget.style.borderColor = "rgba(183, 221, 76, 0.45)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(218, 253, 104, 0.1)";
+              e.currentTarget.style.borderColor = "rgba(183, 221, 76, 0.3)";
+            }}
+          >
+            <span style={{ fontSize: "12px", color: "#7a9a2e", fontWeight: 450 }}>
+              תוכנית חינמית
+            </span>
+            <span style={{ fontSize: "12px", color: "#7a9a2e", opacity: 0.3 }}>&bull;</span>
+            <span style={{ fontSize: "12px", color: "#6b8c24", fontWeight: 550 }}>
+              שדרג ל-Pro
+            </span>
           </div>
 
           {/* Heading */}
@@ -175,6 +204,8 @@ export default function AIWorkspace() {
             onModelChange={setSelectedModel}
             onSubmit={handleSubmit}
             onProClick={() => {}}
+            prefillValue={prefillValue}
+            onPrefillConsumed={() => setPrefillValue("")}
           />
 
           {/* Error / warning */}
@@ -409,6 +440,8 @@ export default function AIWorkspace() {
           onModelChange={setSelectedModel}
           onSubmit={handleSubmit}
           onProClick={() => {}}
+          prefillValue={prefillValue}
+          onPrefillConsumed={() => setPrefillValue("")}
         />
       </div>
     </div>
