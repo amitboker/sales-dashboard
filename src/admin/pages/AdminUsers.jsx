@@ -11,6 +11,10 @@ export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     loadUsers();
@@ -46,8 +50,67 @@ export default function AdminUsers() {
     });
   }
 
+  // ── Delete user (soft delete + analytics cleanup) ──
+  async function deleteUser() {
+    if (!supabase || !deleteTarget) return;
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const now = new Date().toISOString();
+
+      // 1. Soft-delete profile: mark as deleted + inactive
+      const { error: profileErr } = await supabase
+        .from("profiles")
+        .update({ deletedAt: now, isActive: false, updatedAt: now })
+        .eq("id", deleteTarget.id);
+      if (profileErr) throw profileErr;
+
+      // 2. Delete analytics events for this user
+      await supabase
+        .from("analytics_events")
+        .delete()
+        .eq("userId", deleteTarget.authId);
+
+      // 3. Remove from local state
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+
+      trackEvent("user_deleted", {
+        page: "/admin/users",
+        feature: "user_management",
+        userId: user?.id,
+        targetUserId: deleteTarget.authId,
+        targetEmail: deleteTarget.email,
+      });
+
+      setDeleteTarget(null);
+      setDeleteConfirm("");
+    } catch (err) {
+      setDeleteError(err.message || "שגיאה במחיקת המשתמש");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function openDeleteModal(profile) {
+    setDeleteTarget(profile);
+    setDeleteConfirm("");
+    setDeleteError("");
+  }
+
+  function closeDeleteModal() {
+    setDeleteTarget(null);
+    setDeleteConfirm("");
+    setDeleteError("");
+  }
+
+  // Is this the currently logged-in admin user?
+  function isSelf(profile) {
+    return user && profile.authId === user.id;
+  }
+
   const filtered = useMemo(() => {
-    let list = users;
+    let list = users.filter((u) => !u.deletedAt); // hide deleted users
     if (filter === "active") list = list.filter((u) => u.isActive);
     if (filter === "inactive") list = list.filter((u) => !u.isActive);
     if (filter === "admin") list = list.filter((u) => u.isAdmin);
@@ -63,11 +126,12 @@ export default function AdminUsers() {
     return list;
   }, [users, search, filter]);
 
+  const activeProfiles = users.filter((u) => !u.deletedAt);
   const now = new Date();
   const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.isActive).length;
-  const newThisMonth = users.filter((u) => u.createdAt >= thisMonth).length;
+  const totalUsers = activeProfiles.length;
+  const activeUsers = activeProfiles.filter((u) => u.isActive).length;
+  const newThisMonth = activeProfiles.filter((u) => u.createdAt >= thisMonth).length;
   const inactiveUsers = totalUsers - activeUsers;
 
   function formatDate(dateStr) {
@@ -171,13 +235,24 @@ export default function AdminUsers() {
                   <td>{formatDate(u.createdAt)}</td>
                   <td>{formatTime(u.lastSeen)}</td>
                   <td>
-                    <button
-                      className={`admin-action-btn${!u.isActive ? "" : " danger"}`}
-                      onClick={() => toggleActive(u)}
-                      type="button"
-                    >
-                      {u.isActive ? "השבת" : "הפעל"}
-                    </button>
+                    <div className="admin-actions-group">
+                      <button
+                        className={`admin-action-btn${!u.isActive ? "" : " danger"}`}
+                        onClick={() => toggleActive(u)}
+                        type="button"
+                      >
+                        {u.isActive ? "השבת" : "הפעל"}
+                      </button>
+                      <button
+                        className="admin-action-btn delete"
+                        onClick={() => openDeleteModal(u)}
+                        disabled={isSelf(u)}
+                        title={isSelf(u) ? "לא ניתן למחוק את עצמך" : "מחק משתמש"}
+                        type="button"
+                      >
+                        מחק
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -185,6 +260,56 @@ export default function AdminUsers() {
           </table>
         )}
       </div>
+
+      {/* ── Delete Confirmation Modal ── */}
+      {deleteTarget && (
+        <div className="admin-modal-overlay" onClick={closeDeleteModal}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal__icon">⚠️</div>
+            <h3 className="admin-modal__title">מחיקת משתמש</h3>
+            <p className="admin-modal__desc">
+              פעולה זו <strong>בלתי הפיכה</strong>. המשתמש לא יוכל להתחבר יותר
+              וכל הנתונים שלו יימחקו.
+            </p>
+            <div className="admin-modal__user-info">
+              <span>{displayName(deleteTarget)}</span>
+              <span style={{ direction: "ltr" }}>{deleteTarget.email}</span>
+            </div>
+            <label className="admin-modal__label">
+              הקלד <strong>DELETE</strong> כדי לאשר:
+            </label>
+            <input
+              className="admin-modal__input"
+              type="text"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="DELETE"
+              dir="ltr"
+              autoFocus
+            />
+            {deleteError && (
+              <p className="admin-modal__error">{deleteError}</p>
+            )}
+            <div className="admin-modal__actions">
+              <button
+                className="admin-modal__btn cancel"
+                onClick={closeDeleteModal}
+                type="button"
+              >
+                ביטול
+              </button>
+              <button
+                className="admin-modal__btn confirm"
+                onClick={deleteUser}
+                disabled={deleteConfirm !== "DELETE" || deleting}
+                type="button"
+              >
+                {deleting ? "מוחק..." : "מחק לצמיתות"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

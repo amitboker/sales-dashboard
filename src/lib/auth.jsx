@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 const AuthContext = createContext(null);
 
-const ADMIN_EMAIL = 'amitbokershud@gmail.com';
+const ADMIN_EMAIL = 'amitbooker2@gmail.com';
 
 async function syncProfile(authUser) {
   if (!supabase || !authUser) return null;
@@ -15,6 +15,10 @@ async function syncProfile(authUser) {
     .single();
 
   if (existing) {
+    // Deleted user — return profile as-is so route guards can block access
+    if (existing.deletedAt) {
+      return existing;
+    }
     const now = new Date().toISOString();
     await supabase
       .from('profiles')

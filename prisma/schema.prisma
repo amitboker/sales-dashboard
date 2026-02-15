@@ -116,6 +116,7 @@ model Profile {
   isActive            Boolean   @default(true)
   onboardingCompleted Boolean   @default(false)
   onboardingData      Json?
+  deletedAt           DateTime?
   lastSeen            DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt

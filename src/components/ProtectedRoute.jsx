@@ -3,9 +3,10 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading, session, profile, profileLoading } = useAuth();
+  const { user, loading, session, profile, profileLoading, signOut } = useAuth();
   const isDemoMode = !!localStorage.getItem('demo_first_name');
   const [timedOut, setTimedOut] = useState(false);
+  const [deletedKick, setDeletedKick] = useState(false);
 
   // Fallback: if loading takes more than 8 s, stop waiting
   useEffect(() => {
@@ -13,6 +14,18 @@ export default function ProtectedRoute({ children }) {
     const t = setTimeout(() => setTimedOut(true), 8000);
     return () => clearTimeout(t);
   }, [loading, profileLoading]);
+
+  // Kick deleted users — sign them out
+  useEffect(() => {
+    if (profile?.deletedAt && !deletedKick) {
+      setDeletedKick(true);
+      signOut().catch(() => {});
+    }
+  }, [profile, deletedKick, signOut]);
+
+  if (deletedKick) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Still loading auth session
   if (loading && !timedOut) {
