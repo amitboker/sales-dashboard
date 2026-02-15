@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
@@ -44,6 +44,12 @@ export default function AdminApp() {
   })();
 
   usePageTracking("/admin");
+  const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [activePage]);
 
   const handleLogout = async () => {
     try { await signOut(); } catch (_) {}
@@ -56,7 +62,7 @@ export default function AdminApp() {
   return (
     <div className="admin-wrapper">
       <div className="app">
-        <main className="content">
+        <main className="content" ref={contentRef}>
           <TopBar
             profileName={profileName}
             profileRole="אדמין"

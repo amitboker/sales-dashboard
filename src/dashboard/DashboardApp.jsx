@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
@@ -63,6 +63,13 @@ export default function DashboardApp() {
   const [profileRole] = useState("מנהל");
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const contentRef = useRef(null);
+
+  // Reset scroll to top before paint on every tab change
+  useLayoutEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [activePage]);
 
   const handleLogout = async () => {
     try {
@@ -78,7 +85,7 @@ export default function DashboardApp() {
   return (
     <div className="dashboard-wrapper">
       <div className="app">
-        <main className="content">
+        <main className="content" ref={contentRef}>
           <TopBar
             profileName={profileName}
             profileRole={profileRole}

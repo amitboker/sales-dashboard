@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import LoginPage from './pages/LoginPage';
@@ -12,8 +13,20 @@ import AdminRoute from './components/AdminRoute';
 import PricingPage from './pages/PricingPage';
 import AuthCallback from './pages/AuthCallback';
 
+// Disable browser scroll restoration globally — we handle scroll ourselves
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 function App() {
   const location = useLocation();
+
+  // Global scroll reset on route changes (login → dashboard, etc.)
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    const content = document.querySelector('.content');
+    if (content) content.scrollTop = 0;
+  }, [location.pathname]);
 
   return (
     <AnimatePresence mode="wait">
