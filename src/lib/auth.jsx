@@ -15,10 +15,6 @@ async function syncProfile(authUser) {
     .single();
 
   if (existing) {
-    // Deleted user — return profile as-is so route guards can block access
-    if (existing.deletedAt) {
-      return existing;
-    }
     const now = new Date().toISOString();
     await supabase
       .from('profiles')

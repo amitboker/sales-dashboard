@@ -50,38 +50,28 @@ export default function AdminUsers() {
     });
   }
 
-  // ── Delete user (soft delete + analytics cleanup) ──
+  // ── Permanently delete user ──
   async function deleteUser() {
     if (!supabase || !deleteTarget) return;
     setDeleting(true);
     setDeleteError("");
 
     try {
-      const now = new Date().toISOString();
-
-      // 1. Soft-delete profile: mark as deleted + inactive
-      const { error: profileErr } = await supabase
-        .from("profiles")
-        .update({ deletedAt: now, isActive: false, updatedAt: now })
-        .eq("id", deleteTarget.id);
-      if (profileErr) throw profileErr;
-
-      // 2. Delete analytics events for this user
+      // 1. Delete analytics events for this user
       await supabase
         .from("analytics_events")
         .delete()
         .eq("userId", deleteTarget.authId);
 
+      // 2. Hard-delete the profile row — permanent, no recovery
+      const { error: profileErr } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", deleteTarget.id);
+      if (profileErr) throw profileErr;
+
       // 3. Remove from local state
       setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-
-      trackEvent("user_deleted", {
-        page: "/admin/users",
-        feature: "user_management",
-        userId: user?.id,
-        targetUserId: deleteTarget.authId,
-        targetEmail: deleteTarget.email,
-      });
 
       setDeleteTarget(null);
       setDeleteConfirm("");
@@ -110,7 +100,7 @@ export default function AdminUsers() {
   }
 
   const filtered = useMemo(() => {
-    let list = users.filter((u) => !u.deletedAt); // hide deleted users
+    let list = users;
     if (filter === "active") list = list.filter((u) => u.isActive);
     if (filter === "inactive") list = list.filter((u) => !u.isActive);
     if (filter === "admin") list = list.filter((u) => u.isAdmin);
@@ -126,12 +116,11 @@ export default function AdminUsers() {
     return list;
   }, [users, search, filter]);
 
-  const activeProfiles = users.filter((u) => !u.deletedAt);
   const now = new Date();
   const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const totalUsers = activeProfiles.length;
-  const activeUsers = activeProfiles.filter((u) => u.isActive).length;
-  const newThisMonth = activeProfiles.filter((u) => u.createdAt >= thisMonth).length;
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.isActive).length;
+  const newThisMonth = users.filter((u) => u.createdAt >= thisMonth).length;
   const inactiveUsers = totalUsers - activeUsers;
 
   function formatDate(dateStr) {
@@ -247,7 +236,7 @@ export default function AdminUsers() {
                         className="admin-action-btn delete"
                         onClick={() => openDeleteModal(u)}
                         disabled={isSelf(u)}
-                        title={isSelf(u) ? "לא ניתן למחוק את עצמך" : "מחק משתמש"}
+                        title={isSelf(u) ? "לא ניתן למחוק את עצמך" : "מחק משתמש לצמיתות"}
                         type="button"
                       >
                         מחק
@@ -266,10 +255,10 @@ export default function AdminUsers() {
         <div className="admin-modal-overlay" onClick={closeDeleteModal}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal__icon">⚠️</div>
-            <h3 className="admin-modal__title">מחיקת משתמש</h3>
+            <h3 className="admin-modal__title">מחיקה לצמיתות</h3>
             <p className="admin-modal__desc">
-              פעולה זו <strong>בלתי הפיכה</strong>. המשתמש לא יוכל להתחבר יותר
-              וכל הנתונים שלו יימחקו.
+              פעולה זו <strong>בלתי הפיכה</strong>. המשתמש, כל הנתונים שלו ופרטי החשבון
+              יימחקו לצמיתות מהמערכת. אם יירשם שוב, הוא יתחיל כמשתמש חדש לגמרי.
             </p>
             <div className="admin-modal__user-info">
               <span>{displayName(deleteTarget)}</span>
