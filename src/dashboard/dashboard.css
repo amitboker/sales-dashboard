@@ -134,14 +134,13 @@
 }
 
 .brand-title {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--color-text);
-}
-
-.brand-subtitle {
-  font-size: 11px;
-  color: var(--color-muted);
+  font-family: "Liebling", sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.6px;
+  color: #000;
+  direction: ltr;
 }
 
 /* ===== NAV ===== */

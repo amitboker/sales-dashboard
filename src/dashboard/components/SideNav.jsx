@@ -27,10 +27,9 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
         {collapsed ? "›" : "‹"}
       </button>
       <div className="brand">
-        <img src={logo} alt="מוקד בסקייל" className="brand-logo" />
+        <img src={logo} alt="Clario" className="brand-logo" />
         <div className="brand-info">
-          <div className="brand-title">מוקד בסקייל</div>
-          <div className="brand-subtitle">דאשבורד ביצועים</div>
+          <div className="brand-title">Clario</div>
         </div>
       </div>
 

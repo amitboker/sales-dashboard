@@ -92,9 +92,10 @@ body {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* scroll-behavior: smooth removed from html — it forced visible
+   scroll animation on every programmatic scrollTo(), including
+   tab/page switches. Smooth scrolling for in-page anchors is
+   handled per-element where needed. */
 
 a {
   text-decoration: none;

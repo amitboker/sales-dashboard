@@ -5,13 +5,12 @@ export default function DashboardPageWrapper({ routeKey, children }) {
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    // Reset both window and .content scroll — window is the actual scroller
+    // since .content has no fixed height and grows with content
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     const container = document.querySelector(".content");
-    if (container) {
-      container.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? "auto" : "smooth" });
-    } else {
-      window.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? "auto" : "smooth" });
-    }
-  }, [routeKey, reduceMotion]);
+    if (container) container.scrollTop = 0;
+  }, [routeKey]);
 
   const transition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: "easeOut" };
   const initial = reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 };
