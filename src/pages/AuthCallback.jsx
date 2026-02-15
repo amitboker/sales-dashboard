@@ -6,7 +6,8 @@ import { supabase } from '../lib/supabase';
  * OAuth callback handler.
  * Supabase redirects here with hash params (#access_token=...).
  * The Supabase JS client auto-detects the hash and sets the session.
- * We just wait for the session to be established, then navigate to /dashboard.
+ * We navigate to /dashboard — ProtectedRoute will redirect to /onboarding
+ * if the user hasn't completed onboarding yet.
  */
 export default function AuthCallback() {
   const navigate = useNavigate();

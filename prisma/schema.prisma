@@ -106,17 +106,19 @@ model SyncLog {
 }
 
 model Profile {
-  id        String    @id @default(uuid())
-  authId    String    @unique
-  email     String    @unique
-  firstName String?
-  lastName  String?
-  avatarUrl String?
-  isAdmin   Boolean   @default(false)
-  isActive  Boolean   @default(true)
-  lastSeen  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                  String    @id @default(uuid())
+  authId              String    @unique
+  email               String    @unique
+  firstName           String?
+  lastName            String?
+  avatarUrl           String?
+  isAdmin             Boolean   @default(false)
+  isActive            Boolean   @default(true)
+  onboardingCompleted Boolean   @default(false)
+  onboardingData      Json?
+  lastSeen            DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@index([authId])
   @@index([email])

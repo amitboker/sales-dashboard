@@ -1,56 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Step1Company from './onboarding/Step1Company';
-import Step2FocusAreas from './onboarding/Step2FocusAreas';
-import Step3FunnelTemplate from './onboarding/Step3FunnelTemplate';
-import Step4Contact from './onboarding/Step4Contact';
+import { useAuth } from '../lib/auth';
+import Step1Business from './onboarding/Step1Business';
+import Step2Team from './onboarding/Step2Team';
+import Step3CRM from './onboarding/Step3CRM';
+import Step4Connect from './onboarding/Step4Connect';
+import Step5Summary from './onboarding/Step5Summary';
 import './OnboardingPage.css';
+
+const TOTAL_STEPS = 5;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { completeOnboarding } = useAuth();
   const [step, setStep] = useState(1);
-  const [clientId, setClientId] = useState(null);
-  const [clientData, setClientData] = useState({});
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem('onboarding_client_id');
-    if (stored) {
-      setClientId(stored);
-    } else {
-      navigate('/login');
-    }
-  }, [navigate]);
+  const [formData, setFormData] = useState({
+    // Step 1 — Business basics
+    businessName: '',
+    industry: '',
+    country: 'ישראל',
+    timezone: '',
+    // Step 2 — Team & sales
+    repCount: '',
+    hasSalesManager: null,
+    salesChannel: '',
+    // Step 3 — CRM selection
+    crm: '',
+    crmOther: '',
+    // Step 4 — CRM connect
+    crmConnected: false,
+  });
 
   const goNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < TOTAL_STEPS) setStep(step + 1);
   };
 
   const goBack = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleComplete = () => {
-    sessionStorage.removeItem('onboarding_client_id');
-    navigate('/dashboard');
+  const updateData = (partial) => {
+    setFormData((prev) => ({ ...prev, ...partial }));
   };
 
-  const updateClientData = (data) => {
-    setClientData((prev) => ({ ...prev, ...data }));
+  const handleComplete = async () => {
+    await completeOnboarding(formData);
+    navigate('/dashboard', { replace: true });
   };
 
-  if (!clientId) return null;
-
-  const stepProps = { clientId, clientData, updateClientData, goNext, goBack };
-  const totalSteps = 4;
+  const stepProps = { data: formData, onChange: updateData, goNext, goBack };
 
   return (
     <div className="onboarding">
       <div className="onboarding__header">
-        <h2 className="onboarding__logo">מוקד בסקייל</h2>
+        <h2 className="onboarding__logo">Clario</h2>
       </div>
 
+      {/* Progress dots */}
       <div className="ob-dots">
-        {Array.from({ length: totalSteps }, (_, index) => {
+        {Array.from({ length: TOTAL_STEPS }, (_, index) => {
           const dotStep = index + 1;
           const className = dotStep === step
             ? 'ob-dot ob-dot--active'
@@ -62,10 +70,11 @@ export default function OnboardingPage() {
       </div>
 
       <div className="onboarding__content">
-        {step === 1 && <Step1Company {...stepProps} />}
-        {step === 2 && <Step2FocusAreas {...stepProps} />}
-        {step === 3 && <Step3FunnelTemplate {...stepProps} />}
-        {step === 4 && <Step4Contact {...stepProps} onComplete={handleComplete} />}
+        {step === 1 && <Step1Business {...stepProps} />}
+        {step === 2 && <Step2Team {...stepProps} />}
+        {step === 3 && <Step3CRM {...stepProps} />}
+        {step === 4 && <Step4Connect {...stepProps} />}
+        {step === 5 && <Step5Summary data={formData} goBack={goBack} onComplete={handleComplete} />}
       </div>
     </div>
   );

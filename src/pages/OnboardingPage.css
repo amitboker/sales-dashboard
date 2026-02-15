@@ -601,4 +601,229 @@
     font-size: 0.82rem;
     padding: 0.5rem 0.9rem;
   }
+
+  .ob-crm-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ob-connect-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .ob-summary__section {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}
+
+/* ══════════════════════════════
+   CRM Selection Grid (Step 3)
+   ══════════════════════════════ */
+.ob-crm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.ob-crm-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.4rem 1rem;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.ob-crm-card:hover {
+  border-color: #ccc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ob-crm-card--selected {
+  border-color: #DAFD68;
+  background: #fdfff5;
+  box-shadow: 0 0 0 3px rgba(218, 253, 104, 0.15);
+}
+
+.ob-crm-card__icon {
+  font-size: 1.6rem;
+}
+
+.ob-crm-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ob-crm-card--selected .ob-crm-card__name {
+  color: #000;
+}
+
+.ob-crm-card__check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #DAFD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ob-crm-card__check svg {
+  width: 12px;
+  height: 12px;
+  stroke: #000;
+  stroke-width: 3;
+  fill: none;
+}
+
+/* ══════════════════════════════
+   CRM Connect Card (Step 4)
+   ══════════════════════════════ */
+.ob-connect-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  background: #fafafa;
+  margin-bottom: 1rem;
+}
+
+.ob-connect-card__icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.ob-connect-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ob-connect-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 0.15rem;
+}
+
+.ob-connect-card__desc {
+  font-size: 0.82rem;
+  color: #828282;
+}
+
+.ob-connect-btn {
+  padding: 0.55rem 1.2rem;
+  border-radius: 100px;
+  border: none;
+  background: #DAFD68;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ob-connect-btn:hover {
+  background: #c8ec55;
+  box-shadow: 0 2px 8px rgba(218, 253, 104, 0.4);
+}
+
+.ob-connect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ob-connect-badge--success {
+  background: #f0fce4;
+  color: #3d6b1e;
+  border: 1px solid #DAFD68;
+}
+
+.ob-connect-badge--loading {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.ob-connect-badge--soon {
+  background: #fff8e1;
+  color: #b38600;
+  border: 1px solid #ffe082;
+}
+
+.ob-spinner--small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: rgba(0, 0, 0, 0.15);
+  border-top-color: #666;
+}
+
+.ob-connect-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: #f9f9f9;
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+
+/* ══════════════════════════════
+   Summary (Step 5)
+   ══════════════════════════════ */
+.ob-summary {
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.ob-summary__section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0;
+}
+
+.ob-summary__label {
+  font-size: 0.85rem;
+  color: #828282;
+  font-weight: 500;
+}
+
+.ob-summary__value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.ob-summary__divider {
+  height: 1px;
+  background: #eee;
+  margin: 0.4rem 0;
 }

@@ -55,6 +55,7 @@ async function syncProfile(authUser) {
     lastName,
     isAdmin: count === 0,
     isActive: true,
+    onboardingCompleted: false,
     lastSeen: now,
     createdAt: now,
     updatedAt: now,
@@ -84,10 +85,12 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
+      setProfileLoading(false);
       return;
     }
 
@@ -97,6 +100,7 @@ export function AuthProvider({ children }) {
         if (v) console.warn('[auth] loading safety timeout — forcing ready');
         return false;
       });
+      setProfileLoading(false);
     }, 6000);
 
     supabase.auth.getSession()
@@ -104,16 +108,21 @@ export function AuthProvider({ children }) {
         setSession(s);
         setUser(s?.user ?? null);
         setLoading(false);
-        // Sync profile in background — don't block loading
         if (s?.user) {
           syncProfile(s.user)
-            .then((p) => setProfile(p))
-            .catch((err) => console.warn('[auth] syncProfile failed', err?.message || err));
+            .then((p) => { setProfile(p); setProfileLoading(false); })
+            .catch((err) => {
+              console.warn('[auth] syncProfile failed', err?.message || err);
+              setProfileLoading(false);
+            });
+        } else {
+          setProfileLoading(false);
         }
       })
       .catch((err) => {
         console.warn('[auth] getSession failed', err?.message || err);
         setLoading(false);
+        setProfileLoading(false);
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -122,11 +131,16 @@ export function AuthProvider({ children }) {
         setUser(s?.user ?? null);
         setLoading(false);
         if (s?.user) {
+          setProfileLoading(true);
           syncProfile(s.user)
-            .then((p) => setProfile(p))
-            .catch((err) => console.warn('[auth] syncProfile failed (state change)', err?.message || err));
+            .then((p) => { setProfile(p); setProfileLoading(false); })
+            .catch((err) => {
+              console.warn('[auth] syncProfile failed (state change)', err?.message || err);
+              setProfileLoading(false);
+            });
         } else {
           setProfile(null);
+          setProfileLoading(false);
         }
       }
     );
@@ -150,24 +164,27 @@ export function AuthProvider({ children }) {
       console.error('[auth] Supabase not configured - check VITE_SUPABASE_ANON_KEY');
       throw new Error('Supabase not configured');
     }
-    
-    console.log('[auth] Calling signInWithPassword...');
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
+
     if (error) {
       console.error('[auth] Sign in error:', error);
       throw error;
     }
-    
+
     // Immediately update state — don't block on profile sync
     if (data.user) {
       setSession(data.session);
       setUser(data.user);
       setLoading(false);
-      // Sync profile in background
+      // Sync profile — track loading
+      setProfileLoading(true);
       syncProfile(data.user)
-        .then((p) => setProfile(p))
-        .catch((err) => console.warn('[auth] syncProfile failed after signIn', err?.message || err));
+        .then((p) => { setProfile(p); setProfileLoading(false); })
+        .catch((err) => {
+          console.warn('[auth] syncProfile failed after signIn', err?.message || err);
+          setProfileLoading(false);
+        });
     }
 
     return data;
@@ -192,16 +209,29 @@ export function AuthProvider({ children }) {
     setProfile(null);
   }
 
+  async function completeOnboarding(onboardingData) {
+    if (!supabase || !profile) throw new Error('No profile');
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ onboardingCompleted: true, onboardingData, updatedAt: now })
+      .eq('id', profile.id);
+    if (error) throw error;
+    setProfile((prev) => ({ ...prev, onboardingCompleted: true, onboardingData }));
+  }
+
   const value = {
     user,
     session,
     profile,
+    profileLoading,
     isAdmin: !!user && user.email === ADMIN_EMAIL,
     loading,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
+    completeOnboarding,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

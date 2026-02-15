@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
-import { createOnboardingClient } from '../lib/onboarding-api';
 import { trackEvent } from '../lib/tracking';
 import './SignUpPage.css';
 
@@ -25,13 +24,11 @@ function SignUpPage() {
     try {
       const result = await signUp(email, password);
       trackEvent('signup', { page: '/signup', userId: result.user?.id });
-      localStorage.setItem('demo_first_name', `${firstName} ${lastName}`.trim());
-      const client = await createOnboardingClient({ email });
-      sessionStorage.setItem('onboarding_client_id', client.id);
       if (result.needsConfirmation) {
         setConfirmationSent(true);
       } else {
-        navigate('/onboarding');
+        // ProtectedRoute will redirect to /onboarding for new users
+        navigate('/dashboard');
       }
     } catch (err) {
       const msg = err.message || '';

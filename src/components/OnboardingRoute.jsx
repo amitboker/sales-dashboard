@@ -2,19 +2,25 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
-export default function ProtectedRoute({ children }) {
-  const { user, loading, session, profile, profileLoading } = useAuth();
+/**
+ * Guard for the /onboarding route:
+ * - Not authenticated → /login
+ * - Authenticated + onboardingCompleted → /dashboard
+ * - Authenticated + not completed → show onboarding
+ * - Demo mode → /dashboard (skip onboarding)
+ */
+export default function OnboardingRoute({ children }) {
+  const { user, session, loading, profile, profileLoading } = useAuth();
   const isDemoMode = !!localStorage.getItem('demo_first_name');
   const [timedOut, setTimedOut] = useState(false);
 
-  // Fallback: if loading takes more than 8 s, stop waiting
   useEffect(() => {
     if (!loading && !profileLoading) return;
     const t = setTimeout(() => setTimedOut(true), 8000);
     return () => clearTimeout(t);
   }, [loading, profileLoading]);
 
-  // Still loading auth session
+  // Still loading auth
   if (loading && !timedOut) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -23,18 +29,18 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // Not authenticated and not demo → login
-  if (!user && !isDemoMode && !session) {
+  // Not authenticated and not demo
+  if (!user && !session && !isDemoMode) {
     return <Navigate to="/login" replace />;
   }
 
-  // Demo users skip onboarding check
+  // Demo users skip onboarding
   if (isDemoMode && !user && !session) {
-    return children;
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // Authenticated user: wait for profile to determine onboarding status
-  if ((user || session) && profileLoading && !timedOut) {
+  // Wait for profile to load for authenticated users
+  if (profileLoading && !timedOut) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div className="login__btn-spinner" />
@@ -42,9 +48,9 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // Authenticated but has NOT completed onboarding → redirect to /onboarding
-  if ((user || session) && profile && !profile.onboardingCompleted) {
-    return <Navigate to="/onboarding" replace />;
+  // Already completed onboarding → go to dashboard
+  if (profile?.onboardingCompleted) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

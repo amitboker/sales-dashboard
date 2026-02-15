@@ -7,6 +7,7 @@ import AdminApp from './admin/AdminApp';
 import OnboardingPage from './pages/OnboardingPage';
 import PageTransition from './components/PageTransition';
 import ProtectedRoute from './components/ProtectedRoute';
+import OnboardingRoute from './components/OnboardingRoute';
 import AdminRoute from './components/AdminRoute';
 import PricingPage from './pages/PricingPage';
 import AuthCallback from './pages/AuthCallback';
@@ -20,7 +21,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><SignUpPage /></PageTransition>} />
-        <Route path="/onboarding" element={<PageTransition><ProtectedRoute><OnboardingPage /></ProtectedRoute></PageTransition>} />
+        <Route path="/onboarding" element={<PageTransition><OnboardingRoute><OnboardingPage /></OnboardingRoute></PageTransition>} />
         <Route path="/dashboard" element={<PageTransition variant="scale"><ProtectedRoute><DashboardApp /></ProtectedRoute></PageTransition>} />
         <Route path="/admin" element={<PageTransition variant="scale"><AdminRoute><AdminApp /></AdminRoute></PageTransition>} />
         <Route path="/auth/callback" element={<AuthCallback />} />
