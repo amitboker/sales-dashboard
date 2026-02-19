@@ -62,6 +62,10 @@ function LoginPage() {
     try {
       const result = await signIn(email, password);
       trackEvent('login', { page: '/login', userId: result.user?.id });
+      // Navigate to /dashboard — ProtectedRoute will redirect to onboarding if needed
+      console.log('[NAV] login → /dashboard (ProtectedRoute will gate)', {
+        meta: result.user?.user_metadata,
+      });
       navigate('/dashboard');
     } catch (err) {
       const msg = err.message || '';

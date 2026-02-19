@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const ADMIN_EMAIL = 'amitbooker2@gmail.com';
 
@@ -56,6 +56,7 @@ async function syncProfile(authUser) {
     isAdmin: count === 0,
     isActive: true,
     onboardingCompleted: false,
+    onboardingStep: 'name',
     lastSeen: now,
     createdAt: now,
     updatedAt: now,
@@ -127,6 +128,10 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, s) => {
+        console.log('[auth] onAuthStateChange:', _event, {
+          user: !!s?.user,
+          meta: s?.user?.user_metadata,
+        });
         setSession(s);
         setUser(s?.user ?? null);
         setLoading(false);
@@ -155,8 +160,34 @@ export function AuthProvider({ children }) {
     if (!supabase) throw new Error('Supabase not configured');
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
-    const needsConfirmation = data.user && !data.session;
-    return { ...data, needsConfirmation };
+
+    console.log('[auth] signUp response:', {
+      user: !!data.user,
+      session: !!data.session,
+      userId: data.user?.id,
+      emailConfirmed: data.user?.email_confirmed_at,
+    });
+
+    // If Supabase returned a session, update state immediately
+    if (data.session) {
+      console.log('[auth] Session received on signup — immediate access');
+      setSession(data.session);
+      setUser(data.user);
+      setLoading(false);
+      setProfileLoading(true);
+      syncProfile(data.user)
+        .then((p) => { setProfile(p); setProfileLoading(false); })
+        .catch((err) => {
+          console.warn('[auth] syncProfile failed after signUp', err?.message || err);
+          setProfileLoading(false);
+        });
+      return { ok: true, session: data.session, requiresEmailConfirmation: false };
+    }
+
+    // No session — email confirmation is pending. Do NOT attempt signIn fallback
+    // to avoid logging in an existing user with stale onboarding metadata.
+    console.log('[auth] No session on signup — email confirmation required');
+    return { ok: true, session: null, requiresEmailConfirmation: true };
   }
 
   async function signIn(email, password) {
@@ -209,15 +240,34 @@ export function AuthProvider({ children }) {
     setProfile(null);
   }
 
-  async function completeOnboarding(onboardingData) {
-    if (!supabase || !profile) throw new Error('No profile');
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from('profiles')
-      .update({ onboardingCompleted: true, onboardingData, updatedAt: now })
-      .eq('id', profile.id);
+  async function updateUserMeta(data) {
+    if (!supabase) throw new Error('Supabase not configured');
+    console.log('[auth] updateUserMeta:', data);
+    const { data: result, error } = await supabase.auth.updateUser({ data });
     if (error) throw error;
-    setProfile((prev) => ({ ...prev, onboardingCompleted: true, onboardingData }));
+    // Update local user state immediately so route guards see the new metadata
+    if (result.user) {
+      setUser(result.user);
+    }
+    return result;
+  }
+
+  async function completeOnboarding(onboardingData) {
+    // Update user_metadata (instant, used by route guards)
+    await updateUserMeta({ onboarding_completed: true });
+
+    // Also update profiles table (for admin/analytics)
+    if (supabase && profile) {
+      const now = new Date().toISOString();
+      await supabase
+        .from('profiles')
+        .update({ onboardingCompleted: true, onboardingData, updatedAt: now })
+        .eq('id', profile.id)
+        .then(({ error }) => {
+          if (error) console.warn('[auth] profile update failed:', error.message);
+          else setProfile((prev) => ({ ...prev, onboardingCompleted: true, onboardingData }));
+        });
+    }
   }
 
   const value = {
@@ -231,6 +281,7 @@ export function AuthProvider({ children }) {
     signIn,
     signInWithGoogle,
     signOut,
+    updateUserMeta,
     completeOnboarding,
   };
 

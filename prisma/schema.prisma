@@ -115,6 +115,7 @@ model Profile {
   isAdmin             Boolean   @default(false)
   isActive            Boolean   @default(true)
   onboardingCompleted Boolean   @default(false)
+  onboardingStep      String?
   onboardingData      Json?
   deletedAt           DateTime?
   lastSeen            DateTime?

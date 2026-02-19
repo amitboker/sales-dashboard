@@ -12,6 +12,9 @@ import OnboardingRoute from './components/OnboardingRoute';
 import AdminRoute from './components/AdminRoute';
 import PricingPage from './pages/PricingPage';
 import AuthCallback from './pages/AuthCallback';
+import DevOnboardingPreview from './pages/DevOnboardingPreview';
+import OnboardingName from './pages/OnboardingName';
+import OnboardingBusiness from './pages/OnboardingBusiness';
 
 // Disable browser scroll restoration globally — we handle scroll ourselves
 if ('scrollRestoration' in history) {
@@ -39,6 +42,12 @@ function App() {
         <Route path="/admin" element={<PageTransition variant="scale"><AdminRoute><AdminApp /></AdminRoute></PageTransition>} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/pricing" element={<PageTransition><PricingPage /></PageTransition>} />
+        <Route path="/onboarding/name" element={<PageTransition><OnboardingRoute><OnboardingName /></OnboardingRoute></PageTransition>} />
+        <Route path="/onboarding/business" element={<PageTransition><OnboardingRoute><OnboardingBusiness /></OnboardingRoute></PageTransition>} />
+        <Route path="/onboarding/next-step" element={<PageTransition><OnboardingRoute><div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#faf9f6', color: '#8b8b8b', fontFamily: '"Liebling","Heebo",system-ui,sans-serif', fontSize: 17, direction: 'rtl' }}>שלב הבא — בקרוב</div></OnboardingRoute></PageTransition>} />
+        <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
+        <Route path="/dev/onboarding-name" element={<OnboardingName />} />
+        <Route path="/dev/onboarding-business" element={<OnboardingBusiness />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>
