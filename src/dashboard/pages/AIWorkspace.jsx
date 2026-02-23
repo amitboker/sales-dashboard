@@ -8,6 +8,7 @@ import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
+import DottedBackground from "../../components/DottedBackground";
 
 export default function AIWorkspace() {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ export default function AIWorkspace() {
   const [prefillValue, setPrefillValue] = useState("");
   const abortRef = useRef(null);
   const chatEndRef = useRef(null);
+  const messagesRef = useRef(null);
+  const isNearBottomRef = useRef(true);
 
   const hasChat = messages.length > 0;
 
@@ -64,11 +67,24 @@ export default function AIWorkspace() {
     setTimeout(() => setIsRefreshing(false), 400);
   }, []);
 
+  /* ── Smart scroll: instant during streaming, smooth for new messages ── */
+  const handleMessagesScroll = useCallback(() => {
+    const el = messagesRef.current;
+    if (!el) return;
+    isNearBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  }, []);
+
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (!isNearBottomRef.current) return;
+    const el = messagesRef.current;
+    if (!el) return;
+    if (isStreaming) {
+      requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+    } else {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, isStreaming]);
 
   const handleSend = useCallback(
     async (text) => {
@@ -154,8 +170,10 @@ export default function AIWorkspace() {
   if (!hasChat) {
     return (
       <div
+        className="ai-workspace-container"
         style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
       >
+        <DottedBackground />
         <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
           {/* Plan badge — subtle green pill */}
           <div
@@ -348,9 +366,10 @@ export default function AIWorkspace() {
   /* ── Conversation state ── */
   return (
     <div
-      className="flex flex-col"
+      className="ai-workspace-container flex flex-col"
       style={{ minHeight: "calc(100vh - 140px)" }}
     >
+      <DottedBackground />
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -366,61 +385,78 @@ export default function AIWorkspace() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 pb-6">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-3 ${
-              msg.role === "user" ? "flex-row-reverse" : ""
-            }`}
-          >
-            {/* Avatar */}
-            <div
-              className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={
-                msg.role === "user"
-                  ? { backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A" }
-                  : { backgroundColor: "var(--color-surface-muted, #f5f5f5)", border: "1px solid var(--color-border, #e5e5e5)", color: "var(--color-muted, #828282)" }
-              }
-            >
-              {msg.role === "user" ? displayName.slice(0, 1) : "AI"}
-            </div>
+      <div
+        ref={messagesRef}
+        onScroll={handleMessagesScroll}
+        className="flex-1 overflow-y-auto pb-8"
+      >
+        {messages.map((msg, i) => {
+          const isGrouped = i > 0 && messages[i - 1].role === msg.role;
+          const isLast = i === messages.length - 1;
+          const isActiveStream = isLast && msg.role === "assistant" && isStreaming;
 
-            {/* Bubble */}
+          return (
             <div
-              className="max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
-              dir="auto"
-              style={
-                msg.role === "user"
-                  ? {
-                      backgroundColor: "var(--color-primary-light, #f8fde8)",
-                      border: "1px solid var(--color-primary-soft, #f3f9d6)",
-                      color: "var(--color-text, #000)",
-                    }
-                  : {
-                      backgroundColor: "var(--color-surface, #fff)",
-                      border: "1px solid var(--color-border, #e5e5e5)",
-                      color: "var(--color-text, #000)",
-                    }
-              }
+              key={i}
+              className={`chat-msg flex gap-3.5 ${msg.role === "assistant" ? "flex-row-reverse" : ""}`}
+              style={{ marginTop: i === 0 ? 0 : isGrouped ? 6 : 20 }}
             >
-              {msg.role === "assistant" && !msg.content && isStreaming ? (
-                <span className="flex gap-1 py-1">
-                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:0ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
-                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:150ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
-                  <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:300ms]" style={{ backgroundColor: "var(--color-primary, #DAFD68)" }} />
-                </span>
+              {/* Avatar — hidden for grouped continuation */}
+              {!isGrouped ? (
+                msg.role === "user" ? (
+                  <div
+                    className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A" }}
+                  >
+                    {displayName.slice(0, 1)}
+                  </div>
+                ) : (
+                  <img
+                    src="/clario-symbol.png"
+                    alt="Clario"
+                    className="flex-shrink-0 h-8 w-8 rounded-full object-contain"
+                  />
+                )
               ) : (
-                msg.content.split("\n").map((line, j) => (
-                  <span key={j}>
-                    {line}
-                    {j < msg.content.split("\n").length - 1 && <br />}
-                  </span>
-                ))
+                <div className="flex-shrink-0 w-8" />
               )}
+
+              {/* Bubble */}
+              <div
+                className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"
+                }`}
+                dir="auto"
+                style={
+                  msg.role === "user"
+                    ? {
+                        backgroundColor: "var(--color-primary-light, #f8fde8)",
+                        border: "1px solid var(--color-primary-soft, #f3f9d6)",
+                        color: "var(--color-text, #000)",
+                      }
+                    : {
+                        backgroundColor: "var(--color-surface, #fff)",
+                        border: "1px solid var(--color-border, #e5e5e5)",
+                        color: "var(--color-text, #000)",
+                      }
+                }
+              >
+                {isActiveStream && !msg.content ? (
+                  <div className="typing-dots">
+                    <span /><span /><span />
+                  </div>
+                ) : (
+                  <span
+                    className={isActiveStream && msg.content ? "streaming-cursor" : ""}
+                    style={{ whiteSpace: "pre-wrap" }}
+                  >
+                    {msg.content}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={chatEndRef} />
       </div>
 
@@ -431,8 +467,8 @@ export default function AIWorkspace() {
         </div>
       )}
 
-      {/* Chat input (sticky bottom) */}
-      <div className="pt-2 pb-4">
+      {/* Chat input — elevated with fade separator */}
+      <div className="chat-input-elevated pt-2 pb-4">
         <ChatInput
           activeMode={activeMode}
           onClearMode={() => setActiveMode(null)}

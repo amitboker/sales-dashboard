@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "./Icon.jsx";
-import logo from "../../assets/images/logo.png";
+import logo from "../../assets/icons/clario-symbol.png";
 
 const navItems = [
   { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },

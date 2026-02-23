@@ -1,4 +1,4 @@
-import clarioSymbol from '../assets/icons/clario symbol.png';
+import clarioSymbol from '../assets/icons/clario-symbol.png';
 import '../pages/SignUpPage.css';
 
 /**

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../lib/tracking';
-import clarioSymbol from '../assets/icons/clario symbol.png';
+import clarioSymbol from '../assets/icons/clario-symbol.png';
 import './SignUpPage.css';
 
 const GoogleIcon = () => (
