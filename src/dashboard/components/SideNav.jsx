@@ -18,15 +18,15 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
 
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
-      <button
-        className="sidebar-toggle"
-        onClick={onToggleCollapse}
-        type="button"
-        aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
-      >
-        {collapsed ? "›" : "‹"}
-      </button>
       <div className="brand">
+        <button
+          className="sidebar-toggle"
+          onClick={onToggleCollapse}
+          type="button"
+          aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
+        >
+          {collapsed ? "›" : "‹"}
+        </button>
         <img src={logo} alt="Clario" className="brand-logo" />
         <div className="brand-info">
           <div className="brand-title">Clario</div>

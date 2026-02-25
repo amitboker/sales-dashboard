@@ -83,7 +83,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow: visible;
   direction: rtl;
   color: var(--color-text);
   border-left: 1px solid var(--color-border);
@@ -108,7 +108,7 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 20px;
   padding: 0 8px 20px;
   direction: ltr;
@@ -2583,19 +2583,7 @@ body.funnel-editor-open .funnel-editor-panel {
 
 /* --- Page enter --- */
 .page-enter {
-  animation: pageIn 0.4s ease-out both;
   margin-top: -14px;
-}
-
-@keyframes pageIn {
-  from {
-    opacity: 0;
-    transform: translateX(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 /* --- Fade up entrance --- */
@@ -3486,13 +3474,9 @@ body.funnel-editor-open .funnel-editor-panel {
    ============================================ */
 
 .sidebar-toggle {
-  position: absolute;
-  top: 32px;
-  left: -14px;
-  transform: translateY(-50%);
-  z-index: 10;
   width: 28px;
   height: 28px;
+  min-width: 28px;
   border-radius: 50%;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -3505,7 +3489,8 @@ body.funnel-editor-open .funnel-editor-panel {
   line-height: 1;
   padding: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: background 0.15s ease, color 0.15s ease, left 300ms ease-in-out, top 300ms ease-in-out;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
