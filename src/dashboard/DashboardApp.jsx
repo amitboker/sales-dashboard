@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
@@ -65,11 +65,11 @@ export default function DashboardApp() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const contentRef = useRef(null);
 
-  // Reset scroll to top before paint on every tab change
-  useLayoutEffect(() => {
+  // Reset scroll between exit and enter animations
+  const handleExitComplete = useCallback(() => {
     if (contentRef.current) contentRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
-  }, [activePage]);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -94,7 +94,7 @@ export default function DashboardApp() {
             onLogout={handleLogout}
             isAdmin={isAdmin || !!localStorage.getItem("demo_first_name")}
           />
-          <DashboardPageWrapper routeKey={activePage}>
+          <DashboardPageWrapper routeKey={activePage} onExitComplete={handleExitComplete}>
             {isSettings ? (
               <ActiveComponent
                 profileName={profileName}
