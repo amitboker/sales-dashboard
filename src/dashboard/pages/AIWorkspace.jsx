@@ -86,10 +86,18 @@ export default function AIWorkspace() {
     }
   }, [messages, isStreaming]);
 
+  const [isThinking, setIsThinking] = useState(false);
+
+  // Scroll to bottom when thinking indicator appears
+  useEffect(() => {
+    if (!isThinking || !isNearBottomRef.current) return;
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [isThinking]);
+
   const handleSend = useCallback(
     async (text) => {
       const trimmed = (typeof text === "string" ? text : "").trim();
-      if (!trimmed || isStreaming) return;
+      if (!trimmed || isStreaming || isThinking) return;
 
       setError("");
       trackEvent("ai_workspace_use", {
@@ -102,17 +110,37 @@ export default function AIWorkspace() {
 
       const history = messages.map(({ role, content }) => ({ role, content }));
 
-      setIsStreaming(true);
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      // Premium "thinking" phase — buffer chunks until min delay passes
+      setIsThinking(true);
+      const thinkStart = Date.now();
+      const MIN_THINK_MS = 900;
 
       const controller = new AbortController();
       abortRef.current = controller;
 
+      // Buffer holds all chunks that arrive before we transition to streaming
+      let buffer = "";
+      let transitioned = false;
+
+      const transitionToStreaming = () => {
+        if (transitioned) return;
+        transitioned = true;
+        setIsThinking(false);
+        setIsStreaming(true);
+        setMessages((prev) => [...prev, { role: "assistant", content: buffer }]);
+      };
+
       try {
-        await sendChatMessage(
+        const streamPromise = sendChatMessage(
           history,
           trimmed,
           (chunk) => {
+            if (!transitioned) {
+              // Still in thinking phase — buffer the chunk
+              buffer += chunk;
+              return;
+            }
+            // Already streaming — append directly
             setMessages((prev) => {
               const updated = [...prev];
               const last = updated[updated.length - 1];
@@ -127,23 +155,49 @@ export default function AIWorkspace() {
           },
           controller.signal
         );
+
+        // Wait for BOTH: minimum thinking time AND first chunk to arrive
+        // The stream runs in parallel, buffering chunks
+        await new Promise((resolve) => {
+          const checkReady = () => {
+            const elapsed = Date.now() - thinkStart;
+            if (elapsed >= MIN_THINK_MS && buffer.length > 0) {
+              resolve();
+            } else {
+              setTimeout(checkReady, 50);
+            }
+          };
+          // Also resolve if stream finishes before min time
+          streamPromise.then(resolve).catch(resolve);
+          checkReady();
+        });
+
+        // Transition: fade out thinking → fade in response
+        transitionToStreaming();
+
+        // Continue streaming remaining chunks
+        await streamPromise;
       } catch (err) {
         if (err.name === "AbortError") return;
         const msg = err.message || "שגיאה בתקשורת עם השרת";
         setError(msg);
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last && last.role === "assistant" && !last.content) {
-            return prev.slice(0, -1);
-          }
-          return prev;
-        });
+        // Clean up empty assistant message if we already transitioned
+        if (transitioned) {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === "assistant" && !last.content) {
+              return prev.slice(0, -1);
+            }
+            return prev;
+          });
+        }
       } finally {
+        setIsThinking(false);
         setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [isStreaming, messages]
+    [isStreaming, isThinking, messages]
   );
 
   const handleSubmit = (payload) => {
@@ -394,19 +448,31 @@ export default function AIWorkspace() {
           const isGrouped = i > 0 && messages[i - 1].role === msg.role;
           const isLast = i === messages.length - 1;
           const isActiveStream = isLast && msg.role === "assistant" && isStreaming;
+          const isUser = msg.role === "user";
 
           return (
             <div
               key={i}
-              className={`chat-msg flex gap-3.5 ${msg.role === "assistant" ? "flex-row-reverse" : ""}`}
-              style={{ marginTop: i === 0 ? 0 : isGrouped ? 6 : 20 }}
+              className="chat-msg"
+              style={{
+                marginTop: i === 0 ? 0 : isGrouped ? 6 : 20,
+                display: "flex",
+                gap: "12px",
+                direction: "rtl",
+                maxWidth: "100%",
+              }}
             >
               {/* Avatar — hidden for grouped continuation */}
               {!isGrouped ? (
-                msg.role === "user" ? (
+                isUser ? (
                   <div
-                    className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A" }}
+                    className="flex-shrink-0"
+                    style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "12px", fontWeight: 700,
+                      backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A",
+                    }}
                   >
                     {displayName.slice(0, 1)}
                   </div>
@@ -414,21 +480,25 @@ export default function AIWorkspace() {
                   <img
                     src="/clario-symbol.png"
                     alt="Clario"
-                    className="flex-shrink-0 h-8 w-8 rounded-full object-contain"
+                    style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "contain", flexShrink: 0 }}
                   />
                 )
               ) : (
-                <div className="flex-shrink-0 w-8" />
+                <div style={{ width: 32, flexShrink: 0 }} />
               )}
 
               {/* Bubble */}
               <div
-                className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"
-                }`}
-                dir="auto"
-                style={
-                  msg.role === "user"
+                className={isUser ? "chat-bubble-user" : "chat-bubble-ai"}
+                dir="rtl"
+                style={{
+                  maxWidth: "75%",
+                  borderRadius: "16px",
+                  padding: "12px 16px",
+                  fontSize: "14px",
+                  lineHeight: "1.65",
+                  textAlign: "right",
+                  ...(isUser
                     ? {
                         backgroundColor: "var(--color-primary-light, #f8fde8)",
                         border: "1px solid var(--color-primary-soft, #f3f9d6)",
@@ -438,8 +508,8 @@ export default function AIWorkspace() {
                         backgroundColor: "var(--color-surface, #fff)",
                         border: "1px solid var(--color-border, #e5e5e5)",
                         color: "var(--color-text, #000)",
-                      }
-                }
+                      }),
+                }}
               >
                 {isActiveStream && !msg.content ? (
                   <div className="typing-dots">
@@ -448,7 +518,7 @@ export default function AIWorkspace() {
                 ) : (
                   <span
                     className={isActiveStream && msg.content ? "streaming-cursor" : ""}
-                    style={{ whiteSpace: "pre-wrap" }}
+                    style={{ whiteSpace: "pre-wrap", unicodeBidi: "plaintext" }}
                   >
                     {msg.content}
                   </span>
@@ -457,6 +527,51 @@ export default function AIWorkspace() {
             </div>
           );
         })}
+        {/* Thinking indicator */}
+        <AnimatePresence>
+          {isThinking && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: -2 }}
+              transition={{
+                enter: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1], delay: 0.08 },
+                exit: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+              }}
+              style={{
+                marginTop: 20,
+                display: "flex",
+                gap: "12px",
+                direction: "rtl",
+              }}
+            >
+              <motion.img
+                src="/clario-symbol.png"
+                alt="Clario"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "contain", flexShrink: 0 }}
+              />
+              <motion.div
+                className="chat-bubble-ai"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{
+                  borderRadius: "16px",
+                  padding: "14px 20px",
+                  backgroundColor: "var(--color-surface, #fff)",
+                  border: "1px solid var(--color-border, #e5e5e5)",
+                }}
+              >
+                <div className="thinking-dots">
+                  <span /><span /><span />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div ref={chatEndRef} />
       </div>
 
