@@ -101,6 +101,8 @@ export default function DashboardApp() {
                 profilePhoto={profilePhoto}
                 onPhotoChange={setProfilePhoto}
               />
+            ) : activePage === "ai" ? (
+              <ActiveComponent profilePhoto={profilePhoto} />
             ) : (
               <ActiveComponent />
             )}

@@ -10,7 +10,7 @@ import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
 import DottedBackground from "../../components/DottedBackground";
 
-export default function AIWorkspace() {
+export default function AIWorkspace({ profilePhoto } = {}) {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const displayName = (() => {
@@ -24,6 +24,16 @@ export default function AIWorkspace() {
     const demoName = localStorage.getItem("demo_first_name");
     if (demoName && demoName.trim()) return demoName.trim().split(" ")[0];
     return "שם פרטי";
+  })();
+
+  // Resolve user avatar: Settings upload → DB profile → Google OAuth metadata → null (fallback to initial)
+  const userAvatar = (() => {
+    if (profilePhoto) return profilePhoto;
+    if (profile?.avatarUrl) return profile.avatarUrl;
+    const meta = user?.user_metadata;
+    if (meta?.avatar_url) return meta.avatar_url;
+    if (meta?.picture) return meta.picture;
+    return null;
   })();
 
   const [activeMode, setActiveMode] = useState(null);
@@ -465,17 +475,28 @@ export default function AIWorkspace() {
               {/* Avatar — hidden for grouped continuation */}
               {!isGrouped ? (
                 isUser ? (
-                  <div
-                    className="flex-shrink-0"
-                    style={{
-                      width: 32, height: 32, borderRadius: "50%",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: "12px", fontWeight: 700,
-                      backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A",
-                    }}
-                  >
-                    {displayName.slice(0, 1)}
-                  </div>
+                  userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={displayName}
+                      style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        objectFit: "cover", flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="flex-shrink-0"
+                      style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "12px", fontWeight: 700,
+                        backgroundColor: "var(--color-primary, #DAFD68)", color: "#0A0A0A",
+                      }}
+                    >
+                      {displayName.slice(0, 1)}
+                    </div>
+                  )
                 ) : (
                   <img
                     src="/clario-symbol.png"
