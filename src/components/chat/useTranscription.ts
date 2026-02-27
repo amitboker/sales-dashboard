@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from "react";
 export type TranscriptionState = "idle" | "transcribing" | "done" | "error";
 
 const WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions";
+const PROXY_URL = "/api/transcribe";
 const MIN_BLOB_SIZE = 1000; // ~1KB → too short to be useful
 
 export interface UseTranscriptionReturn {
@@ -21,13 +22,6 @@ export function useTranscription(): UseTranscriptionReturn {
   const lastBlobRef = useRef<Blob | null>(null);
 
   const doTranscribe = useCallback(async (blob: Blob): Promise<string | null> => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      setError("VITE_OPENAI_API_KEY לא מוגדר");
-      setState("error");
-      return null;
-    }
-
     if (blob.size < MIN_BLOB_SIZE) {
       setError("הקליטו הודעה ארוכה יותר");
       setState("error");
@@ -40,6 +34,9 @@ export function useTranscription(): UseTranscriptionReturn {
     setText(null);
 
     try {
+      const localKey = import.meta.env.VITE_OPENAI_API_KEY || "";
+      const useProxy = !localKey;
+
       // Determine file extension from MIME type
       const mime = blob.type || "audio/webm";
       const ext = mime.includes("mp4") ? "mp4" : mime.includes("wav") ? "wav" : "webm";
@@ -49,11 +46,15 @@ export function useTranscription(): UseTranscriptionReturn {
       formData.append("model", "whisper-1");
       formData.append("language", "he");
 
-      const res = await fetch(WHISPER_URL, {
+      const url = useProxy ? PROXY_URL : WHISPER_URL;
+      const headers: Record<string, string> = {};
+      if (!useProxy) {
+        headers.Authorization = `Bearer ${localKey}`;
+      }
+
+      const res = await fetch(url, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers,
         body: formData,
       });
 

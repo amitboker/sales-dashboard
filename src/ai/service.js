@@ -5,16 +5,18 @@
  * Sends to OpenAI Chat Completions API via fetch (no SDK).
  * Streams the response for fast, progressive rendering.
  *
- * Env var: VITE_OPENAI_API_KEY
+ * - Local dev: calls OpenAI directly using VITE_OPENAI_API_KEY from .env
+ * - Production: calls /api/chat serverless proxy (key stays server-side)
  */
 
 import { SYSTEM_PROMPT_V1 } from './prompts/system-v1';
 import { buildDashboardContext } from './context';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+const PROXY_API_URL = '/api/chat';
 const MODEL = 'gpt-4o-mini';
 
-function getApiKey() {
+function getLocalApiKey() {
   return import.meta.env.VITE_OPENAI_API_KEY || '';
 }
 
@@ -37,10 +39,8 @@ function buildSystemMessage() {
  * @returns {Promise<string>} the full assistant response
  */
 export async function sendChatMessage(history, userMessage, onChunk, signal) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error('VITE_OPENAI_API_KEY is not configured. Add it to your .env file.');
-  }
+  const localKey = getLocalApiKey();
+  const useProxy = !localKey;
 
   const systemMsg = buildSystemMessage();
   const messages = [
@@ -49,19 +49,24 @@ export async function sendChatMessage(history, userMessage, onChunk, signal) {
     { role: 'user', content: userMessage },
   ];
 
-  const res = await fetch(OPENAI_API_URL, {
+  const requestBody = {
+    model: MODEL,
+    messages,
+    stream: true,
+    temperature: 0.3,
+    max_tokens: 2048,
+  };
+
+  const url = useProxy ? PROXY_API_URL : OPENAI_API_URL;
+  const headers = { 'Content-Type': 'application/json' };
+  if (!useProxy) {
+    headers.Authorization = `Bearer ${localKey}`;
+  }
+
+  const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      stream: true,
-      temperature: 0.3,
-      max_tokens: 2048,
-    }),
+    headers,
+    body: JSON.stringify(requestBody),
     signal,
   });
 
@@ -107,7 +112,8 @@ export async function sendChatMessage(history, userMessage, onChunk, signal) {
 
 /**
  * Check if the AI service is configured (API key present).
+ * In production, the key lives server-side so we assume configured.
  */
 export function isAIConfigured() {
-  return !!getApiKey();
+  return import.meta.env.PROD || !!getLocalApiKey();
 }
