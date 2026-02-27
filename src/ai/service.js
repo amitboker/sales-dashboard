@@ -11,6 +11,7 @@
 
 import { SYSTEM_PROMPT_V1 } from './prompts/system-v1';
 import { buildDashboardContext } from './context';
+import { supabase } from '../lib/supabase';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const PROXY_API_URL = '/api/chat';
@@ -59,7 +60,13 @@ export async function sendChatMessage(history, userMessage, onChunk, signal) {
 
   const url = useProxy ? PROXY_API_URL : OPENAI_API_URL;
   const headers = { 'Content-Type': 'application/json' };
-  if (!useProxy) {
+  if (useProxy) {
+    // Send Supabase JWT so the server can verify the user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  } else {
     headers.Authorization = `Bearer ${localKey}`;
   }
 

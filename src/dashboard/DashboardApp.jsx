@@ -55,9 +55,6 @@ export default function DashboardApp() {
       }
       return "משתמש";
     }
-    // Demo mode only
-    const demoName = localStorage.getItem("demo_first_name");
-    if (demoName && demoName.trim()) return demoName.trim();
     return "משתמש";
   })();
   const [profileRole] = useState("מנהל");
@@ -75,7 +72,6 @@ export default function DashboardApp() {
     try {
       await signOut();
     } catch (_) { /* ignore */ }
-    localStorage.removeItem("demo_first_name");
     navigate("/login");
   };
 
@@ -92,7 +88,7 @@ export default function DashboardApp() {
             profilePhoto={profilePhoto}
             onNavigate={setActivePage}
             onLogout={handleLogout}
-            isAdmin={isAdmin || !!localStorage.getItem("demo_first_name")}
+            isAdmin={isAdmin}
           />
           <DashboardPageWrapper routeKey={activePage} onExitComplete={handleExitComplete}>
             {isSettings ? (

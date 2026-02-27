@@ -38,8 +38,6 @@ export default function AdminApp() {
       }
       return "משתמש";
     }
-    const demoName = localStorage.getItem("demo_first_name");
-    if (demoName && demoName.trim()) return demoName.trim();
     return "Admin";
   })();
 
@@ -53,7 +51,6 @@ export default function AdminApp() {
 
   const handleLogout = async () => {
     try { await signOut(); } catch (_) {}
-    localStorage.removeItem("demo_first_name");
     navigate("/login");
   };
 

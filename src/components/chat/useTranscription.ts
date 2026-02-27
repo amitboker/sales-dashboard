@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { supabase } from "../../lib/supabase";
 
 export type TranscriptionState = "idle" | "transcribing" | "done" | "error";
 
@@ -48,7 +49,13 @@ export function useTranscription(): UseTranscriptionReturn {
 
       const url = useProxy ? PROXY_URL : WHISPER_URL;
       const headers: Record<string, string> = {};
-      if (!useProxy) {
+      if (useProxy) {
+        // Send Supabase JWT so the server can verify the user
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+        }
+      } else {
         headers.Authorization = `Bearer ${localKey}`;
       }
 

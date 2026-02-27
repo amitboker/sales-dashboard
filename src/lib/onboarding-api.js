@@ -51,32 +51,6 @@ async function updateClientSafe(clientId, payload, customFields) {
   return data;
 }
 
-// ── Demo User ──
-
-export async function createDemoUser() {
-  const timestamp = Date.now();
-  const email = `demo-${timestamp}@test.com`;
-
-  const { data, error } = await db()
-    .from('clients')
-    .insert({
-      id: crypto.randomUUID(),
-      email,
-      passwordHash: 'demo-no-auth',
-      companyName: '',
-      salesReps: 1,
-      onboardingStep: 0,
-      isActive: true,
-      createdAt: now(),
-      updatedAt: now(),
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
 // ── Onboarding Client ──
 
 export async function createOnboardingClient({ email }) {

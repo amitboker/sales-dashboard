@@ -5,7 +5,6 @@ import { getOnboardingTarget, isOnboardingComplete } from '../lib/onboarding';
 
 export default function ProtectedRoute({ children }) {
   const { user, loading, session } = useAuth();
-  const isDemoMode = !!localStorage.getItem('demo_first_name');
   const [timedOut, setTimedOut] = useState(false);
   const [searchParams] = useSearchParams();
   const forceOnboarding = searchParams.get('forceOnboarding') === 'true';
@@ -25,15 +24,10 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // Not authenticated and not demo → login
-  if (!user && !isDemoMode && !session) {
+  // Not authenticated → login
+  if (!user && !session) {
     console.log('[NAV] ProtectedRoute → /login because: not authenticated');
     return <Navigate to="/login" replace />;
-  }
-
-  // Demo users skip onboarding
-  if (isDemoMode && !user && !session) {
-    return children;
   }
 
   // Force onboarding override — for local testing

@@ -33,8 +33,6 @@ function LoginPage() {
   const { signIn, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showDemoPrompt, setShowDemoPrompt] = useState(false);
-  const [demoName, setDemoName] = useState("");
   const [error, setError] = useState("");
 
   // Check if Supabase is configured
@@ -81,19 +79,6 @@ function LoginPage() {
     }
   };
 
-  const handleDemoLogin = () => {
-    setShowDemoPrompt(true);
-  };
-
-  const handleDemoContinue = (e) => {
-    e.preventDefault();
-    const trimmed = demoName.trim();
-    if (!trimmed) return;
-    localStorage.setItem('demo_first_name', trimmed);
-    trackEvent('demo_login', { page: '/login' });
-    navigate('/dashboard');
-  };
-
   const handleGoogleSignIn = async () => {
     setError('');
     try {
@@ -102,45 +87,6 @@ function LoginPage() {
       setError('שגיאה בהתחברות עם Google. נסה שוב.');
     }
   };
-
-  if (showDemoPrompt) {
-    return (
-      <div className="li">
-        <div className="li__card">
-          <div className="li__header">
-            <img src={clarioSymbol} alt="Clario" className="li__logo" />
-            <h1 className="li__title">איך קוראים לך?</h1>
-            <p className="li__subtitle">נשמח להכיר לפני שמתחילים</p>
-          </div>
-
-          <form className="li__form" onSubmit={handleDemoContinue}>
-            <div className="li__input-wrap">
-              <input
-                type="text"
-                className="li__input"
-                placeholder="שם מלא"
-                dir="rtl"
-                value={demoName}
-                onChange={(e) => setDemoName(e.target.value)}
-              />
-            </div>
-
-            <button className="li__btn li__btn--primary" type="submit" disabled={!demoName.trim()}>
-              המשך
-            </button>
-
-            <button
-              className="li__btn li__btn--secondary"
-              type="button"
-              onClick={() => setShowDemoPrompt(false)}
-            >
-              חזור
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="li">
@@ -214,10 +160,6 @@ function LoginPage() {
         <button className="li__btn li__btn--google" type="button" onClick={handleGoogleSignIn} disabled={isLoading}>
           <GoogleIcon />
           המשך עם Google
-        </button>
-
-        <button className="li__btn li__btn--secondary" type="button" onClick={handleDemoLogin} disabled={isLoading}>
-          נסה את הדמו
         </button>
 
         <p className="li__signup-link">

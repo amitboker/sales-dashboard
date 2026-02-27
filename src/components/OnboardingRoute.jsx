@@ -11,7 +11,6 @@ import { isOnboardingComplete } from '../lib/onboarding';
  */
 export default function OnboardingRoute({ children }) {
   const { user, session, loading } = useAuth();
-  const isDemoMode = !!localStorage.getItem('demo_first_name');
   const [timedOut, setTimedOut] = useState(false);
   const [searchParams] = useSearchParams();
   const forceOnboarding = searchParams.get('forceOnboarding') === 'true';
@@ -31,16 +30,10 @@ export default function OnboardingRoute({ children }) {
     );
   }
 
-  // Not authenticated and not demo
-  if (!user && !session && !isDemoMode) {
+  // Not authenticated
+  if (!user && !session) {
     console.log('[NAV] OnboardingRoute → /login because: not authenticated');
     return <Navigate to="/login" replace />;
-  }
-
-  // Demo users skip onboarding
-  if (isDemoMode && !user && !session) {
-    console.log('[NAV] OnboardingRoute → /dashboard because: demo mode');
-    return <Navigate to="/dashboard" replace />;
   }
 
   // Force onboarding override — always show onboarding

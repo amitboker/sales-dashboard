@@ -21,8 +21,6 @@ export default function AIWorkspace({ profilePhoto } = {}) {
       if (full) return full.split(" ")[0];
       return user.email.split("@")[0];
     }
-    const demoName = localStorage.getItem("demo_first_name");
-    if (demoName && demoName.trim()) return demoName.trim().split(" ")[0];
     return "שם פרטי";
   })();
 

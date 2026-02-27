@@ -3,8 +3,6 @@ import { useAuth } from '../lib/auth';
 
 export default function AdminRoute({ children }) {
   const { isAdmin, loading } = useAuth();
-  const isDemoAdmin = !!localStorage.getItem('demo_first_name');
-
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -13,7 +11,7 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  if (!isAdmin && !isDemoAdmin) {
+  if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 
