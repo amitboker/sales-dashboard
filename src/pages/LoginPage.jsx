@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { trackEvent } from '../lib/tracking';
@@ -34,15 +34,6 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-
-  // Check if Supabase is configured
-  useEffect(() => {
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    if (!supabaseKey) {
-      console.warn('[LoginPage] VITE_SUPABASE_ANON_KEY is not set');
-      setError('המערכת לא מוגדרת כראוי. אנא פנה למנהל המערכת.');
-    }
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
