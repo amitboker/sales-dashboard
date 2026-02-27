@@ -4,11 +4,12 @@ import {
   ScatterChart, Scatter, ZAxis, LabelList,
 } from "recharts";
 import PageHeader from "../components/PageHeader.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 import Icon from "../components/Icon.jsx";
 import { teamTable, teamStats, conversionTrend, callsVsDeals } from "../data/mockData.js";
 import { generatePDF } from "../utils/pdfExport.js";
 
-export default function TeamPerformance() {
+export default function TeamPerformance({ hasData, onConnectData }) {
   const rows = teamTable.rows;
   const lineChartRef = useRef(null);
   const scatterChartRef = useRef(null);
@@ -41,6 +42,22 @@ export default function TeamPerformance() {
       alert("שגיאה בייצוא PDF: " + e.message);
     }
   };
+
+  if (!hasData) {
+    return (
+      <div>
+        <PageHeader title="ביצועי צוות" subtitle="מעקב אחר ביצועי המוקדנים" />
+        <div className="card padded section">
+          <EmptyState
+            title="אין נתונים עדיין"
+            description="חבר מקור נתונים כדי לראות את ביצועי הצוות, שיעורי המרה ומגמות"
+            ctaLabel="חבר מקור נתונים"
+            onCta={onConnectData}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -214,7 +231,7 @@ export default function TeamPerformance() {
       </div>
 
       <div className="footer">
-        Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
+        Powered by Clario | RevOps Intelligence
       </div>
     </div>
   );

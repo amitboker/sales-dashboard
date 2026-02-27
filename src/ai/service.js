@@ -2,30 +2,24 @@
  * AI Service Layer
  *
  * Assembles: system prompt + dashboard context + user message
- * Sends to OpenAI Chat Completions API via fetch (no SDK).
+ * Sends to /api/chat serverless proxy (key stays server-side).
  * Streams the response for fast, progressive rendering.
- *
- * - Local dev: calls OpenAI directly using VITE_OPENAI_API_KEY from .env
- * - Production: calls /api/chat serverless proxy (key stays server-side)
  */
 
 import { SYSTEM_PROMPT_V1 } from './prompts/system-v1';
 import { buildDashboardContext } from './context';
 import { supabase } from '../lib/supabase';
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const PROXY_API_URL = '/api/chat';
 const MODEL = 'gpt-4o-mini';
 
-function getLocalApiKey() {
-  return import.meta.env.VITE_OPENAI_API_KEY || '';
-}
-
 /**
  * Build the full system message with dashboard context injected.
+ * @param {object} [opts]
+ * @param {boolean} [opts.hasData]
  */
-function buildSystemMessage() {
-  const context = buildDashboardContext();
+function buildSystemMessage({ hasData, isDemo } = {}) {
+  const context = buildDashboardContext({ hasData, isDemo });
   const content = SYSTEM_PROMPT_V1.replace('{{DASHBOARD_CONTEXT}}', context);
   return { role: 'system', content };
 }
@@ -39,11 +33,8 @@ function buildSystemMessage() {
  * @param {AbortSignal} [signal] - optional abort signal
  * @returns {Promise<string>} the full assistant response
  */
-export async function sendChatMessage(history, userMessage, onChunk, signal) {
-  const localKey = getLocalApiKey();
-  const useProxy = !localKey;
-
-  const systemMsg = buildSystemMessage();
+export async function sendChatMessage(history, userMessage, onChunk, signal, { hasData, isDemo } = {}) {
+  const systemMsg = buildSystemMessage({ hasData, isDemo });
   const messages = [
     systemMsg,
     ...history,
@@ -58,19 +49,14 @@ export async function sendChatMessage(history, userMessage, onChunk, signal) {
     max_tokens: 2048,
   };
 
-  const url = useProxy ? PROXY_API_URL : OPENAI_API_URL;
   const headers = { 'Content-Type': 'application/json' };
-  if (useProxy) {
-    // Send Supabase JWT so the server can verify the user
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-  } else {
-    headers.Authorization = `Bearer ${localKey}`;
+  // Send Supabase JWT so the server can verify the user
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(PROXY_API_URL, {
     method: 'POST',
     headers,
     body: JSON.stringify(requestBody),
@@ -118,9 +104,9 @@ export async function sendChatMessage(history, userMessage, onChunk, signal) {
 }
 
 /**
- * Check if the AI service is configured (API key present).
- * In production, the key lives server-side so we assume configured.
+ * Check if the AI service is configured.
+ * In production, the key lives server-side so we always return true.
  */
 export function isAIConfigured() {
-  return import.meta.env.PROD || !!getLocalApiKey();
+  return true;
 }

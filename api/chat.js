@@ -2,15 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'edge' };
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://yijomhtugowhrnrrbyzy.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpam9taHR1Z293aHJucnJieXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMTM0NjAsImV4cCI6MjA4NTg4OTQ2MH0.nf7D3kO3cuZwLXWvvsYPv9DLQoRCw6ObQc4a-n_dL_U';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 const MODEL = 'gpt-4o-mini';
 const MAX_TOKENS = 2048;
 const TEMPERATURE = 0.3;
 const MAX_MESSAGES = 50;
+const MAX_CONTENT_LENGTH = 10000;
+const ALLOWED_ROLES = new Set(['user', 'assistant', 'system']);
 
 async function verifyAuth(req) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
 
@@ -21,9 +25,28 @@ async function verifyAuth(req) {
   return user;
 }
 
+function sanitizeMessages(rawMessages) {
+  if (!Array.isArray(rawMessages)) return [];
+
+  return rawMessages
+    .filter((m) => m && ALLOWED_ROLES.has(m.role) && typeof m.content === 'string')
+    .map((m) => ({
+      role: m.role,
+      content: m.content.slice(0, MAX_CONTENT_LENGTH),
+    }))
+    .slice(-MAX_MESSAGES);
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return new Response(
+      JSON.stringify({ error: 'Server configuration error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   const user = await verifyAuth(req);
@@ -37,13 +60,13 @@ export default async function handler(req) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'OPENAI_API_KEY not configured on server' }),
+      JSON.stringify({ error: 'AI service unavailable' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
   const body = await req.json();
-  const messages = Array.isArray(body.messages) ? body.messages.slice(-MAX_MESSAGES) : [];
+  const messages = sanitizeMessages(body.messages);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

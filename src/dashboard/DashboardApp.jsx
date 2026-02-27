@@ -2,7 +2,8 @@ import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
-import { trackEvent } from "../lib/tracking";
+import useClientData from "./hooks/useClientData.js";
+import { DemoModeProvider, useDemoMode } from "./context/DemoModeContext.jsx";
 import SideNav from "./components/SideNav.jsx";
 import TopBar from "./components/TopBar.jsx";
 import DashboardPageWrapper from "./components/DashboardPageWrapper.jsx";
@@ -12,7 +13,7 @@ import SalesFunnel from "./pages/SalesFunnel.jsx";
 import ProjectionBuilder from "./pages/ProjectionBuilder.jsx";
 import AIWorkspace from "./pages/AIWorkspace.jsx";
 import Settings from "./pages/Settings.jsx";
-import ClarioAcademy from "./pages/ClarioAcademy.jsx";
+import IntegrationsPage from "./pages/IntegrationsPage.jsx";
 import "./dashboard.css";
 
 const pageMap = {
@@ -21,33 +22,28 @@ const pageMap = {
   team: TeamPerformance,
   ai: AIWorkspace,
   projection: ProjectionBuilder,
-  academy: ClarioAcademy,
+  integrations: IntegrationsPage,
   settings: Settings,
 };
 
-export default function DashboardApp() {
+function DashboardAppInner() {
   const navigate = useNavigate();
   const { user, profile, isAdmin, signOut } = useAuth();
   usePageTracking("/dashboard");
+  const { client, hasData, loading: clientLoading } = useClientData();
+  const { isDemo } = useDemoMode();
   const [activePage, setActivePage] = useState("ai");
-  const KNOWN_NAMES = {
-    "amitbokershud@gmail.com": "עמית בוקר",
-    "amitboker@gmail.com": "עמית בוקר",
-  };
+
+  const effectiveHasData = isDemo || hasData;
 
   const profileName = (() => {
-    // Authenticated user — never fall through to stale localStorage
     if (user) {
-      // Known users — guaranteed Hebrew display name
-      const known = KNOWN_NAMES[user.email];
-      if (known) return known;
       if (profile) {
         const first = profile.firstName || "";
         const last = profile.lastName || "";
         const full = `${first} ${last}`.trim();
         if (full) return full;
       }
-      // Try auth metadata as fallback
       const meta = user.user_metadata;
       if (meta) {
         const metaName = meta.full_name || `${meta.first_name || ""} ${meta.last_name || ""}`.trim();
@@ -62,7 +58,6 @@ export default function DashboardApp() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const contentRef = useRef(null);
 
-  // Reset scroll between exit and enter animations
   const handleExitComplete = useCallback(() => {
     if (contentRef.current) contentRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
@@ -75,8 +70,16 @@ export default function DashboardApp() {
     navigate("/login");
   };
 
+  // Navigate to integrations page for data connection
+  const handleConnectData = useCallback(() => {
+    setActivePage("integrations");
+  }, []);
+
   const ActiveComponent = pageMap[activePage] || AIWorkspace;
   const isSettings = activePage === "settings";
+
+  // Common props for data-dependent pages
+  const dataProps = { hasData: effectiveHasData, clientLoading, onConnectData: handleConnectData };
 
   return (
     <div className="dashboard-wrapper">
@@ -96,11 +99,15 @@ export default function DashboardApp() {
                 profileName={profileName}
                 profilePhoto={profilePhoto}
                 onPhotoChange={setProfilePhoto}
+                client={client}
+                onNavigate={setActivePage}
               />
+            ) : activePage === "integrations" ? (
+              <ActiveComponent client={client} />
             ) : activePage === "ai" ? (
-              <ActiveComponent profilePhoto={profilePhoto} />
+              <ActiveComponent profilePhoto={profilePhoto} {...dataProps} isDemo={isDemo} />
             ) : (
-              <ActiveComponent />
+              <ActiveComponent {...dataProps} />
             )}
           </DashboardPageWrapper>
         </main>
@@ -112,5 +119,14 @@ export default function DashboardApp() {
         />
       </div>
     </div>
+  );
+}
+
+export default function DashboardApp() {
+  const { isAdmin } = useAuth();
+  return (
+    <DemoModeProvider isAdmin={isAdmin}>
+      <DashboardAppInner />
+    </DemoModeProvider>
   );
 }

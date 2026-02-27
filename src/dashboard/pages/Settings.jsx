@@ -1,27 +1,27 @@
 import { useMemo, useRef, useState } from "react";
+import { useAuth } from "../../lib/auth";
 import SettingsModal from "../components/SettingsModal.jsx";
 
-export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
+export default function Settings({ profileName, profilePhoto, onPhotoChange, client, onNavigate }) {
+  const { user } = useAuth();
   const fileRef = useRef(null);
   const companyLogoRef = useRef(null);
   const [companyLogo, setCompanyLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("מוקד בסקייל");
-  const [industry, setIndustry] = useState("מוקד שירות");
+  const [companyName, setCompanyName] = useState(client?.companyName || "");
+  const [industry, setIndustry] = useState(client?.industry || "");
   const [timezone, setTimezone] = useState("Asia/Jerusalem");
   const [currency, setCurrency] = useState("ILS");
   const [defaultCurrency, setDefaultCurrency] = useState("ILS");
   const [defaultTimezone, setDefaultTimezone] = useState("Asia/Jerusalem");
   const [themePreference, setThemePreference] = useState("light");
-  const [salesReps, setSalesReps] = useState([
-    { id: "rep-1", name: "נועם לויגנר", role: "Sales Rep", active: true },
-    { id: "rep-2", name: "שירה כהן", role: "Sales Manager", active: true },
-    { id: "rep-3", name: "עומר דוד", role: "Sales Rep", active: false },
-  ]);
+  const [salesReps, setSalesReps] = useState([]);
   const [isRepModalOpen, setIsRepModalOpen] = useState(false);
   const [editingRepId, setEditingRepId] = useState(null);
   const [repName, setRepName] = useState("");
   const [repRole, setRepRole] = useState("Sales Rep");
   const [repActive, setRepActive] = useState(true);
+
+  const userEmail = user?.email || "";
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0];
@@ -136,7 +136,7 @@ export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
           </div>
           <div className="settings-info-row">
             <span className="settings-info-label">אימייל</span>
-            <span className="settings-info-value" style={{ direction: "ltr" }}>amit@mokad.co.il</span>
+            <span className="settings-info-value" style={{ direction: "ltr" }}>{userEmail}</span>
           </div>
         </div>
       </div>
@@ -155,6 +155,7 @@ export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="הכנס שם חברה"
             />
           </div>
           <div className="settings-field">
@@ -180,6 +181,7 @@ export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
           <div className="settings-field">
             <label>תחום פעילות</label>
             <select value={industry} onChange={(e) => setIndustry(e.target.value)}>
+              <option value="">בחר תחום</option>
               <option>Tech Startup</option>
               <option>חברת ביטוח</option>
               <option>מוקד שירות</option>
@@ -222,31 +224,37 @@ export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
             הוסף נציג מכירות
           </button>
         </div>
-        <div className="settings-table">
-          <div className="settings-table-header">
-            <span>שם מלא</span>
-            <span>תפקיד</span>
-            <span>סטטוס</span>
-            <span>פעולות</span>
+        {salesReps.length === 0 ? (
+          <div style={{ padding: "24px 0", textAlign: "center", color: "var(--color-muted, #828282)", fontSize: 14 }}>
+            לא הוגדרו נציגי מכירות עדיין. לחץ "הוסף נציג מכירות" כדי להתחיל.
           </div>
-          {salesReps.map((rep) => (
-            <div key={rep.id} className="settings-table-row">
-              <span>{rep.name}</span>
-              <span>{rep.role === "Sales Manager" ? "מנהל מכירות" : "נציג מכירות"}</span>
-              <span className={`settings-status ${rep.active ? "active" : "inactive"}`}>
-                {rep.active ? "פעיל" : "לא פעיל"}
-              </span>
-              <div className="settings-row-actions">
-                <button className="button" type="button" onClick={() => openEditRep(rep)}>
-                  עריכה
-                </button>
-                <button className="button" type="button" onClick={() => toggleRepStatus(rep.id)}>
-                  {rep.active ? "השבת" : "הפעל"}
-                </button>
-              </div>
+        ) : (
+          <div className="settings-table">
+            <div className="settings-table-header">
+              <span>שם מלא</span>
+              <span>תפקיד</span>
+              <span>סטטוס</span>
+              <span>פעולות</span>
             </div>
-          ))}
-        </div>
+            {salesReps.map((rep) => (
+              <div key={rep.id} className="settings-table-row">
+                <span>{rep.name}</span>
+                <span>{rep.role === "Sales Manager" ? "מנהל מכירות" : "נציג מכירות"}</span>
+                <span className={`settings-status ${rep.active ? "active" : "inactive"}`}>
+                  {rep.active ? "פעיל" : "לא פעיל"}
+                </span>
+                <div className="settings-row-actions">
+                  <button className="button" type="button" onClick={() => openEditRep(rep)}>
+                    עריכה
+                  </button>
+                  <button className="button" type="button" onClick={() => toggleRepStatus(rep.id)}>
+                    {rep.active ? "השבת" : "הפעל"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="settings-section card padded">
@@ -283,6 +291,24 @@ export default function Settings({ profileName, profilePhoto, onPhotoChange }) {
         </div>
         <div className="settings-actions-row">
           <button className="button primary">שמור העדפות</button>
+        </div>
+      </div>
+
+      <div className="settings-section card padded">
+        <div className="settings-section-header">
+          <div>
+            <h2>מקורות נתונים</h2>
+            <p>חבר את מערכות ה-CRM והנתונים שלך לקבלת תובנות בזמן אמת</p>
+          </div>
+        </div>
+        <div className="settings-datasource-content">
+          <button
+            className="button primary"
+            type="button"
+            onClick={() => onNavigate?.("integrations")}
+          >
+            ניהול חיבורים
+          </button>
         </div>
       </div>
 

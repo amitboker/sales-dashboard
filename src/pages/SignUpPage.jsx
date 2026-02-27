@@ -80,7 +80,7 @@ function SignUpPage() {
     setIsLoading(true);
     try {
       const result = await signUp(email, password);
-      console.log('[NAV] signup result:', result);
+      if (import.meta.env.DEV) console.log('[NAV] signup result:', result);
       trackEvent('signup', { page: '/signup' });
 
       if (result.requiresEmailConfirmation) {
@@ -91,7 +91,7 @@ function SignUpPage() {
       }
     } catch (err) {
       const msg = err.message || '';
-      console.error('[signup] error:', msg);
+      if (import.meta.env.DEV) console.error('[signup] error:', msg);
       if (msg.includes('already registered') || msg.includes('already_exists')) {
         setError('כתובת האימייל כבר רשומה. נסה להתחבר.');
       } else {

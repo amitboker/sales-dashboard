@@ -7,6 +7,7 @@ import {
 import PageHeader from "../components/PageHeader.jsx";
 import StatCard from "../components/StatCard.jsx";
 import AlertCard from "../components/AlertCard.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 import { trackEvent } from "../../lib/tracking";
 import Icon from "../components/Icon.jsx";
 import { alerts, revenueByService } from "../data/mockData.js";
@@ -20,7 +21,7 @@ const breakdownData = [
   { stage: "נשלחה הצעת מחיר", opportunities: 115, value: "₪ 1,679,250", percent: 11 },
 ];
 
-export default function OverviewDashboard() {
+export default function OverviewDashboard({ hasData, onConnectData }) {
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(0);
@@ -86,6 +87,22 @@ export default function OverviewDashboard() {
       setContentHeight(contentRef.current.scrollHeight);
     }
   }, [expanded]);
+
+  if (!hasData) {
+    return (
+      <div className="page-enter overview-page">
+        <PageHeader title="מרכז שליטה" subtitle="סקירה ניהולית של ביצועים והכנסות" />
+        <div className="card padded section">
+          <EmptyState
+            title="אין נתונים עדיין"
+            description="חבר מקור נתונים כדי לראות את מדדי הביצועים, ההכנסות והתובנות שלך כאן"
+            ctaLabel="חבר מקור נתונים"
+            onCta={onConnectData}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-enter overview-page">
@@ -311,7 +328,7 @@ export default function OverviewDashboard() {
       </div>
 
       <div className="footer">
-        Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
+        Powered by Clario | RevOps Intelligence
       </div>
     </div>
   );

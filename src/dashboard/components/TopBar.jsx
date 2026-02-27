@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "./Icon.jsx";
+import { useDemoMode } from "../context/DemoModeContext.jsx";
 
 export default function TopBar({ profileName, profilePhoto, profileRole, onNavigate, onLogout, isAdmin }) {
   const navigate = useNavigate();
+  const { isDemo, toggleDemo, exitDemo } = useDemoMode();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -80,6 +82,15 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
           </button>
         </div>
 
+        {/* Inline demo mode pill */}
+        {isDemo && (
+          <div className="demo-pill">
+            <span className="demo-pill-dot" />
+            <span className="demo-pill-text">מצב דמו פעיל</span>
+            <button className="demo-pill-exit" type="button" onClick={exitDemo}>✕</button>
+          </div>
+        )}
+
         {/* Dropdown Menu */}
         {dropdownOpen && (
           <div className="topbar-dropdown">
@@ -105,6 +116,17 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
                   }}
                 >
                   פאנל ניהול
+                </button>
+                <button
+                  className="topbar-dropdown-item"
+                  type="button"
+                  onClick={() => {
+                    toggleDemo();
+                    setDropdownOpen(false);
+                  }}
+                >
+                  <span className={`demo-toggle-indicator${isDemo ? " active" : ""}`} />
+                  {isDemo ? "כבה מצב דמו" : "הפעל מצב דמו"}
                 </button>
               </>
             )}

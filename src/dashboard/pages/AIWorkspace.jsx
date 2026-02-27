@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpLeft, RefreshCw } from "lucide-react";
 import { trackEvent } from "../../lib/tracking";
-import { sendChatMessage, isAIConfigured } from "../../ai/service";
+import { sendChatMessage } from "../../ai/service";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
@@ -10,7 +10,7 @@ import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
 import DottedBackground from "../../components/DottedBackground";
 
-export default function AIWorkspace({ profilePhoto } = {}) {
+export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const displayName = (() => {
@@ -161,7 +161,8 @@ export default function AIWorkspace({ profilePhoto } = {}) {
               return updated;
             });
           },
-          controller.signal
+          controller.signal,
+          { hasData, isDemo }
         );
 
         // Wait for BOTH: minimum thinking time AND first chunk to arrive
@@ -294,13 +295,6 @@ export default function AIWorkspace({ profilePhoto } = {}) {
               {error}
             </div>
           )}
-          {!isAIConfigured() && !error && (
-            <div style={{ width: "100%", borderRadius: "12px", border: "1px solid var(--color-warning-border, #f5e6b8)", padding: "12px 16px", fontSize: "14px", textAlign: "center", backgroundColor: "var(--color-warning-bg, #fef4d9)", color: "var(--color-warning, #f0ad4e)" }}>
-              VITE_OPENAI_API_KEY לא מוגדר. הוסף אותו לקובץ .env כדי להפעיל את
-              העוזר.
-            </div>
-          )}
-
           {/* Mode selector chips */}
           <ModeSelector activeMode={activeMode} onSelect={setActiveMode} />
 
@@ -419,7 +413,7 @@ export default function AIWorkspace({ profilePhoto } = {}) {
 
         {/* Footer */}
         <div style={{ marginTop: "auto", paddingTop: "32px", paddingBottom: "16px", fontSize: "12px", textAlign: "center", color: "var(--color-muted, #828282)", opacity: 0.5 }}>
-          Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
+          Powered by Clario | RevOps Intelligence
         </div>
       </div>
     );

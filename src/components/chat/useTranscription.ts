@@ -3,7 +3,6 @@ import { supabase } from "../../lib/supabase";
 
 export type TranscriptionState = "idle" | "transcribing" | "done" | "error";
 
-const WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions";
 const PROXY_URL = "/api/transcribe";
 const MIN_BLOB_SIZE = 1000; // ~1KB → too short to be useful
 
@@ -35,9 +34,6 @@ export function useTranscription(): UseTranscriptionReturn {
     setText(null);
 
     try {
-      const localKey = import.meta.env.VITE_OPENAI_API_KEY || "";
-      const useProxy = !localKey;
-
       // Determine file extension from MIME type
       const mime = blob.type || "audio/webm";
       const ext = mime.includes("mp4") ? "mp4" : mime.includes("wav") ? "wav" : "webm";
@@ -47,19 +43,14 @@ export function useTranscription(): UseTranscriptionReturn {
       formData.append("model", "whisper-1");
       formData.append("language", "he");
 
-      const url = useProxy ? PROXY_URL : WHISPER_URL;
       const headers: Record<string, string> = {};
-      if (useProxy) {
-        // Send Supabase JWT so the server can verify the user
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          headers.Authorization = `Bearer ${session.access_token}`;
-        }
-      } else {
-        headers.Authorization = `Bearer ${localKey}`;
+      // Send Supabase JWT so the server can verify the user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
       }
 
-      const res = await fetch(url, {
+      const res = await fetch(PROXY_URL, {
         method: "POST",
         headers,
         body: formData,

@@ -30,8 +30,8 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Force onboarding override — for local testing
-  if (forceOnboarding) {
+  // Force onboarding override — for local testing only
+  if (import.meta.env.DEV && forceOnboarding) {
     const target = getOnboardingTarget(user) || '/onboarding/name';
     console.log(`[NAV] ProtectedRoute → ${target} because: forceOnboarding=true`);
     return <Navigate to={target} replace />;

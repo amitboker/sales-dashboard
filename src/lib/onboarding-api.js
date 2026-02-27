@@ -53,15 +53,25 @@ async function updateClientSafe(clientId, payload, customFields) {
 
 // ── Onboarding Client ──
 
-export async function createOnboardingClient({ email }) {
+export async function createOnboardingClient({ email, companyName, salesReps, industry }) {
+  // Idempotent: if client already exists for this email, return it
+  const { data: existing } = await db()
+    .from('clients')
+    .select('*')
+    .eq('email', email)
+    .single();
+
+  if (existing) return existing;
+
   const { data, error } = await db()
     .from('clients')
     .insert({
       id: crypto.randomUUID(),
       email,
       passwordHash: 'supabase-auth',
-      companyName: '',
-      salesReps: 1,
+      companyName: companyName || '',
+      salesReps: parseInt(salesReps) || 1,
+      industry: industry || null,
       onboardingStep: 0,
       isActive: true,
       createdAt: now(),

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { createOnboardingClient } from '../lib/onboarding-api';
 import OnboardingLayout from '../components/OnboardingLayout';
 import AccountCreationTransition from '../components/AccountCreationTransition';
 
@@ -26,7 +27,7 @@ const CHANNELS = [
 ];
 
 export default function OnboardingBusiness() {
-  const { updateUserMeta, completeOnboarding } = useAuth();
+  const { user, updateUserMeta, completeOnboarding } = useAuth();
   const [businessType, setBusinessType] = useState('');
   const [teamSize, setTeamSize] = useState('');
   const [channel, setChannel] = useState('');
@@ -48,14 +49,26 @@ export default function OnboardingBusiness() {
     try {
       // Save business info + mark onboarding complete in user_metadata
       await updateUserMeta(data);
-      console.log('[NAV] onboarding/business: saved metadata →', data);
+      if (import.meta.env.DEV) console.log('[NAV] onboarding/business: saved metadata →', data);
+
+      // Create client entity in DB (idempotent — skips if already exists)
+      if (user?.email) {
+        createOnboardingClient({
+          email: user.email,
+          companyName: user.user_metadata?.full_name ? `${user.user_metadata.full_name}` : '',
+          salesReps: teamSize,
+          industry: businessType,
+        }).catch((err) => {
+          if (import.meta.env.DEV) console.warn('[onboarding/business] createOnboardingClient failed:', err?.message);
+        });
+      }
 
       // Also update profiles table (fire-and-forget)
-      completeOnboarding(data).catch((err) =>
-        console.warn('[onboarding/business] completeOnboarding failed:', err?.message)
-      );
+      completeOnboarding(data).catch((err) => {
+        if (import.meta.env.DEV) console.warn('[onboarding/business] completeOnboarding failed:', err?.message);
+      });
     } catch (err) {
-      console.warn('[onboarding/business] metadata update failed, continuing:', err?.message);
+      if (import.meta.env.DEV) console.warn('[onboarding/business] metadata update failed, continuing:', err?.message);
     }
 
     setSubmitted(true);

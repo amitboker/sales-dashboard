@@ -121,7 +121,7 @@ function addFooter(doc) {
     doc.setTextColor(...TEXT_SECONDARY);
     // Footer is mixed Hebrew+Latin+numbers — R2L handles it correctly
     doc.text(
-      `${pageCount} מתוך ${i} עמוד  |  RevOps Intelligence  |  מוקד בסקייל`,
+      `${pageCount} מתוך ${i} עמוד  |  RevOps Intelligence  |  Clario`,
       pageWidth / 2,
       pageHeight - 6,
       { align: "center" }

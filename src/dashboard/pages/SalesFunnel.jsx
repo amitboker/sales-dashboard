@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import PageHeader from "../components/PageHeader.jsx";
 import AlertCard from "../components/AlertCard.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 import Icon from "../components/Icon.jsx";
 import FunnelStagesEditor from "../components/FunnelStagesEditor.jsx";
 import { trackEvent } from "../../lib/tracking";
@@ -54,7 +55,7 @@ function FunnelStageRow({ stage, isLast }) {
   );
 }
 
-export default function SalesFunnel() {
+export default function SalesFunnel({ hasData, onConnectData }) {
   const { stages, setStages, activeStages } = useFunnelStages();
   const barChartRef = useRef(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -93,6 +94,22 @@ export default function SalesFunnel() {
       alert("שגיאה בייצוא PDF: " + e.message);
     }
   };
+
+  if (!hasData) {
+    return (
+      <div className="sales-funnel-page">
+        <PageHeader title="משפך מכירות" subtitle="ניתוח שלבי המשפך וזיהוי דליפות" />
+        <div className="card padded section">
+          <EmptyState
+            title="אין נתונים עדיין"
+            description="חבר מקור נתונים כדי לראות את שלבי המשפך, שיעורי ההמרה וניתוח הדליפות"
+            ctaLabel="חבר מקור נתונים"
+            onCta={onConnectData}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sales-funnel-page">
@@ -283,7 +300,7 @@ export default function SalesFunnel() {
       </div>
 
       <div className="footer">
-        Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
+        Powered by Clario | RevOps Intelligence
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 export const AuthContext = createContext(null);
 
-const ADMIN_EMAIL = 'amitbooker2@gmail.com';
+const ADMIN_EMAIL = 'amitboker@gmail.com';
 
 async function syncProfile(authUser) {
   if (!supabase || !authUser) return null;
@@ -128,10 +128,12 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, s) => {
-        console.log('[auth] onAuthStateChange:', _event, {
-          user: !!s?.user,
-          meta: s?.user?.user_metadata,
-        });
+        if (import.meta.env.DEV) {
+          console.log('[auth] onAuthStateChange:', _event, {
+            user: !!s?.user,
+            meta: s?.user?.user_metadata,
+          });
+        }
         setSession(s);
         setUser(s?.user ?? null);
         setLoading(false);
@@ -161,16 +163,18 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
 
-    console.log('[auth] signUp response:', {
-      user: !!data.user,
-      session: !!data.session,
-      userId: data.user?.id,
-      emailConfirmed: data.user?.email_confirmed_at,
-    });
+    if (import.meta.env.DEV) {
+      console.log('[auth] signUp response:', {
+        user: !!data.user,
+        session: !!data.session,
+        userId: data.user?.id,
+        emailConfirmed: data.user?.email_confirmed_at,
+      });
+    }
 
     // If Supabase returned a session, update state immediately
     if (data.session) {
-      console.log('[auth] Session received on signup — immediate access');
+      if (import.meta.env.DEV) console.log('[auth] Session received on signup — immediate access');
       setSession(data.session);
       setUser(data.user);
       setLoading(false);
@@ -186,20 +190,19 @@ export function AuthProvider({ children }) {
 
     // No session — email confirmation is pending. Do NOT attempt signIn fallback
     // to avoid logging in an existing user with stale onboarding metadata.
-    console.log('[auth] No session on signup — email confirmation required');
+    if (import.meta.env.DEV) console.log('[auth] No session on signup — email confirmation required');
     return { ok: true, session: null, requiresEmailConfirmation: true };
   }
 
   async function signIn(email, password) {
     if (!supabase) {
-      console.error('[auth] Supabase not configured - check VITE_SUPABASE_ANON_KEY');
       throw new Error('Supabase not configured');
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      console.error('[auth] Sign in error:', error);
+      if (import.meta.env.DEV) console.error('[auth] Sign in error:', error);
       throw error;
     }
 
@@ -242,7 +245,7 @@ export function AuthProvider({ children }) {
 
   async function updateUserMeta(data) {
     if (!supabase) throw new Error('Supabase not configured');
-    console.log('[auth] updateUserMeta:', data);
+    if (import.meta.env.DEV) console.log('[auth] updateUserMeta:', data);
     const { data: result, error } = await supabase.auth.updateUser({ data });
     if (error) throw error;
     // Update local user state immediately so route guards see the new metadata

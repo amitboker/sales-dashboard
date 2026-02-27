@@ -7,20 +7,21 @@ datasource db {
 }
 
 model Client {
-  id             String       @id @default(uuid())
-  email          String       @unique
+  id             String        @id @default(uuid())
+  email          String        @unique
   passwordHash   String
   companyName    String
-  salesReps      Int          @default(1)
+  salesReps      Int           @default(1)
   industry       String?
-  onboardingStep Int          @default(0)
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  onboardingStep Int           @default(0)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   dataSource     DataSource?
   funnelData     FunnelData[]
   funnel         Funnel?
   syncLogs       SyncLog[]
+  integrations   Integration[]
 
   @@index([email])
   @@map("clients")
@@ -103,6 +104,22 @@ model SyncLog {
 
   @@index([clientId, startedAt])
   @@map("sync_logs")
+}
+
+model Integration {
+  id        String   @id @default(uuid())
+  provider  String   // gohighlevel, monday, powerlink, hubspot
+  status    String   @default("pending") // pending, connected, error
+  apiKey    String?
+  config    Json?
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, provider])
+  @@index([clientId])
+  @@map("integrations")
 }
 
 model Profile {

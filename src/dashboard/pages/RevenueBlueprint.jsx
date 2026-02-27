@@ -154,7 +154,7 @@ export default function RevenueBlueprint({ embedded = false }) {
 
       {!embedded && (
         <div className="footer">
-          Powered by &nbsp; מוקד בסקייל &nbsp; | &nbsp; RevOps Intelligence
+          Powered by Clario | RevOps Intelligence
         </div>
       )}
     </>

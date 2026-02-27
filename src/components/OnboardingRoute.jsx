@@ -36,8 +36,8 @@ export default function OnboardingRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Force onboarding override — always show onboarding
-  if (forceOnboarding) {
+  // Force onboarding override — for local testing only
+  if (import.meta.env.DEV && forceOnboarding) {
     console.log('[NAV] OnboardingRoute: forceOnboarding=true — showing step');
     return children;
   }
