@@ -206,7 +206,7 @@ function SignUpPage() {
           </div>
 
           <p className="su__terms">
-            בהמשך, אתה מסכים ל<span className="su__terms-link">תנאי השימוש</span> ול<span className="su__terms-link">מדיניות הפרטיות</span>
+            בהמשך, אתה מסכים ל<a href="https://clario-website-ecru.vercel.app/terms" className="su__terms-link">תנאי השימוש</a> ול<a href="https://clario-website-ecru.vercel.app/privacy" className="su__terms-link">מדיניות הפרטיות</a>
           </p>
 
           {error && <p className="su__error">{error}</p>}

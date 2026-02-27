@@ -123,7 +123,7 @@ export default function OverviewDashboard() {
         ))}
       </div>
 
-      <div className="grid section" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 20 }}>
+      <div className="grid grid-charts section" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 20 }}>
         <div className="card padded anim-fade-up" ref={areaChartRef} style={{ animationDelay: "0.1s" }}>
           <div className="card-header-row">
             <div className="section-title">הכנסות חודשיות</div>
@@ -148,6 +148,7 @@ export default function OverviewDashboard() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
+              className="chart-height-wrap"
               style={{ height: 380 }}
             >
               <ResponsiveContainer width="100%" height="100%">

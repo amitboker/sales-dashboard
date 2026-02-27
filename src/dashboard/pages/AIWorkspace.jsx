@@ -234,7 +234,7 @@ export default function AIWorkspace({ profilePhoto } = {}) {
   if (!hasChat) {
     return (
       <div
-        className="ai-workspace-container"
+        className="ai-workspace-container ai-landing"
         style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
       >
         <DottedBackground />
@@ -359,7 +359,7 @@ export default function AIWorkspace({ profilePhoto } = {}) {
                   </button>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div className="ai-sample-prompts-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                   <AnimatePresence mode="wait">
                     {getVisiblePrompts(activeMode.id).map((text, i) => (
                       <motion.button
@@ -510,7 +510,7 @@ export default function AIWorkspace({ profilePhoto } = {}) {
 
               {/* Bubble */}
               <div
-                className={isUser ? "chat-bubble-user" : "chat-bubble-ai"}
+                className={`chat-bubble ${isUser ? "chat-bubble-user" : "chat-bubble-ai"}`}
                 dir="rtl"
                 style={{
                   maxWidth: "75%",
