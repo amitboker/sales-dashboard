@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpLeft, RefreshCw } from "lucide-react";
+import { ArrowUpLeft, ChevronDown, RefreshCw } from "lucide-react";
 import { trackEvent } from "../../lib/tracking";
 import { sendChatMessage } from "../../ai/service";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,79 @@ import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
 import DottedBackground from "../../components/DottedBackground";
+
+/* ── Intent-aware activity feed ── */
+
+const ACTIVITY_POOLS = {
+  greeting: [
+    "מנתח את השאלה…",
+    "מכין תשובה…",
+  ],
+  sales: [
+    "סורק את נתוני המכירות…",
+    "פותח את נתוני הנציגים…",
+    "מאתר את 30 הימים האחרונים…",
+    "מחשב יחסי המרה…",
+    "מנתח ביצועי צוות…",
+    "בודק מגמות הכנסה…",
+    "משווה מול תקופה קודמת…",
+    "מזהה דפוסים בנתונים…",
+    "מכין תובנות…",
+    "אוסף נתונים רלוונטיים…",
+    "בודק יעדים מול ביצוע…",
+    "מסכם ביצועים…",
+  ],
+  technical: [
+    "מנתח את השאלה…",
+    "מחפש מידע רלוונטי…",
+    "מארגן תשובה…",
+  ],
+  general: [
+    "מעבד את הבקשה…",
+    "מנתח את השאלה…",
+    "מכין תשובה…",
+  ],
+};
+
+const INTENT_LINE_COUNTS = {
+  greeting:  { min: 2, max: 2 },
+  sales:     { min: 3, max: 5 },
+  technical: { min: 2, max: 3 },
+  general:   { min: 2, max: 3 },
+};
+
+const GREETING_RE = /^(היי|הי|שלום|אהלן|בוקר טוב|ערב טוב|לילה טוב|מה נשמע|מה קורה|מה העניינים|הלו|yo|hello|hi|hey)\b/i;
+
+const SALES_KEYWORDS = [
+  "מכירות","מכירה","נציג","נציגים","ביצועים","ביצועי","המרה","המרות",
+  "סגירה","סגירות","לידים","ליד","פאנל","הכנסה","הכנסות","עסקאות","עסקה",
+  "יעד","יעדים","דשבורד","מגמות","צוות","לקוחות","לקוח","תחזית",
+  "revenue","sales","leads","funnel","pipeline","conversion",
+  "rep","reps","performance","target","deal","deals","kpi",
+];
+
+const TECHNICAL_KEYWORDS = [
+  "מה אתה","מה את","איך אתה","איך את","תסביר","הסבר",
+  "מה זה","איך זה","למה זה","מה אפשר","יכולות","פיצ׳רים",
+  "what are you","what can you","how do you","explain",
+];
+
+function classifyIntent(text) {
+  const t = text.trim();
+  if (GREETING_RE.test(t)) return "greeting";
+  const lower = t.toLowerCase();
+  if (SALES_KEYWORDS.some((kw) => lower.includes(kw))) return "sales";
+  if (TECHNICAL_KEYWORDS.some((kw) => lower.includes(kw))) return "technical";
+  return "general";
+}
+
+function pickActivityLines(intent) {
+  const pool = ACTIVITY_POOLS[intent] || ACTIVITY_POOLS.general;
+  const { min, max } = INTENT_LINE_COUNTS[intent] || INTENT_LINE_COUNTS.general;
+  const count = min + Math.floor(Math.random() * (max - min + 1));
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
   const navigate = useNavigate();
@@ -31,7 +104,10 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
   const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState("");
   const [prefillValue, setPrefillValue] = useState("");
+  const [activityLines, setActivityLines] = useState([]);
+  const [expandedThinking, setExpandedThinking] = useState(new Set());
   const abortRef = useRef(null);
+  const activityIntervalRef = useRef(null);
   const chatEndRef = useRef(null);
   const messagesRef = useRef(null);
   const isNearBottomRef = useRef(true);
@@ -83,7 +159,7 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
     } else {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, isStreaming, isThinking]);
+  }, [messages, isStreaming, isThinking, activityLines]);
 
   /* ── Send message ── */
   const handleSend = useCallback(
@@ -110,6 +186,21 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
       setIsThinking(true);
       isThinkingRef.current = true;
 
+      // Start intent-aware activity simulation
+      setActivityLines([]);
+      const intent = classifyIntent(trimmed);
+      const selectedLines = pickActivityLines(intent);
+      let lineIndex = 0;
+      activityIntervalRef.current = setInterval(() => {
+        if (lineIndex < selectedLines.length) {
+          setActivityLines((prev) => [...prev, selectedLines[lineIndex]]);
+          lineIndex++;
+        } else {
+          clearInterval(activityIntervalRef.current);
+          activityIntervalRef.current = null;
+        }
+      }, 600);
+
       const controller = new AbortController();
       abortRef.current = controller;
 
@@ -120,6 +211,32 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
           (chunk) => {
             // First chunk → transition from thinking to streaming
             if (isThinkingRef.current) {
+              // Clear activity simulation
+              if (activityIntervalRef.current) {
+                clearInterval(activityIntervalRef.current);
+                activityIntervalRef.current = null;
+              }
+              // Capture thinking duration (time until first real chunk)
+              const thinkElapsed = (Date.now() - thinkStartRef.current) / 1000;
+              const thinkDuration = thinkElapsed < 1
+                ? Math.round(thinkElapsed * 10) / 10
+                : Math.round(thinkElapsed);
+              // Save activity lines + think duration to the message
+              setActivityLines((currentLines) => {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last && last.role === "assistant") {
+                    updated[updated.length - 1] = {
+                      ...last,
+                      _activityLines: currentLines,
+                      _thinkDuration: thinkDuration,
+                    };
+                  }
+                  return updated;
+                });
+                return currentLines;
+              });
               isThinkingRef.current = false;
               setIsThinking(false);
               setIsStreaming(true);
@@ -140,6 +257,10 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
           { hasData, isDemo }
         );
       } catch (err) {
+        if (activityIntervalRef.current) {
+          clearInterval(activityIntervalRef.current);
+          activityIntervalRef.current = null;
+        }
         if (err.name === "AbortError") return;
         const msg = err.message || "שגיאה בתקשורת עם השרת";
         setError(msg);
@@ -152,13 +273,13 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
           return prev;
         });
       } finally {
-        const elapsed = (Date.now() - thinkStartRef.current) / 1000;
-        const duration = elapsed < 1 ? Math.round(elapsed * 10) / 10 : Math.round(elapsed);
-        // Store duration on the completed assistant message
+        // Store duration on the completed assistant message (fallback if not set in onChunk)
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
-          if (last && last.role === "assistant" && last.content) {
+          if (last && last.role === "assistant" && last.content && last._thinkDuration == null) {
+            const elapsed = (Date.now() - thinkStartRef.current) / 1000;
+            const duration = elapsed < 1 ? Math.round(elapsed * 10) / 10 : Math.round(elapsed);
             updated[updated.length - 1] = { ...last, _thinkDuration: duration };
           }
           return updated;
@@ -186,7 +307,13 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
 
   const handleNewChat = () => {
     if (abortRef.current) abortRef.current.abort();
+    if (activityIntervalRef.current) {
+      clearInterval(activityIntervalRef.current);
+      activityIntervalRef.current = null;
+    }
     setMessages([]);
+    setActivityLines([]);
+    setExpandedThinking(new Set());
     setError("");
     setIsStreaming(false);
     setIsThinking(false);
@@ -201,37 +328,14 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
       >
         <DottedBackground />
         <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
-          {/* Plan badge */}
-          <div
-            onClick={() => navigate("/pricing")}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "5px 14px",
-              borderRadius: "999px",
-              border: "1px solid rgba(183, 221, 76, 0.3)",
-              backgroundColor: "rgba(218, 253, 104, 0.1)",
-              cursor: "pointer",
-              marginBottom: "-8px",
-              transition: "all 0.2s ease",
-              letterSpacing: "0.01em",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(218, 253, 104, 0.16)";
-              e.currentTarget.style.borderColor = "rgba(183, 221, 76, 0.45)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(218, 253, 104, 0.1)";
-              e.currentTarget.style.borderColor = "rgba(183, 221, 76, 0.3)";
-            }}
-          >
-            <span style={{ fontSize: "12px", color: "#7a9a2e", fontWeight: 450 }}>
-              תוכנית חינמית
-            </span>
-            <span style={{ fontSize: "12px", color: "#7a9a2e", opacity: 0.3 }}>&bull;</span>
-            <span style={{ fontSize: "12px", color: "#6b8c24", fontWeight: 550 }}>
-              שדרג ל-Pro
+          {/* Early access pill — mirrors marketing site */}
+          <div className="ai-early-pill" onClick={() => navigate("/pricing")}>
+            <span className="ai-early-pill__fill" />
+            <span className="ai-early-pill__badge">חדש</span>
+            <span className="ai-early-pill__text">Clario AI · עכשיו בגישה מוקדמת</span>
+            <span className="ai-early-pill__arrow-wrap">
+              <span className="ai-early-pill__arrow-out">←</span>
+              <span className="ai-early-pill__arrow-in">←</span>
             </span>
           </div>
 
@@ -474,53 +578,112 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
 
               {/* Status line + bubble */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Think / stream status */}
+                {/* Think status — only during active thinking */}
                 {isActiveThinking && (
                   <div className="chat-think-label">
                     <span className="think-dot" />
                     <span>...חושב</span>
                   </div>
                 )}
+                {/* Stream status — only during active streaming */}
                 {isActiveStream && (
                   <div className="chat-think-label">
                     <span className="think-dot streaming" />
                     <span>...כותב</span>
                   </div>
                 )}
-                {showDuration && (
+                {/* Simple duration fallback for messages without activity */}
+                {showDuration && !(msg._activityLines || []).length && (
                   <div className="chat-think-label done">
-                    <span>חשב {msg._thinkDuration < 1 ? `${msg._thinkDuration} שניות` : `${msg._thinkDuration} שניות`}</span>
+                    <span>חשב {msg._thinkDuration} שניות</span>
                   </div>
                 )}
 
-                {/* Bubble — always rendered to avoid layout shift */}
-                {(isActiveThinking && !msg.content) ? (
-                  /* Thinking: just status label, no bubble yet */
-                  null
-                ) : (
-                  <div
-                    className="chat-bubble chat-bubble-ai"
-                    dir="rtl"
-                    style={{
-                      maxWidth: "85%",
-                      borderRadius: "16px",
-                      padding: "12px 16px",
-                      fontSize: "14px",
-                      lineHeight: "1.65",
-                      textAlign: "right",
-                      backgroundColor: "var(--color-surface, #fff)",
-                      border: "1px solid var(--color-border, #e5e5e5)",
-                      color: "var(--color-text, #000)",
-                    }}
-                  >
-                    <span
-                      className={isActiveStream && msg.content ? "streaming-cursor" : ""}
-                      style={{ whiteSpace: "pre-wrap", unicodeBidi: "plaintext" }}
+                {/* Bubble */}
+                {(() => {
+                  const liveLines = isActiveThinking ? activityLines : [];
+                  const savedLines = msg._activityLines || [];
+                  const hasActivity = savedLines.length > 0;
+                  const thinkExpanded = expandedThinking.has(i);
+                  const showToggle = !isActiveThinking && hasActivity;
+
+                  // During thinking with no lines yet and no content: no bubble
+                  if (isActiveThinking && liveLines.length === 0 && !msg.content) return null;
+                  // No content and no activity at all: no bubble
+                  if (!msg.content && liveLines.length === 0 && !hasActivity) return null;
+
+                  return (
+                    <div
+                      className="chat-bubble chat-bubble-ai"
+                      dir="rtl"
+                      style={{
+                        maxWidth: "85%",
+                        borderRadius: "16px",
+                        padding: "12px 16px",
+                        fontSize: "14px",
+                        lineHeight: "1.65",
+                        textAlign: "right",
+                        backgroundColor: "var(--color-surface, #fff)",
+                        border: "1px solid var(--color-border, #e5e5e5)",
+                        color: "var(--color-text, #000)",
+                      }}
                     >
-                      {msg.content}
-                    </span>
-                  </div>
-                )}
+                      {/* LIVE thinking: activity lines appearing one by one */}
+                      {isActiveThinking && liveLines.length > 0 && (
+                        <div className="agent-activity-feed">
+                          {liveLines.map((line, j) => (
+                            <div key={j} className="agent-activity-line">
+                              <span className="agent-activity-icon">⟡</span>
+                              <span>{line}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* STREAMING / COMPLETED: collapsible thinking section */}
+                      {showToggle && (
+                        <>
+                          <button
+                            className="agent-thinking-toggle"
+                            onClick={() => setExpandedThinking((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(i)) next.delete(i);
+                              else next.add(i);
+                              return next;
+                            })}
+                          >
+                            <span className="agent-thinking-toggle__dot" />
+                            <span>חשב במשך {msg._thinkDuration ?? "…"} שניות</span>
+                            <ChevronDown className={`agent-thinking-toggle__chevron${thinkExpanded ? " expanded" : ""}`} />
+                          </button>
+                          {thinkExpanded && (
+                            <div className="agent-activity-feed agent-activity-feed--revealed">
+                              {savedLines.map((line, j) => (
+                                <div key={j} className="agent-activity-line">
+                                  <span className="agent-activity-icon">⟡</span>
+                                  <span>{line}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* Divider between thinking section and answer */}
+                      {(showToggle || (isActiveThinking && liveLines.length > 0)) && msg.content && (
+                        <div className="agent-activity-divider" />
+                      )}
+
+                      {/* Final answer content */}
+                      <span
+                        className={isActiveStream && msg.content ? "streaming-cursor" : ""}
+                        style={{ whiteSpace: "pre-wrap", unicodeBidi: "plaintext" }}
+                      >
+                        {msg.content}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           );
