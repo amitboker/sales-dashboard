@@ -16,7 +16,7 @@ const SendArrow = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2.5"
+    strokeWidth="1.8"
     strokeLinecap="round"
     strokeLinejoin="round"
     style={{ display: "block" }}
