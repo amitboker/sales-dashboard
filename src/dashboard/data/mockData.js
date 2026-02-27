@@ -333,6 +333,15 @@ export const conversionTrend = [
   { month: "יוני", יוסי_כהן: 25, שירה_לוי: 22, דוד_מזרחי: 17, זיבי_שמש: 13 },
 ];
 
+export const funnelKPIs = [
+  { label: "סה״כ לידים", value: "420", delta: "+12%", deltaDirection: "up" },
+  { label: "עסקאות שנסגרו", value: "87", delta: "+8%", deltaDirection: "up" },
+  { label: "אחוז סגירה", value: "20.7%", delta: "-2.1%", deltaDirection: "down" },
+  { label: "אחוז התייצבות", value: "76%", delta: "+4%", deltaDirection: "up" },
+  { label: "הכנסה לליד", value: "₪ 1,420", delta: "+6%", deltaDirection: "up" },
+  { label: "ערך עסקה ממוצע", value: "₪ 6,850", delta: "-3%", deltaDirection: "down" },
+];
+
 export const callsVsDeals = [
   { name: "גולן", calls: 30, deals: 5 },
   { name: "דוד", calls: 35, deals: 6 },

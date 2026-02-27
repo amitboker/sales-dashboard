@@ -876,14 +876,10 @@ tbody tr:hover {
 }
 
 .card.funnel-wrapper {
-  max-width: 640px;
-  margin: 0 auto;
   padding: 20px 24px;
 }
 
 .card.funnel-alerts-card {
-  max-width: 640px;
-  margin: 0 auto;
 }
 
 .funnel-card {
@@ -4073,6 +4069,65 @@ body.settings-modal-open .settings-modal-overlay {
    RESPONSIVE
    ============================================ */
 
+/* ===== FUNNEL COMMAND CENTER ===== */
+
+.funnel-command-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.funnel-intel-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.funnel-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.funnel-kpi {
+  text-align: center;
+  padding: 16px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.funnel-kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.funnel-kpi-label {
+  font-size: 11px;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.funnel-kpi-delta {
+  font-size: 11px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.funnel-kpi-delta.up {
+  color: var(--color-success);
+}
+
+.funnel-kpi-delta.down {
+  color: var(--color-danger);
+}
+
 /* Mobile (≤767px) */
 @media (max-width: 767px) {
   /* ===== LAYOUT ===== */
@@ -4454,7 +4509,15 @@ body.settings-modal-open .settings-modal-overlay {
     font-size: 24px;
   }
 
-  /* ===== FUNNEL ===== */
+  /* ===== FUNNEL COMMAND CENTER ===== */
+  .funnel-command-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .funnel-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .funnel-card {
     max-width: 100%;
     padding: 14px 16px;
@@ -4481,12 +4544,7 @@ body.settings-modal-open .settings-modal-overlay {
   }
 
   .card.funnel-wrapper {
-    max-width: 100%;
     padding: 16px;
-  }
-
-  .card.funnel-alerts-card {
-    max-width: 100%;
   }
 
   /* ===== OPPORTUNITIES ===== */

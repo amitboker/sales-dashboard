@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import PageHeader from "../components/PageHeader.jsx";
 import AlertCard from "../components/AlertCard.jsx";
@@ -10,7 +10,7 @@ import { trackEvent } from "../../lib/tracking";
 import useFunnelStages from "../hooks/useFunnelStages.js";
 import {
   alerts, overallConversion, criticalLeaks,
-  leakageAnalysis, avgTimePerStage,
+  leakageAnalysis, avgTimePerStage, funnelKPIs,
 } from "../data/mockData.js";
 import { generatePDF } from "../utils/pdfExport.js";
 
@@ -116,8 +116,10 @@ export default function SalesFunnel() {
         }
       />
 
-      <div className="section">
-        <div className="card padded funnel-wrapper">
+      {/* ── Two-Column Command Center ── */}
+      <div className="funnel-command-grid section">
+        {/* RIGHT COLUMN — Funnel Visualization */}
+        <div className="card padded funnel-wrapper anim-fade-up">
           <div className="section-title">משפך מכירות</div>
           <div className="funnel-badge">{activeStages.length} שלבים</div>
           <div className="funnel-container">
@@ -147,8 +149,32 @@ export default function SalesFunnel() {
               <div className="muted">{overallConversion.deals} עסקאות</div>
             </div>
           </div>
+        </div>
 
-          <div className="critical-leaks">
+        {/* LEFT COLUMN — Intelligence Panel */}
+        <div className="funnel-intel-panel">
+          {/* KPI Grid */}
+          <div className="card padded anim-fade-up" style={{ animationDelay: "0.05s" }}>
+            <div className="section-title" style={{ marginBottom: 14 }}>מדדי ביצוע</div>
+            <div className="funnel-kpi-grid">
+              {funnelKPIs.map((kpi, i) => (
+                <div key={i} className="funnel-kpi">
+                  <div className="funnel-kpi-value">{kpi.value}</div>
+                  <div className="funnel-kpi-label">{kpi.label}</div>
+                  <div className={`funnel-kpi-delta ${kpi.deltaDirection}`}>
+                    <Icon
+                      name={kpi.deltaDirection === "up" ? "trending-up" : "trending-down"}
+                      size={12}
+                    />
+                    {kpi.delta}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Critical Leaks */}
+          <div className="critical-leaks anim-fade-up" style={{ animationDelay: "0.1s" }}>
             <div className="critical-leaks-header">
               <Icon name="alert-triangle" size={16} style={{ filter: "sepia(1) saturate(5) hue-rotate(30deg) brightness(0.7)" }} />
               <span>2 דליפות קריטיות זוהו!</span>
@@ -168,19 +194,18 @@ export default function SalesFunnel() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
-      <div className="section">
-        <div className="card padded funnel-alerts-card">
-          <div className="alerts-header">
-            <Icon name="bell" size={16} style={{ filter: "sepia(1) saturate(3) hue-rotate(30deg) brightness(0.7)" }} />
-            <h3>התראות</h3>
-          </div>
-          <div className="alerts-section">
-            {alerts.map((alert) => (
-              <AlertCard key={alert.title} {...alert} />
-            ))}
+          {/* Alerts */}
+          <div className="card padded anim-fade-up" style={{ animationDelay: "0.15s" }}>
+            <div className="alerts-header">
+              <Icon name="bell" size={16} style={{ filter: "sepia(1) saturate(3) hue-rotate(30deg) brightness(0.7)" }} />
+              <h3>התראות</h3>
+            </div>
+            <div className="alerts-section">
+              {alerts.map((alert) => (
+                <AlertCard key={alert.title} {...alert} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -195,8 +220,9 @@ export default function SalesFunnel() {
         }}
       />
 
+      {/* ── Full-Width Bottom Section ── */}
       <div className="grid grid-2 section">
-        <div className="card padded" ref={barChartRef}>
+        <div className="card padded anim-fade-up" ref={barChartRef} style={{ animationDelay: "0.2s" }}>
           <div className="section-title">זמן ממוצע בכל שלב (ימים)</div>
           <ResponsiveContainer width="100%" height={340}>
             <BarChart data={avgTimePerStage} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
@@ -220,7 +246,7 @@ export default function SalesFunnel() {
           </div>
         </div>
 
-        <div className="card padded">
+        <div className="card padded anim-fade-up" style={{ animationDelay: "0.25s" }}>
           <div className="section-title">ניתוח דליפות</div>
           <table className="leakage-table">
             <thead>
