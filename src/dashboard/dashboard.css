@@ -3089,6 +3089,8 @@ body.funnel-editor-open .funnel-editor-panel {
   justify-content: flex-end;
   padding: 0 0 20px;
   direction: rtl;
+  position: relative;
+  z-index: 10;
 }
 
 .topbar-user-area {

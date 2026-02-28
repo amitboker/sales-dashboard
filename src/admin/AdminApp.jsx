@@ -2,6 +2,7 @@ import { useState, useRef, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
+import { DemoModeProvider } from "../dashboard/context/DemoModeContext.jsx";
 import TopBar from "../dashboard/components/TopBar.jsx";
 import DashboardPageWrapper from "../dashboard/components/DashboardPageWrapper.jsx";
 import AdminSideNav from "./components/AdminSideNav.jsx";
@@ -19,7 +20,7 @@ const pageMap = {
 
 export default function AdminApp() {
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const [activePage, setActivePage] = useState("users");
   const KNOWN_NAMES = {
     "amitbokershud@gmail.com": "עמית בוקר",
@@ -57,25 +58,28 @@ export default function AdminApp() {
   const ActiveComponent = pageMap[activePage] || AdminUsers;
 
   return (
-    <div className="admin-wrapper">
-      <div className="app">
-        <main className="content" ref={contentRef}>
-          <TopBar
-            profileName={profileName}
-            profileRole="אדמין"
-            profilePhoto={null}
-            onNavigate={setActivePage}
-            onLogout={handleLogout}
+    <DemoModeProvider isAdmin={isAdmin}>
+      <div className="admin-wrapper">
+        <div className="app">
+          <main className="content" ref={contentRef}>
+            <TopBar
+              profileName={profileName}
+              profileRole="אדמין"
+              profilePhoto={null}
+              onNavigate={setActivePage}
+              onLogout={handleLogout}
+              isAdmin={isAdmin}
+            />
+            <DashboardPageWrapper routeKey={activePage}>
+              <ActiveComponent />
+            </DashboardPageWrapper>
+          </main>
+          <AdminSideNav
+            activeId={activePage}
+            onSelect={setActivePage}
           />
-          <DashboardPageWrapper routeKey={activePage}>
-            <ActiveComponent />
-          </DashboardPageWrapper>
-        </main>
-        <AdminSideNav
-          activeId={activePage}
-          onSelect={setActivePage}
-        />
+        </div>
       </div>
-    </div>
+    </DemoModeProvider>
   );
 }
