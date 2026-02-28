@@ -48,18 +48,62 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
           )}
         </div>
 
-        {/* Avatar */}
-        <button
-          className="topbar-avatar-btn"
-          onClick={() => setDropdownOpen((v) => !v)}
-          type="button"
-        >
-          {profilePhoto ? (
-            <img src={profilePhoto} alt={profileName} className="topbar-avatar-img" />
-          ) : (
-            <span className="topbar-avatar-initials">{initials}</span>
+        {/* Avatar + Dropdown anchor */}
+        <div className="topbar-avatar-anchor">
+          <button
+            className="topbar-avatar-btn"
+            onClick={() => setDropdownOpen((v) => !v)}
+            type="button"
+          >
+            {profilePhoto ? (
+              <img src={profilePhoto} alt={profileName} className="topbar-avatar-img" />
+            ) : (
+              <span className="topbar-avatar-initials">{initials}</span>
+            )}
+          </button>
+
+          {/* Dropdown Menu */}
+          {dropdownOpen && (
+            <div className="topbar-dropdown">
+              <button
+                className="topbar-dropdown-item"
+                type="button"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  onNavigate("settings");
+                }}
+              >
+                הצג פרופיל
+              </button>
+              {isAdmin && (
+                <>
+                  <div className="topbar-dropdown-divider" />
+                  <button
+                    className="topbar-dropdown-item"
+                    type="button"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      navigate("/admin");
+                    }}
+                  >
+                    פאנל ניהול
+                  </button>
+                  <button
+                    className="topbar-dropdown-item"
+                    type="button"
+                    onClick={() => {
+                      toggleDemo();
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    <span className={`demo-toggle-indicator${isDemo ? " active" : ""}`} />
+                    {isDemo ? "כבה מצב דמו" : "הפעל מצב דמו"}
+                  </button>
+                </>
+              )}
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Action Buttons */}
         <div className="topbar-action-buttons">
@@ -88,48 +132,6 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
             <span className="demo-pill-dot" />
             <span className="demo-pill-text">מצב דמו פעיל</span>
             <button className="demo-pill-exit" type="button" onClick={exitDemo}>✕</button>
-          </div>
-        )}
-
-        {/* Dropdown Menu */}
-        {dropdownOpen && (
-          <div className="topbar-dropdown">
-            <button
-              className="topbar-dropdown-item"
-              type="button"
-              onClick={() => {
-                setDropdownOpen(false);
-                onNavigate("settings");
-              }}
-            >
-              הצג פרופיל
-            </button>
-            {isAdmin && (
-              <>
-                <div className="topbar-dropdown-divider" />
-                <button
-                  className="topbar-dropdown-item"
-                  type="button"
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    navigate("/admin");
-                  }}
-                >
-                  פאנל ניהול
-                </button>
-                <button
-                  className="topbar-dropdown-item"
-                  type="button"
-                  onClick={() => {
-                    toggleDemo();
-                    setDropdownOpen(false);
-                  }}
-                >
-                  <span className={`demo-toggle-indicator${isDemo ? " active" : ""}`} />
-                  {isDemo ? "כבה מצב דמו" : "הפעל מצב דמו"}
-                </button>
-              </>
-            )}
           </div>
         )}
       </div>

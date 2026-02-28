@@ -3097,8 +3097,12 @@ body.funnel-editor-open .funnel-editor-panel {
   display: flex;
   align-items: center;
   gap: 12px;
-  position: relative;
   direction: ltr;
+}
+
+.topbar-avatar-anchor {
+  position: relative;
+  flex-shrink: 0;
 }
 
 /* Avatar - Rounded Rectangle (Squircle) */
@@ -3205,7 +3209,7 @@ body.funnel-editor-open .funnel-editor-panel {
 .topbar-dropdown {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  left: 0;
   width: 180px;
   background: #ffffff;
   border: 1px solid #E5E7EB;
@@ -4109,8 +4113,7 @@ body.settings-modal-open .settings-modal-overlay {
 
   .topbar-dropdown {
     width: 180px;
-    right: 0;
-    left: auto;
+    left: 0;
   }
 
   /* ===== 3. CONTENT AREA — BREATHING ROOM ===== */
