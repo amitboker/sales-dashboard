@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Paperclip, Sparkles, X, RotateCcw } from "lucide-react";
 import ModelSelector from "./ModelSelector";
 import RecordingOverlay from "./RecordingOverlay";
@@ -23,6 +24,19 @@ const SendArrow = () => (
   >
     <path d="M6 5v6a4 4 0 0 0 4 4h8" />
     <polyline points="14 11 18 15 14 19" />
+  </svg>
+);
+
+/* ── Stop icon (rounded square) ─────────────────────────────────── */
+const StopIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="currentColor"
+    style={{ display: "block" }}
+  >
+    <rect x="2.5" y="2.5" width="11" height="11" rx="2.5" />
   </svg>
 );
 
@@ -81,6 +95,10 @@ interface ChatInputProps {
   prefillValue?: string;
   /** Called when prefill has been consumed (so parent can clear it) */
   onPrefillConsumed?: () => void;
+  /** Whether the AI is currently streaming a response */
+  isStreaming?: boolean;
+  /** Called to abort the current stream */
+  onStop?: () => void;
 }
 
 export default function ChatInput({
@@ -92,6 +110,8 @@ export default function ChatInput({
   onModelChange,
   prefillValue,
   onPrefillConsumed,
+  isStreaming = false,
+  onStop,
 }: ChatInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
@@ -420,17 +440,43 @@ export default function ChatInput({
             )}
 
             {!isVoiceActive && (
-              <Tooltip text="שליחה">
+              <Tooltip text={isStreaming ? "עצור" : "שליחה"}>
                 <button
-                  onClick={handleSubmit}
-                  disabled={isInputEmpty}
+                  onClick={isStreaming ? onStop : handleSubmit}
+                  disabled={!isStreaming && isInputEmpty}
                   className={`${PILL_BASE} w-9 px-0 ${
-                    isInputEmpty
-                      ? "bg-[var(--color-surface-muted,#f0f0f0)] border-transparent text-[var(--color-muted,#828282)]/40 cursor-default"
-                      : "bg-[var(--color-primary,#DAFD68)] border-[var(--color-primary-darker,#b7dd4c)]/30 text-[#1a1a1a] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow active:scale-95"
+                    isStreaming
+                      ? "bg-[var(--color-surface-muted,#e8e8e8)] border-[var(--color-border,#d0d0d0)] text-[#555] hover:bg-[var(--color-surface-muted,#ddd)] active:scale-95"
+                      : isInputEmpty
+                        ? "bg-[var(--color-surface-muted,#f0f0f0)] border-transparent text-[var(--color-muted,#828282)]/40 cursor-default"
+                        : "bg-[var(--color-primary,#DAFD68)] border-[var(--color-primary-darker,#b7dd4c)]/30 text-[#1a1a1a] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow active:scale-95"
                   }`}
                 >
-                  <SendArrow />
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isStreaming ? (
+                      <motion.span
+                        key="stop"
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.5, opacity: 0 }}
+                        transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                        className="flex items-center justify-center"
+                      >
+                        <StopIcon />
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="send"
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.5, opacity: 0 }}
+                        transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                        className="flex items-center justify-center"
+                      >
+                        <SendArrow />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </button>
               </Tooltip>
             )}

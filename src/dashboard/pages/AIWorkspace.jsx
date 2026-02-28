@@ -318,6 +318,18 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
     setIsThinking(false);
   };
 
+  const handleStopStreaming = useCallback(() => {
+    if (abortRef.current) abortRef.current.abort();
+    if (activityIntervalRef.current) {
+      clearInterval(activityIntervalRef.current);
+      activityIntervalRef.current = null;
+    }
+    setActivityLines([]);
+    setIsStreaming(false);
+    setIsThinking(false);
+    abortRef.current = null;
+  }, []);
+
   /* ── Landing state (no messages) ── */
   if (!hasChat) {
     return (
@@ -350,6 +362,8 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
             onProClick={() => {}}
             prefillValue={prefillValue}
             onPrefillConsumed={() => setPrefillValue("")}
+            isStreaming={isStreaming || isThinking}
+            onStop={handleStopStreaming}
           />
 
           {error && (
@@ -706,6 +720,8 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
           onProClick={() => {}}
           prefillValue={prefillValue}
           onPrefillConsumed={() => setPrefillValue("")}
+          isStreaming={isStreaming || isThinking}
+          onStop={handleStopStreaming}
         />
       </div>
     </div>
