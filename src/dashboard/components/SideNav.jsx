@@ -31,21 +31,22 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
             src={logo}
             alt="Clario"
             className="brand-logo"
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, filter: "blur(8px)", y: -6 }}
+            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.div
             className="brand-info"
             initial={{ width: 0 }}
             animate={{ width: "auto" }}
-            transition={{ duration: 0.5, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.55, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
               className="brand-title"
-              initial={{ opacity: 0, x: -8, y: 1.5 }}
-              animate={{ opacity: 1, x: 0, y: 1.5 }}
-              transition={{ duration: 0.4, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              style={{ y: 1.5 }}
+              initial={{ opacity: 0, filter: "blur(6px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              transition={{ duration: 0.6, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
               Clario
             </motion.div>
