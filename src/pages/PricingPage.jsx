@@ -1,58 +1,59 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import DottedBackground from '../components/DottedBackground';
 import './PricingPage.css';
 
 const plans = [
   {
     id: 'starter',
-    name: 'Starter',
-    description: 'גישה בסיסית לנתוני מכירות ודוחות ביצועים.',
-    monthly: { price: 'חינם', period: '' },
-    yearly: { price: 'חינם', period: '' },
+    name: 'סטארטר',
+    description: 'מושלם לצוותים קטנים שמתחילים',
+    monthly: { price: '₪199', period: '/לחודש' },
+    yearly: { price: '₪139', period: '/לחודש' },
     features: [
-      'דאשבורד ביצועים בסיסי',
-      'עד 3 משתמשים',
-      'נתוני מכירות בזמן אמת',
-      'דוחות שבועיים אוטומטיים',
-      'תמיכה בדוא"ל',
+      'עד 3 מקורות נתונים',
+      '5 דשבורדים',
+      'עדכון יומי',
+      'תמיכה במייל',
+      'משתמש אחד',
     ],
-    cta: 'התחל בחינם',
-    recommended: false,
+    cta: 'התחילו תקופת ניסיון חינם',
+    popular: false,
   },
   {
     id: 'pro',
-    name: 'Pro',
-    description: 'לצוותי מכירות שרוצים שליטה מלאה בנתונים ותובנות מתקדמות.',
-    monthly: { price: '₪199', period: '/חודש', numeric: 199 },
-    yearly: { price: '₪179', period: '/חודש', numeric: 179 },
+    name: 'פרו',
+    description: 'לצוותי מכירות שרוצים לצמוח',
+    monthly: { price: '₪499', period: '/לחודש' },
+    yearly: { price: '₪349', period: '/לחודש' },
     features: [
-      'כל מה שיש ב-Starter',
-      'גרפים וייצוא נתונים',
-      'ניתוח ביצועי צוות',
-      'ניתוח משפכי מכירה',
-      'ריענון נתונים בעדיפות גבוהה',
-      'עוזר AI ללא הגבלה',
-      'בניית תחזית',
+      'מקורות נתונים ללא הגבלה',
+      'דשבורדים ללא הגבלה',
+      'סנכרון בזמן אמת',
+      'תובנות AI מתקדמות',
+      'עד 10 משתמשים',
+      'תמיכת פרימיום',
     ],
-    cta: 'שדרג ל-Pro',
-    recommended: true,
+    cta: 'התחילו תקופת ניסיון חינם',
+    popular: true,
   },
   {
-    id: 'custom',
-    name: 'Custom',
-    description: 'פתרון מותאם לארגונים עם צרכים מורכבים.',
-    monthly: { price: 'נדבר', period: '' },
-    yearly: { price: 'נדבר', period: '' },
+    id: 'enterprise',
+    name: 'אנטרפרייז',
+    description: 'לארגונים עם צרכים מתקדמים',
+    monthly: { price: 'צרו קשר', period: '' },
+    yearly: { price: 'צרו קשר', period: '' },
     features: [
-      'כל מה שיש ב-Pro',
-      'מדדים ודשבורדים מותאמים אישית',
-      'דוחות ייעודיים לפי צורך',
-      'קונפיגורציות מתקדמות',
-      'תמיכה בעדיפות גבוהה',
+      'הכל בפרו, ובנוסף:',
+      'SSO ואימות מתקדם',
+      'API גישה מלאה',
+      'SLA מותאם אישית',
+      'משתמשים ללא הגבלה',
+      'מנהל הצלחת לקוח ייעודי',
     ],
-    cta: 'קבע שיחה',
-    recommended: false,
+    cta: 'דברו איתנו',
+    popular: false,
   },
 ];
 
@@ -65,31 +66,23 @@ const stagger = {
   animate: { transition: { staggerChildren: 0.1 } },
 };
 
-/* ── Animated price counter ── */
-function AnimatedPrice({ value, prefix = '₪' }) {
-  const spring = useSpring(value, { stiffness: 120, damping: 20 });
-  const display = useTransform(spring, (v) => `${prefix}${Math.round(v)}`);
-  const scale = useSpring(1, { stiffness: 300, damping: 15 });
-  const isFirst = useRef(true);
-
-  useEffect(() => {
-    if (isFirst.current) {
-      isFirst.current = false;
-      return;
-    }
-    spring.set(value);
-    scale.set(1.08);
-    const t = setTimeout(() => scale.set(1), 80);
-    return () => clearTimeout(t);
-  }, [value, spring, scale]);
-
+/* ── Price swap — vertical crossfade, both visible simultaneously ── */
+function AnimatedPrice({ price }) {
   return (
-    <motion.span
-      className="pricing__price-value"
-      style={{ scale, fontVariantNumeric: 'tabular-nums', display: 'inline-block' }}
-    >
-      {display}
-    </motion.span>
+    <span className="pricing__price-swap">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={price}
+          className="pricing__price-value"
+          initial={{ y: '40%', opacity: 0 }}
+          animate={{ y: '0%', opacity: 1 }}
+          exit={{ y: '-40%', opacity: 0 }}
+          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {price}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
@@ -99,7 +92,7 @@ export default function PricingPage() {
 
   return (
     <div className="pricing">
-      <div className="pricing__gradient" />
+      <DottedBackground vignette={false} />
 
       <header className="pricing__header">
         <button
@@ -117,26 +110,6 @@ export default function PricingPage() {
         initial="initial"
         animate="animate"
       >
-        <motion.div
-          className="pricing__social-proof"
-          variants={fadeUp}
-          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        >
-          <div className="pricing__avatars">
-            {['Noa', 'Yossi', 'Liat', 'Omer', 'Dana'].map((seed) => (
-              <img
-                key={seed}
-                className="pricing__avatar"
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
-                alt=""
-              />
-            ))}
-          </div>
-          <span className="pricing__social-divider" />
-          <span className="pricing__social-text">מצטרפים לעשרות צוותים מרוצים</span>
-          <span className="pricing__social-chevron">›</span>
-        </motion.div>
-
         <motion.h1
           className="pricing__title"
           variants={fadeUp}
@@ -153,24 +126,27 @@ export default function PricingPage() {
         </motion.p>
 
         <motion.div
-          className="pricing__toggle"
+          className="pricing__toggle-wrapper"
           variants={fadeUp}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
-          <button
-            className={`pricing__toggle-btn${billing === 'monthly' ? ' pricing__toggle-btn--active' : ''}`}
-            onClick={() => setBilling('monthly')}
-            type="button"
-          >
-            חודשי
-          </button>
-          <button
-            className={`pricing__toggle-btn${billing === 'yearly' ? ' pricing__toggle-btn--active' : ''}`}
-            onClick={() => setBilling('yearly')}
-            type="button"
-          >
-            שנתי (חסוך 10%)
-          </button>
+          <div className="pricing__toggle">
+            <button
+              className={`pricing__toggle-btn${billing === 'monthly' ? ' pricing__toggle-btn--active' : ''}`}
+              onClick={() => setBilling('monthly')}
+              type="button"
+            >
+              חודשי
+            </button>
+            <button
+              className={`pricing__toggle-btn${billing === 'yearly' ? ' pricing__toggle-btn--active' : ''}`}
+              onClick={() => setBilling('yearly')}
+              type="button"
+            >
+              שנתי
+            </button>
+          </div>
+          <span className="pricing__discount-badge">-30%</span>
         </motion.div>
       </motion.section>
 
@@ -183,23 +159,17 @@ export default function PricingPage() {
         {plans.map((plan) => (
           <motion.div
             key={plan.id}
-            className={`pricing__card${plan.recommended ? ' pricing__card--recommended' : ''}`}
+            className={`pricing__card${plan.popular ? ' pricing__card--popular' : ''}`}
             variants={fadeUp}
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           >
-            {plan.recommended && (
-              <span className="pricing__recommended-tag">הבחירה המומלצת</span>
+            {plan.popular && (
+              <span className="pricing__popular-tag">הכי פופולרי</span>
             )}
-            <span className={`pricing__plan-badge pricing__plan-badge--${plan.id}`}>
-              {plan.name}
-            </span>
+            <span className="pricing__plan-name">{plan.name}</span>
             <p className="pricing__plan-desc">{plan.description}</p>
             <div className="pricing__price">
-              {plan[billing].numeric ? (
-                <AnimatedPrice value={plan[billing].numeric} />
-              ) : (
-                <span className="pricing__price-value">{plan[billing].price}</span>
-              )}
+              <AnimatedPrice price={plan[billing].price} />
               {plan[billing].period && (
                 <span className="pricing__price-period">{plan[billing].period}</span>
               )}
@@ -214,7 +184,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <button
-              className={`pricing__cta${plan.recommended ? ' pricing__cta--primary' : ''}${plan.id === 'custom' ? ' pricing__cta--dark' : ''}`}
+              className={`pricing__cta${plan.popular ? ' pricing__cta--primary' : ''}`}
               type="button"
             >
               {plan.cta}
