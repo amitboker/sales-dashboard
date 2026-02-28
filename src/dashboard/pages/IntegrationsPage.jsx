@@ -296,6 +296,8 @@ export default function IntegrationsPage({ client }) {
           <Dialog.Content
             className="connect-modal"
             onOpenAutoFocus={(e) => e.preventDefault()}
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
           >
             {connectSuccess ? (
               /* ── Success State ── */

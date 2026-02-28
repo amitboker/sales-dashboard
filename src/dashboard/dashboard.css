@@ -5455,7 +5455,7 @@ body.settings-modal-open .settings-modal-overlay {
    Connect Provider Modal
    ═══════════════════════════════════════════════════ */
 
-/* ── Overlay: heavy, commanding ── */
+/* ── Overlay ── */
 .connect-modal__overlay {
   position: fixed;
   inset: 0;
@@ -5463,7 +5463,7 @@ body.settings-modal-open .settings-modal-overlay {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 9998;
-  animation: cm-overlay-in 0.15s ease-out;
+  animation: cm-overlay-in 0.18s ease-out;
 }
 
 @keyframes cm-overlay-in {
@@ -5471,23 +5471,24 @@ body.settings-modal-open .settings-modal-overlay {
   to   { opacity: 1; }
 }
 
-/* ── Modal surface ── */
+/* ── Modal surface — matches integrations-card style ── */
 .connect-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(440px, calc(100vw - 48px));
+  width: min(480px, calc(100vw - 48px));
   background: #fff;
-  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
   z-index: 9999;
   direction: rtl;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 8px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.02),
     0 24px 56px rgba(0, 0, 0, 0.14);
-  animation: cm-in 0.18s ease-out;
+  animation: cm-in 0.2s ease-out;
 }
 
 @keyframes cm-in {
@@ -5497,7 +5498,7 @@ body.settings-modal-open .settings-modal-overlay {
 
 /* ── Header ── */
 .connect-modal__header {
-  padding: 28px 28px 0;
+  padding: 32px 28px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5583,9 +5584,9 @@ body.settings-modal-open .settings-modal-overlay {
 .connect-modal__input {
   width: 100%;
   height: 44px;
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   background: var(--color-surface-muted);
-  border-radius: 12px;
+  border-radius: 9px;
   padding: 0 48px 0 16px;
   font-family: "SF Mono", "Menlo", "Consolas", monospace;
   font-size: 14px;
@@ -5661,7 +5662,9 @@ body.settings-modal-open .settings-modal-overlay {
 
 /* ── Actions ── */
 .connect-modal__actions {
-  padding: 4px 28px 28px;
+  padding: 20px 28px 28px;
+  margin-top: 4px;
+  border-top: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -5674,27 +5677,27 @@ body.settings-modal-open .settings-modal-overlay {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #1a1a1a;
-  color: #fff;
+  background: #DAFD68;
+  color: #1a1a1a;
   border: none;
-  border-radius: 12px;
+  border-radius: 9px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s, opacity 0.15s, filter 0.15s;
 }
 
 .connect-modal__submit:hover:not(:disabled) {
-  background: #000;
+  filter: brightness(0.95);
 }
 
 .connect-modal__submit:active:not(:disabled) {
-  background: #2a2a2a;
+  filter: brightness(0.9);
 }
 
 .connect-modal__submit:disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   cursor: default;
 }
 
