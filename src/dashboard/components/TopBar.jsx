@@ -130,17 +130,6 @@ export default function TopBar({ profileName, profilePhoto, profileRole, onNavig
                 </button>
               </>
             )}
-            <div className="topbar-dropdown-divider" />
-            <button
-              className="topbar-dropdown-item"
-              type="button"
-              onClick={() => {
-                setDropdownOpen(false);
-                if (onLogout) onLogout();
-              }}
-            >
-              התנתק
-            </button>
           </div>
         )}
       </div>

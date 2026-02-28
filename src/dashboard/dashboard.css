@@ -83,7 +83,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: visible;
+  overflow: hidden;
   direction: rtl;
   color: var(--color-text);
   border-left: 1px solid var(--color-border);
@@ -148,6 +148,38 @@
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-left: -4px;
+  padding-left: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.nav-group:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+.nav-group::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-group::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav-group::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.nav-group:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.nav-group::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .nav-label {
@@ -228,6 +260,139 @@
   background: #f3ff9b;
   color: #000;
   border: 1px solid rgba(0, 0, 0, 0.55);
+}
+
+/* ===== EXTRA TOOLS SECTION ===== */
+.extra-tools-divider {
+  height: 1px;
+  background: var(--color-border);
+  opacity: 0.5;
+  margin: 14px 4px 10px;
+}
+
+.extra-tools-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: right;
+  transition: color 0.15s;
+  letter-spacing: 0.2px;
+}
+
+.extra-tools-toggle:hover {
+  color: var(--color-text);
+}
+
+.extra-tools-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-right: auto;
+  margin-left: 0;
+  transition: transform 0.25s ease;
+}
+
+.extra-tools-toggle.open .extra-tools-chevron {
+  transform: rotate(180deg);
+}
+
+.extra-tools-list {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.extra-tools-inner {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.extra-tools-list.open {
+  grid-template-rows: 1fr;
+}
+
+.extra-tool-item {
+  opacity: 0.5;
+  cursor: default !important;
+}
+
+.extra-tool-item:hover {
+  background: transparent !important;
+}
+
+.coming-soon-badge {
+  margin-right: auto;
+  margin-left: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+/* Collapsed: extra tools section */
+.sidebar.collapsed .extra-tools-divider {
+  margin: 10px 2px 6px;
+}
+
+.sidebar.collapsed .extra-tools-toggle {
+  justify-content: center;
+  padding: 8px 0;
+  gap: 0;
+  position: relative;
+}
+
+.sidebar.collapsed .extra-tools-toggle .nav-text {
+  display: none;
+}
+
+.sidebar.collapsed .extra-tools-toggle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1f2a33;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  direction: rtl;
+}
+
+.sidebar.collapsed .extra-tools-toggle:hover::after {
+  opacity: 1;
+}
+
+.sidebar.collapsed .extra-tools-list {
+  display: none;
+}
+
+.sidebar.collapsed .coming-soon-badge {
+  display: none;
 }
 
 /* ===== NAV FOOTER ===== */
@@ -3149,6 +3314,7 @@ body.funnel-editor-open .funnel-editor-panel {
 
 .sidebar.collapsed .nav-group {
   padding-top: 12px;
+  overflow: visible;
 }
 
 .sidebar.collapsed .nav-label {
@@ -3270,116 +3436,181 @@ body.funnel-editor-open .funnel-editor-panel {
 /* ===== PRO UPGRADE CARD ===== */
 .pro-card {
   position: relative;
-  margin-top: 14px;
+  margin-top: 8px;
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 14px 14px 12px;
   background: var(--color-surface-muted, #f5f5f5);
-  border: 1px solid var(--color-border, #e5e5e5);
+  border: none;
   color: var(--color-text, #000);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: opacity 300ms ease-in-out, padding 300ms ease-in-out, margin 300ms ease-in-out;
+  gap: 0;
+  transition: background 0.2s ease;
 }
 
-.pro-card-deco {
-  display: none;
-  position: absolute;
-  left: -20px;
-  bottom: -16px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: rgba(218, 253, 104, 0.12);
-  pointer-events: none;
+.pro-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.pro-card-deco::after {
-  content: "";
-  position: absolute;
-  left: 30px;
-  top: -40px;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(218, 253, 104, 0.08);
-}
-
-.pro-card-content {
-  position: relative;
-  z-index: 1;
-}
-
-.pro-card-icon {
-  display: none;
-}
-
-.pro-card-headline {
+.pro-card-title {
   font-size: 12.5px;
   font-weight: 600;
-  line-height: 1.3;
-  margin-bottom: 2px;
+  line-height: 1.2;
+  color: var(--color-text, #000);
+}
+
+.pro-card-sparkle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-text, #000);
+  color: var(--color-primary, #DAFD68);
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-right: auto;
+  margin-left: 0;
 }
 
 .pro-card-desc {
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--color-muted, #828282);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .pro-card-btn {
-  position: relative;
-  z-index: 1;
   width: 100%;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: 1px solid var(--color-border, #e5e5e5);
   border-radius: 8px;
   background: var(--color-surface, #fff);
   color: var(--color-text, #000);
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .pro-card-btn:hover {
-  background: var(--color-border, #e5e5e5);
+  background: var(--color-text, #000);
+  color: #fff;
+  border-color: var(--color-text, #000);
 }
 
 .pro-card-btn:active {
-  background: var(--color-surface-muted, #f5f5f5);
+  opacity: 0.85;
 }
 
-/* Collapsed sidebar: hide card content, show compact version */
+/* Collapsed sidebar: compact pro card */
 .sidebar.collapsed .pro-card {
   padding: 10px 6px;
-  margin-top: 12px;
+  margin-top: 8px;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.sidebar.collapsed .pro-card-deco {
+.sidebar.collapsed .pro-card-header {
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.sidebar.collapsed .pro-card-title {
   display: none;
 }
 
-.sidebar.collapsed .pro-card-headline,
+.sidebar.collapsed .pro-card-sparkle {
+  margin: 0;
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
 .sidebar.collapsed .pro-card-desc {
   display: none;
-}
-
-.sidebar.collapsed .pro-card-icon {
-  margin-bottom: 0;
-  font-size: 18px;
-  text-align: center;
 }
 
 .sidebar.collapsed .pro-card-btn {
   font-size: 10px;
   padding: 6px 4px;
+  border-radius: 6px;
+}
+
+/* ============================================
+   SIDEBAR LOGOUT BUTTON
+   ============================================ */
+
+.sidebar-logout-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 12px 0 8px;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
   border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: right;
+  transition: all 0.15s;
+}
+
+.sidebar-logout-btn:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.sidebar.collapsed .sidebar-logout-btn {
+  justify-content: center;
+  gap: 0;
+  position: relative;
+}
+
+.sidebar.collapsed .sidebar-logout-btn .nav-text {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-logout-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1f2a33;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  direction: rtl;
+}
+
+.sidebar.collapsed .sidebar-logout-btn:hover::after {
+  opacity: 1;
+}
+
+.sidebar.collapsed .sidebar-logout-divider {
+  margin: 8px 0 4px;
 }
 
 /* ============================================

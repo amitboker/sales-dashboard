@@ -116,6 +116,7 @@ function DashboardAppInner() {
           onSelect={setActivePage}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+          onLogout={handleLogout}
         />
       </div>
     </div>

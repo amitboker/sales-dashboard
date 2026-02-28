@@ -9,11 +9,18 @@ const navItems = [
   { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
   { id: "projection", label: "בניית תחזית", icon: "calculator" },
+  { id: "settings", label: "הגדרות", icon: "settings" },
 ];
 
-export default function SideNav({ activeId, onSelect, collapsed, onToggleCollapse }) {
+const extraTools = [
+  { id: "competitor-intel", label: "מודיעין מתחרים", icon: "trending-up" },
+  { id: "test-planner", label: "מתכנן בדיקות", icon: "check-circle" },
+  { id: "voice-of-customer", label: "קול הלקוח", icon: "users" },
+];
+
+export default function SideNav({ activeId, onSelect, collapsed, onToggleCollapse, onLogout }) {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState("light");
+  const [extraOpen, setExtraOpen] = useState(false);
 
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
@@ -51,43 +58,61 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
             </button>
           ))}
         </nav>
+
+        <div className="extra-tools-divider" />
+
+        <button
+          className={`extra-tools-toggle${extraOpen ? " open" : ""}`}
+          type="button"
+          onClick={() => setExtraOpen((v) => !v)}
+          data-tooltip="כלים נוספים"
+        >
+          <span className="nav-text">כלים נוספים</span>
+          <span className="extra-tools-chevron">
+            <Icon name="chevron-down-sm" size={14} style={{ filter: "none" }} />
+          </span>
+        </button>
+
+        <div className={`extra-tools-list${extraOpen ? " open" : ""}`}>
+          <div className="extra-tools-inner">
+            {extraTools.map((item) => (
+              <button
+                key={item.id}
+                className="nav-item extra-tool-item"
+                type="button"
+                data-tooltip={item.label}
+              >
+                <span className="nav-icon-wrap">
+                  <Icon name={item.icon} size={18} style={{ filter: "none" }} />
+                </span>
+                <span className="nav-text">{item.label}</span>
+                <span className="coming-soon-badge">בקרוב</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="nav-footer">
-        <button
-          className={`nav-footer-item ${activeId === "settings" ? "active" : ""}`}
-          onClick={() => onSelect("settings")}
-          type="button"
-          data-tooltip="הגדרות"
-        >
-          <Icon name="settings" size={16} style={{ filter: "none", opacity: 0.6 }} />
-          <span className="nav-text">הגדרות</span>
-        </button>
-
-        <div className="theme-switcher">
-          <button
-            className={`theme-opt${theme === "light" ? " active" : ""}`}
-            onClick={() => setTheme("light")}
-            type="button"
-          >
-            <span className="theme-icon">☀︎</span>
-            <span className="nav-text">Light</span>
-          </button>
-          <button
-            className={`theme-opt${theme === "dark" ? " active" : ""}`}
-            onClick={() => setTheme("dark")}
-            type="button"
-          >
-            <span className="theme-icon">☽</span>
-            <span className="nav-text">Dark</span>
-          </button>
-        </div>
-
         <div className="pro-card">
-          <div className="pro-card-headline">שדרג לגרסת Pro</div>
-          <div className="pro-card-desc">אתה משתמש בגרסה חינמית</div>
-          <button className="pro-card-btn" type="button" onClick={() => navigate('/pricing')}>שדרג</button>
+          <div className="pro-card-header">
+            <span className="pro-card-title">Clario Pro</span>
+            <span className="pro-card-sparkle">✦</span>
+          </div>
+          <div className="pro-card-desc">גישה מלאה לכל הכלים והתחזיות</div>
+          <button className="pro-card-btn" type="button" onClick={() => navigate('/pricing')}>צפה בתוכניות</button>
         </div>
+
+        <div className="sidebar-logout-divider" />
+        <button
+          className="sidebar-logout-btn"
+          type="button"
+          onClick={onLogout}
+          data-tooltip="התנתק"
+        >
+          <Icon name="logout" size={16} style={{ filter: "none" }} />
+          <span className="nav-text">התנתק</span>
+        </button>
       </div>
     </aside>
   );
