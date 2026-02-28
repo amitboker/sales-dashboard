@@ -13,11 +13,13 @@ export default function AdminSideNav({ activeId, onSelect }) {
 
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <img src={logo} alt="Clario" className="brand-logo" />
-        <div className="brand-info">
-          <div className="brand-title">Clario</div>
-          <div className="brand-subtitle">פאנל ניהול</div>
+      <div className="brand-row">
+        <div className="brand">
+          <img src={logo} alt="Clario" className="brand-logo" />
+          <div className="brand-info">
+            <div className="brand-title">Clario</div>
+            <div className="brand-subtitle">פאנל ניהול</div>
+          </div>
         </div>
       </div>
 

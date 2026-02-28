@@ -24,7 +24,13 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
 
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
-      <div className="brand">
+      <div className="brand-row">
+        <div className="brand">
+          <img src={logo} alt="Clario" className="brand-logo" />
+          <div className="brand-info">
+            <div className="brand-title">Clario</div>
+          </div>
+        </div>
         <button
           className="sidebar-toggle"
           onClick={onToggleCollapse}
@@ -33,10 +39,6 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
         >
           {collapsed ? "›" : "‹"}
         </button>
-        <img src={logo} alt="Clario" className="brand-logo" />
-        <div className="brand-info">
-          <div className="brand-title">Clario</div>
-        </div>
       </div>
 
       <div className="nav-group">
