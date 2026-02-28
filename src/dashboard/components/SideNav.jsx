@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Icon from "./Icon.jsx";
 import logo from "../../assets/icons/clario-symbol.png";
 
@@ -26,10 +27,29 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
       <div className="brand-row">
         <div className="brand">
-          <img src={logo} alt="Clario" className="brand-logo" />
-          <div className="brand-info">
-            <div className="brand-title">Clario</div>
-          </div>
+          <motion.img
+            src={logo}
+            alt="Clario"
+            className="brand-logo"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.div
+            className="brand-info"
+            initial={{ width: 0 }}
+            animate={{ width: "auto" }}
+            transition={{ duration: 0.5, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.div
+              className="brand-title"
+              initial={{ opacity: 0, x: -8, y: 1.5 }}
+              animate={{ opacity: 1, x: 0, y: 1.5 }}
+              transition={{ duration: 0.4, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Clario
+            </motion.div>
+          </motion.div>
         </div>
       </div>
       <button

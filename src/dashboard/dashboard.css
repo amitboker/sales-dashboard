@@ -140,10 +140,6 @@
 .brand-info {
   overflow: hidden;
   white-space: nowrap;
-  transition: opacity 300ms ease-in-out, max-width 300ms ease-in-out, max-height 300ms ease-in-out;
-  opacity: 1;
-  max-width: 200px;
-  max-height: 50px;
 }
 
 .brand-title {
@@ -154,7 +150,6 @@
   letter-spacing: -0.4px;
   color: var(--color-text);
   direction: ltr;
-  transform: translateY(1.5px);
 }
 
 .brand-subtitle {
@@ -3331,9 +3326,9 @@ body.funnel-editor-open .funnel-editor-panel {
    ============================================ */
 
 .sidebar.collapsed .brand-info {
-  opacity: 0;
-  max-width: 0;
-  max-height: 0;
+  opacity: 0 !important;
+  width: 0 !important;
+  overflow: hidden;
 }
 
 .sidebar.collapsed .brand-row {
