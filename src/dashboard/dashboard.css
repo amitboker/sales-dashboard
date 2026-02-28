@@ -125,14 +125,14 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   direction: ltr;
   transition: gap 300ms ease-in-out;
 }
 
 .brand-logo {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -149,7 +149,7 @@
 .brand-title {
   font-family: "Liebling", sans-serif;
   font-weight: 500;
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1;
   letter-spacing: -0.4px;
   color: var(--color-text);
