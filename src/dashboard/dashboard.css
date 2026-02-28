@@ -114,7 +114,7 @@
 .brand-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 20px;
   padding: 0 4px 20px;
   direction: ltr;
@@ -125,14 +125,14 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   direction: ltr;
   transition: gap 300ms ease-in-out;
 }
 
 .brand-logo {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -148,10 +148,10 @@
 
 .brand-title {
   font-family: "Liebling", sans-serif;
-  font-weight: 700;
-  font-size: 23px;
+  font-weight: 500;
+  font-size: 26px;
   line-height: 1;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   color: var(--color-text);
   direction: ltr;
 }
@@ -3285,14 +3285,17 @@ body.funnel-editor-open .funnel-editor-panel {
    ============================================ */
 
 .sidebar-toggle {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  position: absolute;
+  top: 28px;
+  left: 12px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
   border-radius: 50%;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -3300,8 +3303,9 @@ body.funnel-editor-open .funnel-editor-panel {
   line-height: 1;
   padding: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, top 300ms ease-in-out, left 300ms ease-in-out;
   flex-shrink: 0;
+  z-index: 2;
 }
 
 .sidebar-toggle:hover {
@@ -3344,13 +3348,12 @@ body.funnel-editor-open .funnel-editor-panel {
 }
 
 .sidebar.collapsed .sidebar-toggle {
-  position: absolute;
-  top: 68px;
+  top: 72px;
   left: 50%;
   transform: translateX(-50%);
   width: 24px;
   height: 24px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .sidebar.collapsed .nav-group {

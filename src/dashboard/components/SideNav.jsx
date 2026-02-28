@@ -31,15 +31,15 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
             <div className="brand-title">Clario</div>
           </div>
         </div>
-        <button
-          className="sidebar-toggle"
-          onClick={onToggleCollapse}
-          type="button"
-          aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
-        >
-          {collapsed ? "›" : "‹"}
-        </button>
       </div>
+      <button
+        className="sidebar-toggle"
+        onClick={onToggleCollapse}
+        type="button"
+        aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
+      >
+        {collapsed ? "›" : "‹"}
+      </button>
 
       <div className="nav-group">
         <div className="nav-label">ניווט</div>
