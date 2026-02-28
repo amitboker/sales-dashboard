@@ -154,6 +154,7 @@
   letter-spacing: -0.4px;
   color: var(--color-text);
   direction: ltr;
+  transform: translateY(1.5px);
 }
 
 .brand-subtitle {
