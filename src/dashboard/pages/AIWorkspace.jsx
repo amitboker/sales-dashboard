@@ -8,7 +8,6 @@ import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
-import DottedBackground from "../../components/DottedBackground";
 
 /* ── Intent-aware activity feed ── */
 
@@ -326,7 +325,6 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
         className="ai-workspace-container ai-landing"
         style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
       >
-        <DottedBackground />
         <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
           {/* Early access pill — mirrors marketing site */}
           <div className="ai-early-pill" onClick={() => navigate("/pricing")}>
@@ -486,7 +484,6 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
       className="ai-workspace-container flex flex-col"
       style={{ minHeight: "calc(100vh - 140px)" }}
     >
-      <DottedBackground />
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button

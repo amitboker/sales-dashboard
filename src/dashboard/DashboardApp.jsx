@@ -14,6 +14,7 @@ import ProjectionBuilder from "./pages/ProjectionBuilder.jsx";
 import AIWorkspace from "./pages/AIWorkspace.jsx";
 import Settings from "./pages/Settings.jsx";
 import IntegrationsPage from "./pages/IntegrationsPage.jsx";
+import DottedBackground from "../components/DottedBackground";
 import "./dashboard.css";
 
 const pageMap = {
@@ -85,6 +86,7 @@ function DashboardAppInner() {
     <div className="dashboard-wrapper">
       <div className="app">
         <main className="content" ref={contentRef}>
+          {activePage === "ai" && <DottedBackground vignette={false} />}
           <TopBar
             profileName={profileName}
             profileRole={profileRole}
