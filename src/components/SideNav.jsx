@@ -6,7 +6,7 @@ const navItems = [
   { id: "overview", label: "סקירת מכירות", icon: "bar-chart" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
   { id: "team", label: "ביצועי צוות", icon: "users" },
-  { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },
+  { id: "ai", label: "Clario AI", icon: "chat", badge: "חדש" },
   { id: "forecast", label: "תכנון תחזית", icon: "calculator" },
 ];
 

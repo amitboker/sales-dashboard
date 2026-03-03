@@ -5,7 +5,7 @@ import Icon from "./Icon.jsx";
 import logo from "../../assets/icons/clario-symbol.png";
 
 const navItems = [
-  { id: "ai", label: "עוזר AI", icon: "chat", badge: "חדש" },
+  { id: "ai", label: "Clario AI", icon: "chat", badge: "חדש" },
   { id: "command", label: "מרכז שליטה", icon: "bar-chart" },
   { id: "team", label: "ביצועי צוות", icon: "users" },
   { id: "funnel", label: "משפך מכירות", icon: "funnel" },
