@@ -23,8 +23,10 @@ import trendUpLg from "../../assets/icons/trend-up-lg.svg";
 import chevronDownSm from "../../assets/icons/chevron-down-sm.svg";
 import close from "../../assets/icons/close.svg";
 import book from "../../assets/icons/book.svg";
+import home from "../../assets/icons/home.svg";
 
 const icons = {
+  home,
   "bar-chart": barChart,
   funnel,
   users,

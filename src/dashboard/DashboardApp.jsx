@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { usePageTracking } from "../lib/usePageTracking";
@@ -14,8 +14,25 @@ import ProjectionBuilder from "./pages/ProjectionBuilder.jsx";
 import AIWorkspace from "./pages/AIWorkspace.jsx";
 import Settings from "./pages/Settings.jsx";
 import IntegrationsPage from "./pages/IntegrationsPage.jsx";
+import MobileHome from "./pages/MobileHome.jsx";
 import DottedBackground from "../components/DottedBackground";
 import "./dashboard.css";
+
+/* ── Mobile detection hook ── */
+const MOBILE_BREAKPOINT = 768;
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
 
 const pageMap = {
   command: OverviewDashboard,
@@ -33,6 +50,7 @@ function DashboardAppInner() {
   usePageTracking("/dashboard");
   const { client, hasData, loading: clientLoading } = useClientData();
   const { isDemo } = useDemoMode();
+  const isMobile = useIsMobile();
   const [activePage, setActivePage] = useState("ai");
 
   const effectiveHasData = isDemo || hasData;
@@ -82,6 +100,22 @@ function DashboardAppInner() {
   // Common props for data-dependent pages
   const dataProps = { hasData: effectiveHasData, clientLoading, onConnectData: handleConnectData };
 
+  /* ── Mobile: show MobileHome instead of the full dashboard ── */
+  if (isMobile) {
+    return (
+      <div className="dashboard-wrapper">
+        <DottedBackground vignette={false} />
+        <MobileHome
+          onNavigate={setActivePage}
+          profilePhoto={profilePhoto}
+          {...dataProps}
+          isDemo={isDemo}
+        />
+      </div>
+    );
+  }
+
+  /* ── Desktop: original dashboard — unchanged ── */
   return (
     <div className="dashboard-wrapper">
       <div className="app">
