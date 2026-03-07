@@ -21,9 +21,12 @@ export const MODES: Mode[] = [
   { id: "research", label: "מחקר", icon: Search },
 ];
 
+import clarioSymbol from "../../assets/icons/clario-symbol.png";
+import claudeIcon from "../../assets/icons/claude-ai.svg";
+
 export const MODELS: Model[] = [
-  { id: "clario-pro", label: "Clario Pro", icon: Sparkles, description: "מודל מתקדם" },
-  { id: "claude-opus", label: "Claude Opus 4.6", icon: Zap, description: "Anthropic" },
+  { id: "clario-pro", label: "Clario Pro", icon: Sparkles, iconUrl: clarioSymbol, description: "מודל מתקדם" },
+  { id: "claude-opus", label: "Opus 4.6", icon: Zap, iconUrl: claudeIcon, description: "Anthropic" },
 ];
 
 export const SUGGESTION_CARDS = [

@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Paperclip, Sparkles, X, RotateCcw } from "lucide-react";
+import { Mic, Paperclip, X, RotateCcw, Lock } from "lucide-react";
+import clarioSymbol from "../../assets/icons/clario-symbol.png";
+import hubspotIcon from "../../assets/integrations/hubspot.svg";
+import gmailIcon from "../../assets/integrations/gmail.svg";
+import slackIcon from "../../assets/integrations/slack.svg";
 import ModelSelector from "./ModelSelector";
 import RecordingOverlay from "./RecordingOverlay";
 import Toast from "./Toast";
@@ -78,10 +82,40 @@ function Tooltip({ text, children }: TooltipProps) {
   );
 }
 
-/* ── Shared button pill style (consistent height / radius / padding) ── */
+/* ── Integration logo rotator ────────────────────────────────── */
+const INTEGRATION_LOGOS = [gmailIcon, hubspotIcon, slackIcon];
+
+function IntegrationLogoRotator() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % INTEGRATION_LOGOS.length);
+    }, 2400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.img
+        key={index}
+        src={INTEGRATION_LOGOS[index]}
+        alt=""
+        className="h-[18px] w-[18px]"
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.7 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      />
+    </AnimatePresence>
+  );
+}
+
+/* ── Shared button styles ─────────────────────────────────────── */
 const PILL_BASE =
   "flex items-center justify-center h-9 rounded-xl border transition-all duration-200 cursor-pointer";
-const PILL_NEUTRAL = `${PILL_BASE} bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:border-[var(--color-primary,#DAFD68)]/50 hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#fafafa)] active:bg-[var(--color-surface-muted,#f0f0f0)]`;
+const ACTION_BTN =
+  "flex items-center justify-center w-[38px] h-[38px] rounded-[12px] border bg-white border-[#b8b8b8] text-[#888] shadow-[0_1px_4px_rgba(0,0,0,0.08)] hover:border-[#a8a8a8] hover:text-[#555] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-200 cursor-pointer";
 
 /* ── ChatInput ─────────────────────────────────────────────────── */
 interface ChatInputProps {
@@ -272,10 +306,7 @@ export default function ChatInput({
             className="group flex items-center justify-between px-5 py-3 border-b border-[var(--color-border,#e5e5e5)] cursor-pointer transition-all duration-200 hover:bg-[var(--color-surface-muted,#f5f5f5)]/50"
           >
             <div className="flex items-center gap-2.5">
-              <span className="flex items-center gap-1.5 text-[var(--color-primary-darker,#b7dd4c)] text-xs font-semibold tracking-wide">
-                <Sparkles className="h-3.5 w-3.5" />
-                Pro
-              </span>
+              <img src={clarioSymbol} alt="" className="h-5 w-5 object-contain" />
               <span className="text-[13px] text-[var(--color-muted,#828282)] group-hover:text-[var(--color-text,#000)] transition-colors">
                 גלו את כל היכולות של Clario Pro
               </span>
@@ -390,33 +421,49 @@ export default function ChatInput({
 
         {/* ── Bottom toolbar — uniform rounded-rectangle pills ── */}
         <div className="flex items-center justify-between px-4 pb-4 pt-1">
-          {/* Right (RTL start): attach · mic · active-mode chip */}
-          <div className="flex items-center gap-1.5">
-            {!isVoiceActive && (
-              <Tooltip text="העלאת קבצים">
-                <button
-                  className={`${PILL_NEUTRAL} w-9 px-0`}
-                  aria-label="העלאת קבצים"
-                >
-                  <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </button>
-              </Tooltip>
-            )}
-
+          {/* Right (RTL start): mic · integrations · attach */}
+          <div className="flex items-center gap-2">
             <Tooltip text={recorder.state === "recording" ? "מקליט..." : "הקלטת הודעה קולית"}>
               <button
                 onClick={handleMicClick}
-                className={`${PILL_BASE} w-9 px-0 ${
+                className={
                   recorder.state === "recording"
-                    ? "bg-[var(--color-primary,#DAFD68)]/15 border-[var(--color-primary-darker,#b7dd4c)] text-[var(--color-primary-darker,#b7dd4c)]"
-                    : "bg-[var(--color-surface,#fff)] border-[var(--color-border,#e5e5e5)] text-[var(--color-muted,#828282)] hover:border-[var(--color-primary,#DAFD68)]/50 hover:text-[var(--color-text,#000)] hover:bg-[var(--color-surface-muted,#fafafa)] active:bg-[var(--color-surface-muted,#f0f0f0)]"
-                }`}
+                    ? "flex items-center justify-center w-[38px] h-[38px] rounded-[12px] border transition-all duration-200 cursor-pointer bg-[var(--color-primary,#DAFD68)]/15 border-[var(--color-primary-darker,#b7dd4c)] text-[var(--color-primary-darker,#b7dd4c)]"
+                    : ACTION_BTN
+                }
                 aria-label="הקלטת הודעה קולית"
                 disabled={transcription.state === "transcribing"}
               >
-                <Mic className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                <Mic className="h-[18px] w-[18px]" strokeWidth={1.7} />
               </button>
             </Tooltip>
+
+            {!isVoiceActive && (
+              <Tooltip text="אינטגרציות">
+                <div className="relative">
+                  <button
+                    className={ACTION_BTN}
+                    aria-label="אינטגרציות"
+                  >
+                    <IntegrationLogoRotator />
+                  </button>
+                  <div className="absolute -top-1.5 -start-1.5 flex items-center justify-center w-[17px] h-[17px] rounded-full bg-[#DAFD68] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                    <Lock className="h-[8px] w-[8px] text-[#444]" strokeWidth={2.5} />
+                  </div>
+                </div>
+              </Tooltip>
+            )}
+
+            {!isVoiceActive && (
+              <Tooltip text="העלאת קבצים">
+                <button
+                  className={ACTION_BTN}
+                  aria-label="העלאת קבצים"
+                >
+                  <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.7} />
+                </button>
+              </Tooltip>
+            )}
 
             {/* active-mode chip */}
             {activeMode && !isVoiceActive && (
@@ -448,7 +495,7 @@ export default function ChatInput({
                     isStreaming
                       ? "bg-[var(--color-surface-muted,#e8e8e8)] border-[var(--color-border,#d0d0d0)] text-[#555] hover:bg-[var(--color-surface-muted,#ddd)] active:scale-95"
                       : isInputEmpty
-                        ? "bg-[var(--color-surface-muted,#f0f0f0)] border-transparent text-[var(--color-muted,#828282)]/40 cursor-default"
+                        ? "bg-[#f4f4f4] border-transparent text-[#ccc] cursor-not-allowed opacity-50"
                         : "bg-[var(--color-primary,#DAFD68)] border-[var(--color-primary-darker,#b7dd4c)]/30 text-[#1a1a1a] hover:bg-[var(--color-primary-dark,#c8ec55)] shadow-sm hover:shadow active:scale-95"
                   }`}
                 >

@@ -10,6 +10,7 @@ export interface Model {
   id: string;
   label: string;
   icon: LucideIcon;
+  iconUrl?: string;
   description: string;
 }
 

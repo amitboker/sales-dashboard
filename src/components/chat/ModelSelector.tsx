@@ -12,7 +12,9 @@ interface ModelSelectorProps {
 export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [triggerWidth, setTriggerWidth] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -24,7 +26,13 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Compute trigger styles based on state — using inline styles to guarantee rendering
+  // Measure trigger width whenever it opens
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, [isOpen]);
+
   const triggerStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -53,18 +61,13 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
 
   return (
     <div style={{ position: "relative" }} ref={ref}>
-      {/* ── Trigger — rounded rectangle ── */}
       <button
+        ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={triggerStyle}
       >
-        <value.icon
-          style={{ width: "16px", height: "16px", color: "#b7dd4c" }}
-          strokeWidth={1.8}
-        />
-        <span>{value.label}</span>
         <ChevronDown
           style={{
             width: "14px",
@@ -75,9 +78,17 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
           }}
           strokeWidth={2}
         />
+        <span>{value.label}</span>
+        {value.iconUrl ? (
+          <img src={value.iconUrl} alt="" style={{ width: "18px", height: "18px", borderRadius: "4px", objectFit: "contain" }} />
+        ) : (
+          <value.icon
+            style={{ width: "16px", height: "16px", color: "#b7dd4c" }}
+            strokeWidth={1.8}
+          />
+        )}
       </button>
 
-      {/* ── Dropdown ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -88,15 +99,15 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
             style={{
               position: "absolute",
               top: "100%",
-              marginTop: "8px",
+              marginTop: "6px",
               right: 0,
-              borderRadius: "14px",
+              minWidth: triggerWidth > 0 ? `${triggerWidth}px` : "auto",
+              borderRadius: "16px",
               backgroundColor: "#fff",
               border: "1px solid #e5e5e5",
-              boxShadow: "0 4px 20px -4px rgba(0, 0, 0, 0.08)",
+              boxShadow: "0 6px 24px -4px rgba(0, 0, 0, 0.1)",
               padding: "6px 0",
               zIndex: 60,
-              minWidth: "220px",
               overflow: "hidden",
             }}
           >
@@ -121,7 +132,7 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
   );
 }
 
-/* ── Dropdown item (separate component for hover state) ── */
+/* ── Dropdown item ── */
 function DropdownItem({
   model,
   isSelected,
@@ -141,44 +152,50 @@ function DropdownItem({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "12px",
+        gap: "10px",
         width: "100%",
         textAlign: "start",
-        padding: "10px 16px",
-        fontSize: "13px",
+        padding: "10px 14px",
+        fontSize: "14px",
         cursor: "pointer",
         transition: "all 0.15s ease",
         border: "none",
         fontFamily: "inherit",
         backgroundColor: isSelected
-          ? "rgba(218, 253, 104, 0.1)"
+          ? "rgba(218, 253, 104, 0.18)"
           : hovered
             ? "#f5f5f5"
             : "transparent",
-        color: isSelected || hovered ? "#1a1a1a" : "#828282",
+        color: isSelected || hovered ? "#1a1a1a" : "#666",
       }}
     >
-      <model.icon
-        style={{
-          width: "16px",
-          height: "16px",
-          color: isSelected ? "#b7dd4c" : "#828282",
-        }}
-        strokeWidth={1.8}
-      />
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <span style={{ fontWeight: 500 }}>{model.label}</span>
-        <span style={{ fontSize: "11px", color: "#aaa" }}>{model.description}</span>
-      </div>
       {isSelected && (
         <div
           style={{
-            marginInlineStart: "auto",
-            width: "6px",
-            height: "6px",
+            width: "7px",
+            height: "7px",
             borderRadius: "50%",
-            backgroundColor: "#b7dd4c",
+            backgroundColor: "#7a8a2e",
+            flexShrink: 0,
           }}
+        />
+      )}
+      {!isSelected && <div style={{ width: "7px", flexShrink: 0 }} />}
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+        <span style={{ fontWeight: 500, whiteSpace: "nowrap" }}>{model.label}</span>
+        <span style={{ fontSize: "12px", color: "#aaa", marginTop: "1px" }}>{model.description}</span>
+      </div>
+      {model.iconUrl ? (
+        <img src={model.iconUrl} alt="" style={{ width: "20px", height: "20px", borderRadius: "3px", objectFit: "contain", flexShrink: 0 }} />
+      ) : (
+        <model.icon
+          style={{
+            width: "18px",
+            height: "18px",
+            color: isSelected ? "#b7dd4c" : "#bbb",
+            flexShrink: 0,
+          }}
+          strokeWidth={1.8}
         />
       )}
     </button>
