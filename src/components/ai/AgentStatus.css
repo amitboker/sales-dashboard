@@ -1,0 +1,48 @@
+/* ============================================
+   AI AGENT STATUS — Adaptive Interaction Modes
+   ============================================ */
+
+.agent-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  direction: rtl;
+}
+
+.agent-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary, #d4f34e);
+  animation: agent-dot-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* Mode-specific dot pacing */
+.agent-status[data-mode="instant"] .agent-status-dot {
+  animation-duration: 0.8s;
+}
+.agent-status[data-mode="smart"] .agent-status-dot {
+  animation-duration: 1.2s;
+}
+.agent-status[data-mode="agent"] .agent-status-dot {
+  animation-duration: 1.6s;
+}
+
+.agent-status-text {
+  font-size: 13px;
+  color: var(--color-muted, #8b8b8b);
+  font-weight: 400;
+  animation: agent-text-fade-in 0.3s ease-out;
+}
+
+@keyframes agent-dot-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50%      { opacity: 1;   transform: scale(1.1); }
+}
+
+@keyframes agent-text-fade-in {
+  from { opacity: 0; filter: blur(4px); transform: translateY(2px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}

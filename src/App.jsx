@@ -13,6 +13,7 @@ import AdminRoute from './components/AdminRoute';
 import PricingPage from './pages/PricingPage';
 import AuthCallback from './pages/AuthCallback';
 import DevOnboardingPreview from './pages/DevOnboardingPreview';
+import DevAiModesPreview from './pages/DevAiModesPreview';
 import OnboardingName from './pages/OnboardingName';
 import OnboardingBusiness from './pages/OnboardingBusiness';
 
@@ -50,6 +51,7 @@ function App() {
             <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
             <Route path="/dev/onboarding-name" element={<OnboardingName />} />
             <Route path="/dev/onboarding-business" element={<OnboardingBusiness />} />
+            <Route path="/dev/ai-modes" element={<DevAiModesPreview />} />
           </>
         )}
         <Route path="*" element={<Navigate to="/login" replace />} />

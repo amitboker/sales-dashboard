@@ -59,7 +59,7 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
         type="button"
         aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
       >
-        {collapsed ? "›" : "‹"}
+        {collapsed ? "›" : <Icon name="panel-sidebar" size={16} style={{ filter: "none", opacity: 0.7 }} />}
       </button>
 
       <div className="nav-group">

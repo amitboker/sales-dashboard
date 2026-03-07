@@ -8,6 +8,9 @@ import { useAuth } from "../../lib/auth";
 import ChatInput from "../../components/chat/ChatInput";
 import ModeSelector from "../../components/chat/ModeSelector";
 import { MODELS, SAMPLE_PROMPTS, PROMPTS_PER_PAGE } from "../../components/chat/modes";
+import { determineInteractionMode } from "../../ai/interactionModeRouter";
+import { getBehavior } from "../../ai/interactionBehaviorConfig";
+import AgentStatus from "../../components/ai/AgentStatus";
 
 /* ── Intent-aware activity feed ── */
 
@@ -105,6 +108,11 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
   const [prefillValue, setPrefillValue] = useState("");
   const [activityLines, setActivityLines] = useState([]);
   const [expandedThinking, setExpandedThinking] = useState(new Set());
+  const [interactionMode, setInteractionMode] = useState("instant");
+  const modeBehaviorMessages = useCallback(
+    () => getBehavior(interactionMode).statusMessages.slice(0, 1),
+    [interactionMode]
+  );
   const abortRef = useRef(null);
   const activityIntervalRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -185,20 +193,26 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
       setIsThinking(true);
       isThinkingRef.current = true;
 
-      // Start intent-aware activity simulation
+      // Classify interaction mode and start mode-aware activity simulation
       setActivityLines([]);
+      const detectedMode = determineInteractionMode(trimmed);
+      setInteractionMode(detectedMode);
+      const modeBehavior = getBehavior(detectedMode);
+
       const intent = classifyIntent(trimmed);
       const selectedLines = pickActivityLines(intent);
+      const intervalMs = modeBehavior.rotationInterval || 600;
+      const maxLines = modeBehavior.maxMessagesToShow;
       let lineIndex = 0;
       activityIntervalRef.current = setInterval(() => {
-        if (lineIndex < selectedLines.length) {
+        if (lineIndex < selectedLines.length && (maxLines == null || lineIndex < maxLines)) {
           setActivityLines((prev) => [...prev, selectedLines[lineIndex]]);
           lineIndex++;
         } else {
           clearInterval(activityIntervalRef.current);
           activityIntervalRef.current = null;
         }
-      }, 600);
+      }, intervalMs);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -230,6 +244,7 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
                       ...last,
                       _activityLines: currentLines,
                       _thinkDuration: thinkDuration,
+                      _interactionMode: detectedMode,
                     };
                   }
                   return updated;
@@ -335,7 +350,7 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
     return (
       <div
         className="ai-workspace-container ai-landing"
-        style={{ minHeight: "calc(100vh - 140px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 6vh, 72px) 16px 0" }}
+        style={{ height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 16px" }}
       >
         <div style={{ width: "100%", maxWidth: "48rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
           {/* Early access pill — mirrors marketing site */}
@@ -483,10 +498,10 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
-        <div style={{ marginTop: "auto", paddingTop: "32px", paddingBottom: "16px", fontSize: "12px", textAlign: "center", color: "var(--color-muted, #828282)", opacity: 0.5 }}>
-          Powered by Clario | RevOps Intelligence
+          <div style={{ paddingTop: "24px", fontSize: "12px", textAlign: "center", color: "var(--color-muted, #828282)", opacity: 0.5 }}>
+            Powered by Clario | RevOps Intelligence
+          </div>
         </div>
       </div>
     );
@@ -495,11 +510,10 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
   /* ── Conversation state ── */
   return (
     <div
-      className="ai-workspace-container flex flex-col"
-      style={{ minHeight: "calc(100vh - 140px)" }}
+      className="ai-workspace-container ai-chat-active"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4" style={{ flexShrink: 0 }}>
         <button
           onClick={handleNewChat}
           className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 cursor-pointer"
@@ -589,12 +603,15 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
 
               {/* Status line + bubble */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Think status — only during active thinking */}
+                {/* Think status — mode-aware indicator during active thinking */}
                 {isActiveThinking && (
-                  <div className="chat-think-label">
-                    <span className="think-dot" />
-                    <span>...חושב</span>
-                  </div>
+                  <>
+                    <AgentStatus
+                      mode={interactionMode}
+                      messages={activityLines.length > 0 ? [activityLines[activityLines.length - 1]] : modeBehaviorMessages()}
+                      active={true}
+                    />
+                  </>
                 )}
                 {/* Stream status — only during active streaming */}
                 {isActiveStream && (
@@ -710,7 +727,7 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
       )}
 
       {/* Chat input */}
-      <div className="chat-input-elevated pt-2 pb-4">
+      <div className="chat-input-elevated pt-2">
         <ChatInput
           activeMode={activeMode}
           onClearMode={() => setActiveMode(null)}
@@ -723,6 +740,7 @@ export default function AIWorkspace({ profilePhoto, hasData, isDemo } = {}) {
           isStreaming={isStreaming || isThinking}
           onStop={handleStopStreaming}
         />
+        <p className="ai-disclaimer">Clario AI may make mistakes. Please verify important business decisions.</p>
       </div>
     </div>
   );

@@ -22,9 +22,11 @@ import checkCircle from "../assets/icons/check-circle.svg";
 import trendUpLg from "../assets/icons/trend-up-lg.svg";
 import chevronDownSm from "../assets/icons/chevron-down-sm.svg";
 import close from "../assets/icons/close.svg";
+import panelSidebar from "../assets/icons/panel-sidebar.svg";
 
 const icons = {
   "bar-chart": barChart,
+  "panel-sidebar": panelSidebar,
   funnel,
   users,
   chat,

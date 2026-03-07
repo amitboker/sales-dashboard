@@ -74,7 +74,7 @@ function DashboardAppInner() {
   })();
   const [profileRole] = useState("מנהל");
   const [profilePhoto, setProfilePhoto] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const contentRef = useRef(null);
 
   const handleExitComplete = useCallback(() => {

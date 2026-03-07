@@ -21,7 +21,7 @@ export default function SideNav({ activeId, onSelect, collapsed, onToggleCollaps
         type="button"
         aria-label={collapsed ? "הרחב תפריט" : "כווץ תפריט"}
       >
-        {collapsed ? "›" : "‹"}
+        <Icon name="panel-sidebar" size={16} style={{ filter: "brightness(0) invert(1)", opacity: 0.7 }} />
       </button>
       <div className="brand">
         <img src={logo} alt="מוקד בסקייל" className="brand-logo" />

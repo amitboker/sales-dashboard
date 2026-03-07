@@ -69,7 +69,7 @@
 .app {
   display: grid;
   grid-template-columns: 1fr auto;
-  min-height: 100vh;
+  height: 100vh;
   direction: ltr;
 }
 
@@ -102,7 +102,7 @@
   background: var(--color-bg);
   overflow-y: auto;
   direction: rtl;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .content > *:not(.dotted-bg-wrapper):not(.topbar) {
@@ -3097,13 +3097,14 @@ body.funnel-editor-open .funnel-editor-panel {
    ============================================ */
 
 .topbar {
+  position: fixed;
+  top: 24px;
+  left: 40px;
+  z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0 0 20px;
   direction: rtl;
-  position: relative;
-  z-index: 10;
+  pointer-events: none;
 }
 
 .topbar-user-area {
@@ -3111,6 +3112,7 @@ body.funnel-editor-open .funnel-editor-panel {
   align-items: center;
   gap: 12px;
   direction: ltr;
+  pointer-events: auto;
 }
 
 .topbar-avatar-anchor {
@@ -3284,10 +3286,10 @@ body.funnel-editor-open .funnel-editor-panel {
   position: absolute;
   top: 28px;
   left: 12px;
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 6px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-muted);
@@ -3299,7 +3301,7 @@ body.funnel-editor-open .funnel-editor-panel {
   line-height: 1;
   padding: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: background 0.15s ease, color 0.15s ease, top 300ms ease-in-out, left 300ms ease-in-out;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease, top 300ms ease-in-out, left 300ms ease-in-out;
   flex-shrink: 0;
   z-index: 2;
 }
@@ -3307,6 +3309,11 @@ body.funnel-editor-open .funnel-editor-panel {
 .sidebar-toggle:hover {
   background: var(--color-primary-light);
   color: #000;
+  opacity: 1;
+}
+
+.sidebar-toggle:hover .icon {
+  opacity: 1 !important;
 }
 
 /* ============================================
@@ -3347,8 +3354,9 @@ body.funnel-editor-open .funnel-editor-panel {
   top: 72px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   font-size: 14px;
 }
 
@@ -4740,8 +4748,8 @@ body.settings-modal-open .settings-modal-overlay {
   }
 
   /* Conversation view adjustments */
-  .ai-workspace-container.flex.flex-col {
-    min-height: calc(100vh - 120px) !important;
+  .ai-workspace-container.ai-chat-active {
+    height: calc(100vh - 120px) !important;
   }
 
   .chat-input-elevated {
@@ -5178,9 +5186,35 @@ body.settings-modal-open .settings-modal-overlay {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
+/* ── Stable chat layout: messages scroll, composer stays pinned ── */
+
+.ai-workspace-container.ai-chat-active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.ai-workspace-container.ai-chat-active > .flex-1.overflow-y-auto,
+.ai-workspace-container.ai-chat-active > [class*="flex-1"] {
+  /* let the messages area fill available space and scroll */
+}
+
 /* Input area — gradient fade separator from messages */
 .chat-input-elevated {
   position: relative;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+}
+
+.ai-disclaimer {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--color-muted, #8b8b8b);
+  text-align: center;
+  opacity: 0.55;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 .chat-input-elevated::before {
